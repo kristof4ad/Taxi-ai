@@ -22,6 +22,16 @@ final class TripViewModel {
     var tripInfo: TripInfo?
     var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
 
+    // MARK: - Pickup Approach State
+
+    /// The car's current position as it approaches the pickup.
+    var pickupCarPosition: CLLocationCoordinate2D?
+    /// The calculated route from the car's start position to the pickup.
+    var pickupRoute: MKRoute?
+    /// Dedicated simulation engine for the pickup approach (separate from trip simulation).
+    let pickupSimulationEngine = SimulationEngine()
+    private var pickupApproachTask: Task<Void, Never>?
+
     // MARK: - Services
 
     let locationService: LocationService
@@ -83,6 +93,11 @@ final class TripViewModel {
         Date.now.addingTimeInterval(60 * 7)
     }
 
+    /// The remaining portion of the pickup approach route ahead of the car.
+    var remainingPickupRouteCoordinates: [CLLocationCoordinate2D] {
+        pickupSimulationEngine.remainingCoordinates
+    }
+
     // MARK: - Actions
 
     func onAppear() {
@@ -107,6 +122,55 @@ final class TripViewModel {
         selectDestination(place.coordinate)
     }
 
+    /// Starts the car approaching the pickup location along real roads from a random nearby position.
+    func startPickupApproach() {
+        guard let userLocation = locationService.userLocation else { return }
+
+        let startPosition = randomNearbyPosition(around: userLocation)
+        pickupCarPosition = startPosition
+        simulationState = .approachingPickup(progress: 0)
+
+        pickupApproachTask = Task {
+            // Calculate a real driving route from the random start to the user's pickup.
+            do {
+                let approachRoute = try await routeService.calculateRoute(
+                    from: startPosition,
+                    to: userLocation
+                )
+                pickupRoute = approachRoute
+
+                // Zoom camera to show the approach route area (car → pickup).
+                let approachRect = approachRoute.polyline.boundingMapRect
+                let paddedRect = approachRect.insetBy(
+                    dx: -approachRect.size.width * 0.5,
+                    dy: -approachRect.size.height * 0.5
+                )
+                cameraPosition = .region(MKCoordinateRegion(paddedRect))
+
+                // Configure the pickup simulation engine and start it.
+                let coordinates = approachRoute.coordinates
+                pickupSimulationEngine.configure(with: coordinates)
+                pickupSimulationEngine.start()
+
+                // Monitor the engine's progress.
+                while pickupSimulationEngine.isRunning {
+                    if let position = pickupSimulationEngine.currentPosition {
+                        pickupCarPosition = position
+                    }
+                    simulationState = .approachingPickup(progress: pickupSimulationEngine.progress)
+                    try? await Task.sleep(for: .milliseconds(16))
+                }
+
+                pickupCarPosition = userLocation
+                simulationState = .arrivedAtPickup
+            } catch {
+                // If route calculation fails, fall back to arrived state.
+                pickupCarPosition = userLocation
+                simulationState = .arrivedAtPickup
+            }
+        }
+    }
+
     func startSimulation() {
         guard simulationState == .routeReady, let route else { return }
 
@@ -127,6 +191,11 @@ final class TripViewModel {
 
     func resetTrip() {
         simulationEngine.reset()
+        pickupSimulationEngine.reset()
+        pickupApproachTask?.cancel()
+        pickupApproachTask = nil
+        pickupRoute = nil
+        pickupCarPosition = nil
         destination = nil
         destinationName = nil
         destinationAddress = nil
@@ -139,6 +208,19 @@ final class TripViewModel {
     func dismissError() {
         simulationState = .selectingDestination
         destination = nil
+    }
+
+    // MARK: - Pickup Approach Helpers
+
+    /// Generates a random position ~1-2 km from the given coordinate in a random direction.
+    private func randomNearbyPosition(
+        around center: CLLocationCoordinate2D
+    ) -> CLLocationCoordinate2D {
+        let bearingRad = Double.random(in: 0..<(2 * .pi))
+        let distance = Double.random(in: 800...1500)
+        let lat = center.latitude + (distance / 111_320) * cos(bearingRad)
+        let lon = center.longitude + (distance / (111_320 * cos(center.latitude * .pi / 180))) * sin(bearingRad)
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
 
     // MARK: - Private

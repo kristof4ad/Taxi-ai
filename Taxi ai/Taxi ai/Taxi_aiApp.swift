@@ -5,6 +5,7 @@ enum AppScreen {
     case welcome
     case home
     case routePreview
+    case rideTracking
     case ride
 }
 
@@ -42,14 +43,18 @@ struct Taxi_aiApp: App {
                     RoutePreviewView(
                         viewModel: tripViewModel,
                         onBook: {
-                            tripViewModel.startSimulation()
-                            currentScreen = .ride
+                            currentScreen = .rideTracking
                         },
                         onBack: {
                             self.tripViewModel = nil
                             currentScreen = .home
                         }
                     )
+                }
+
+            case .rideTracking:
+                if let tripViewModel {
+                    RideTrackingView(viewModel: tripViewModel)
                 }
 
             case .ride:

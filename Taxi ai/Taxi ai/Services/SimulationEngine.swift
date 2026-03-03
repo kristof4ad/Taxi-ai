@@ -103,6 +103,34 @@ final class SimulationEngine {
         totalDistance = running
     }
 
+    /// Returns the remaining route coordinates from the current position to the end.
+    var remainingCoordinates: [CLLocationCoordinate2D] {
+        guard routeCoordinates.count >= 2, totalDistance > 0 else {
+            return routeCoordinates
+        }
+
+        let targetDistance = progress * totalDistance
+
+        // Find the segment containing the current position.
+        var segmentIndex = 0
+        for i in 1..<cumulativeDistances.count {
+            if cumulativeDistances[i] >= targetDistance {
+                segmentIndex = i - 1
+                break
+            }
+            segmentIndex = i - 1
+        }
+
+        // Start with the current interpolated position, then all remaining waypoints.
+        var remaining: [CLLocationCoordinate2D] = []
+        if let current = currentPosition {
+            remaining.append(current)
+        }
+        let startIndex = min(segmentIndex + 1, routeCoordinates.count - 1)
+        remaining.append(contentsOf: routeCoordinates[startIndex...])
+        return remaining
+    }
+
     /// Returns the interpolated coordinate at a given progress fraction (0.0 to 1.0).
     func interpolatedCoordinate(at progress: Double) -> CLLocationCoordinate2D {
         guard routeCoordinates.count >= 2, totalDistance > 0 else {

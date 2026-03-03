@@ -6,6 +6,8 @@ nonisolated enum SimulationState: Equatable, Sendable {
     case selectingDestination
     case calculatingRoute
     case routeReady
+    case approachingPickup(progress: Double)
+    case arrivedAtPickup
     case simulating(progress: Double)
     case completed
     case error(String)
