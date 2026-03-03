@@ -8,7 +8,10 @@ struct HomeView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HomeMapSection(cameraPosition: $viewModel.cameraPosition)
+            HomeMapSection(
+                cameraPosition: $viewModel.cameraPosition,
+                selectedDestination: viewModel.selectedDestination
+            )
 
             BottomSheetSection(
                 viewModel: viewModel,
@@ -20,6 +23,11 @@ struct HomeView: View {
             viewModel.onAppear()
             await viewModel.loadInitialPlaces()
         }
+        .alert("Destination Too Far", isPresented: $viewModel.showTooFarAlert) {
+            Button("OK") { }
+        } message: {
+            Text("This destination is more than 30 miles away. Our taxi service cannot reach it.")
+        }
     }
 }
 
@@ -27,11 +35,18 @@ struct HomeView: View {
 
 private struct HomeMapSection: View {
     @Binding var cameraPosition: MapCameraPosition
+    var selectedDestination: NearbyPlace?
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
             Map(position: $cameraPosition) {
                 UserAnnotation()
+
+                if let destination = selectedDestination {
+                    Annotation(destination.name, coordinate: destination.coordinate) {
+                        DestinationMarkerView()
+                    }
+                }
             }
             .mapStyle(.standard)
             .mapControls {}
@@ -63,59 +78,224 @@ private struct MenuButton: View {
 // MARK: - Bottom Sheet
 
 private struct BottomSheetSection: View {
-    var viewModel: HomeViewModel
+    @Bindable var viewModel: HomeViewModel
     var onPlaceSelected: (NearbyPlace) -> Void
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 12) {
-                SearchBarRow()
-
-                ArrivalBanner(minutes: viewModel.estimatedArrival)
-
-                CategoriesRow(
-                    selected: viewModel.selectedCategory,
-                    onSelect: { viewModel.selectCategory($0) }
-                )
-
-                Divider()
-
-                if viewModel.isSearching {
-                    ProgressView()
-                        .padding(.vertical)
-                } else {
-                    PlacesList(
-                        places: viewModel.nearbyPlaces,
-                        onSelect: onPlaceSelected
+        ZStack(alignment: .top) {
+            // Main content
+            ScrollView {
+                VStack(spacing: 12) {
+                    SearchBarRow(
+                        text: $viewModel.searchText,
+                        isActive: viewModel.isSearchActive,
+                        onActivate: { viewModel.isSearchActive = true },
+                        onClear: { viewModel.clearSearch() }
                     )
+                    .onChange(of: viewModel.searchText) { _, newValue in
+                        viewModel.updateSearchText(newValue)
+                    }
+
+                    if let destination = viewModel.selectedDestination {
+                        DestinationBanner(
+                            destination: destination,
+                            onGoDirectly: { onPlaceSelected(destination) },
+                            onClear: { viewModel.clearSearch() }
+                        )
+                    }
+
+                    ArrivalBanner(minutes: viewModel.estimatedArrival)
+
+                    CategoriesRow(
+                        selected: viewModel.selectedCategory,
+                        onSelect: { viewModel.selectCategory($0) }
+                    )
+
+                    if viewModel.selectedDestination != nil {
+                        Text("Places nearby")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    Divider()
+
+                    if viewModel.isSearching {
+                        ProgressView()
+                            .padding(.vertical)
+                    } else {
+                        PlacesList(
+                            places: viewModel.nearbyPlaces,
+                            onSelect: onPlaceSelected
+                        )
+                    }
                 }
+                .padding(16)
             }
-            .padding(16)
+            .scrollIndicators(.hidden)
+            .background(.background)
+
+            // Search overlay when actively typing
+            if viewModel.isSearchActive && !viewModel.searchText.isEmpty {
+                SearchResultsOverlay(
+                    completions: viewModel.currentCompletions,
+                    onSelect: { completion in
+                        Task {
+                            await viewModel.selectSearchCompletion(completion)
+                        }
+                    }
+                )
+                .padding(.top, 64)
+            }
         }
-        .scrollIndicators(.hidden)
-        .background(.background)
     }
 }
 
 // MARK: - Search Bar
 
 private struct SearchBarRow: View {
+    @Binding var text: String
+    var isActive: Bool
+    var onActivate: () -> Void
+    var onClear: () -> Void
+    @FocusState private var isFocused: Bool
+
     var body: some View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
 
-            Text("Hi, where to?")
+            TextField("Hi, where to?", text: $text)
+                .focused($isFocused)
+                .textFieldStyle(.plain)
+                .autocorrectionDisabled()
+                .submitLabel(.search)
+
+            if !text.isEmpty {
+                Button("Clear", systemImage: "xmark.circle.fill") {
+                    onClear()
+                }
+                .labelStyle(.iconOnly)
                 .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 48)
+        .background {
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(Color(.systemGray4), lineWidth: 1)
+        }
+        .contentShape(.rect(cornerRadius: 24))
+        .onTapGesture {
+            isFocused = true
+        }
+        .onChange(of: isActive) { _, newValue in
+            isFocused = newValue
+        }
+        .onChange(of: isFocused) { _, newValue in
+            if newValue {
+                onActivate()
+            }
+        }
+    }
+}
+
+// MARK: - Search Results Overlay
+
+/// Overlay showing autocomplete suggestions while the user types.
+private struct SearchResultsOverlay: View {
+    var completions: [SearchCompletion]
+    var onSelect: (SearchCompletion) -> Void
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                ForEach(completions) { completion in
+                    Button {
+                        onSelect(completion)
+                    } label: {
+                        SearchCompletionRow(completion: completion)
+                    }
+                    .buttonStyle(.plain)
+
+                    Divider()
+                }
+            }
+        }
+        .scrollIndicators(.hidden)
+        .background(.background)
+    }
+}
+
+// MARK: - Search Completion Row
+
+private struct SearchCompletionRow: View {
+    var completion: SearchCompletion
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "mappin.circle")
+                .foregroundStyle(.secondary)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(completion.title)
+                    .font(.subheadline)
+
+                if !completion.subtitle.isEmpty {
+                    Text(completion.subtitle)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             Spacer()
         }
         .padding(.horizontal, 16)
-        .frame(height: 48)
-        .overlay {
-            RoundedRectangle(cornerRadius: 24)
-                .stroke(Color(.systemGray4), lineWidth: 1)
+        .padding(.vertical, 10)
+        .contentShape(.rect)
+    }
+}
+
+// MARK: - Destination Banner
+
+/// Banner showing the selected destination — tap anywhere to go directly there.
+private struct DestinationBanner: View {
+    var destination: NearbyPlace
+    var onGoDirectly: () -> Void
+    var onClear: () -> Void
+
+    var body: some View {
+        Button {
+            onGoDirectly()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "mappin.and.ellipse")
+                    .foregroundStyle(Color(red: 0.83, green: 0.66, blue: 0.29))
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(destination.name)
+                        .font(.subheadline.weight(.semibold))
+
+                    if !destination.address.isEmpty {
+                        Text(destination.address)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(Color(red: 0.83, green: 0.66, blue: 0.29))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(
+                Color(red: 0.83, green: 0.66, blue: 0.29).opacity(0.08)
+            )
+            .clipShape(.rect(cornerRadius: 12))
         }
+        .buttonStyle(.plain)
     }
 }
 
