@@ -1,0 +1,233 @@
+import MapKit
+import SwiftUI
+
+/// Shows the calculated route with trip details and pricing before booking.
+struct RoutePreviewView: View {
+    @Bindable var viewModel: TripViewModel
+    var onBook: () -> Void
+    var onBack: () -> Void
+
+    var body: some View {
+        VStack(spacing: 0) {
+            RouteMapSection(
+                cameraPosition: $viewModel.cameraPosition,
+                route: viewModel.route,
+                destination: viewModel.destination,
+                onBack: onBack
+            )
+
+            RouteDetailsCard(
+                viewModel: viewModel,
+                onBook: onBook
+            )
+        }
+        .ignoresSafeArea(edges: .top)
+    }
+}
+
+// MARK: - Map Section
+
+private struct RouteMapSection: View {
+    @Binding var cameraPosition: MapCameraPosition
+    var route: MKRoute?
+    var destination: CLLocationCoordinate2D?
+    var onBack: () -> Void
+
+    var body: some View {
+        ZStack(alignment: .topLeading) {
+            Map(position: $cameraPosition) {
+                UserAnnotation()
+
+                if let destination {
+                    Annotation("Destination", coordinate: destination) {
+                        DestinationMarkerView()
+                    }
+                }
+
+                if let route {
+                    MapPolyline(route)
+                        .stroke(.blue, lineWidth: 5)
+                }
+            }
+            .mapStyle(.standard)
+            .mapControls {}
+            .frame(height: 420)
+
+            HStack {
+                BackButton(action: onBack)
+                Spacer()
+                MenuBadge()
+            }
+            .padding(.top, 62)
+            .padding(.horizontal, 16)
+        }
+    }
+}
+
+// MARK: - Back Button
+
+private struct BackButton: View {
+    var action: () -> Void
+
+    var body: some View {
+        Button("Back", systemImage: "chevron.left", action: action)
+            .labelStyle(.iconOnly)
+            .foregroundStyle(.primary)
+            .frame(width: 40, height: 40)
+            .background(.background, in: .circle)
+            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+    }
+}
+
+// MARK: - Menu Badge
+
+private struct MenuBadge: View {
+    var body: some View {
+        Image(systemName: "line.3.horizontal")
+            .font(.title3)
+            .foregroundStyle(.primary)
+            .frame(width: 44, height: 44)
+            .background(.background, in: .rect(cornerRadius: 8))
+            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+    }
+}
+
+// MARK: - Route Details Card
+
+private struct RouteDetailsCard: View {
+    var viewModel: TripViewModel
+    var onBook: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            if let tripInfo = viewModel.tripInfo {
+                let minutes = Int(tripInfo.expectedTravelTime / 60)
+                Text("A ride can arrive in \(minutes) min")
+                    .font(.headline)
+
+                Text("Prepare to meet at the pickup spot")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+
+                Text("Calculating route...")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+                .frame(height: 12)
+
+            TripTimeline(viewModel: viewModel)
+
+            Spacer()
+
+            BookButton(price: viewModel.estimatedPrice, action: onBook)
+        }
+        .padding(.init(top: 20, leading: 16, bottom: 24, trailing: 16))
+        .background(.background)
+    }
+}
+
+// MARK: - Trip Timeline
+
+private struct TripTimeline: View {
+    var viewModel: TripViewModel
+
+    var body: some View {
+        VStack(spacing: 0) {
+            // Pickup row
+            HStack(spacing: 12) {
+                Circle()
+                    .stroke(Color.secondary, lineWidth: 2)
+                    .frame(width: 12, height: 12)
+
+                Text("Pickup")
+                    .font(.subheadline.weight(.medium))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                Text(viewModel.estimatedPickupTime, format: .dateTime.hour().minute())
+                    .font(.subheadline)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            // Connector line
+            HStack {
+                Rectangle()
+                    .fill(Color(.systemGray4))
+                    .frame(width: 2, height: 20)
+                    .padding(.leading, 21)
+                Spacer()
+            }
+
+            // Destination row
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(.primary)
+                    .frame(width: 12, height: 12)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(viewModel.destinationName ?? "Destination")
+                        .font(.subheadline.weight(.medium))
+
+                    if let address = viewModel.destinationAddress {
+                        Text(address)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if let arrivalTime = viewModel.estimatedArrivalTime {
+                    Text(arrivalTime, format: .dateTime.hour().minute())
+                        .font(.subheadline)
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(.systemGray4), lineWidth: 1)
+        }
+    }
+}
+
+// MARK: - Book Button
+
+private struct BookButton: View {
+    var price: Double?
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Group {
+                if let price {
+                    Text("Book Ride \u{00B7} \(price, format: .currency(code: "USD"))")
+                } else {
+                    ProgressView()
+                }
+            }
+            .font(.body.weight(.semibold))
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.83, green: 0.66, blue: 0.29),
+                        Color(red: 0.72, green: 0.58, blue: 0.29)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .clipShape(.rect(cornerRadius: 26))
+        }
+        .buttonStyle(.plain)
+        .disabled(price == nil)
+    }
+}
