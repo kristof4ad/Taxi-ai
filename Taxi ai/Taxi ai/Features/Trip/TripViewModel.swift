@@ -26,6 +26,8 @@ final class TripViewModel {
 
     /// The car's current position as it approaches the pickup.
     var pickupCarPosition: CLLocationCoordinate2D?
+    /// The road-snapped location where the car will stop for pickup (end of the approach route).
+    var pickupStopLocation: CLLocationCoordinate2D?
     /// The calculated route from the car's start position to the pickup.
     var pickupRoute: MKRoute?
     /// Dedicated simulation engine for the pickup approach (separate from trip simulation).
@@ -147,9 +149,16 @@ final class TripViewModel {
                 )
                 cameraPosition = .region(MKCoordinateRegion(paddedRect))
 
+                // Trim the route to stop ~100 m before the end so the car stays on the road
+                // rather than pulling up to the user's exact position.
+                let trimmedCoordinates = Self.trimmedRoute(
+                    approachRoute.coordinates,
+                    trailingMeters: 100
+                )
+                pickupStopLocation = trimmedCoordinates.last ?? userLocation
+
                 // Configure the pickup simulation engine and start it.
-                let coordinates = approachRoute.coordinates
-                pickupSimulationEngine.configure(with: coordinates)
+                pickupSimulationEngine.configure(with: trimmedCoordinates)
                 pickupSimulationEngine.start()
 
                 // Monitor the engine's progress.
@@ -161,11 +170,12 @@ final class TripViewModel {
                     try? await Task.sleep(for: .milliseconds(16))
                 }
 
-                pickupCarPosition = userLocation
+                pickupCarPosition = pickupStopLocation
                 simulationState = .arrivedAtPickup
             } catch {
                 // If route calculation fails, fall back to arrived state.
                 pickupCarPosition = userLocation
+                pickupStopLocation = userLocation
                 simulationState = .arrivedAtPickup
             }
         }
@@ -196,6 +206,7 @@ final class TripViewModel {
         pickupApproachTask = nil
         pickupRoute = nil
         pickupCarPosition = nil
+        pickupStopLocation = nil
         destination = nil
         destinationName = nil
         destinationAddress = nil
@@ -221,6 +232,51 @@ final class TripViewModel {
         let lat = center.latitude + (distance / 111_320) * cos(bearingRad)
         let lon = center.longitude + (distance / (111_320 * cos(center.latitude * .pi / 180))) * sin(bearingRad)
         return CLLocationCoordinate2D(latitude: lat, longitude: lon)
+    }
+
+    /// Returns the route coordinates with the trailing segment trimmed so the car stops
+    /// approximately `trailingMeters` before the route's end.
+    static func trimmedRoute(
+        _ coordinates: [CLLocationCoordinate2D],
+        trailingMeters: Double
+    ) -> [CLLocationCoordinate2D] {
+        guard coordinates.count >= 2 else { return coordinates }
+
+        // Walk backwards through the route, accumulating distance until we hit the threshold.
+        var remaining = trailingMeters
+        var cutIndex = coordinates.count - 1
+
+        while cutIndex > 0 {
+            let from = CLLocation(
+                latitude: coordinates[cutIndex - 1].latitude,
+                longitude: coordinates[cutIndex - 1].longitude
+            )
+            let to = CLLocation(
+                latitude: coordinates[cutIndex].latitude,
+                longitude: coordinates[cutIndex].longitude
+            )
+            let segmentLength = from.distance(from: to)
+
+            if segmentLength >= remaining {
+                // The cut point falls within this segment — interpolate.
+                let fraction = 1 - remaining / segmentLength
+                let interpolated = CLLocationCoordinate2D(
+                    latitude: coordinates[cutIndex - 1].latitude
+                        + (coordinates[cutIndex].latitude - coordinates[cutIndex - 1].latitude) * fraction,
+                    longitude: coordinates[cutIndex - 1].longitude
+                        + (coordinates[cutIndex].longitude - coordinates[cutIndex - 1].longitude) * fraction
+                )
+                var trimmed = Array(coordinates.prefix(cutIndex))
+                trimmed.append(interpolated)
+                return trimmed
+            }
+
+            remaining -= segmentLength
+            cutIndex -= 1
+        }
+
+        // Route is shorter than trailingMeters — just return the first point.
+        return [coordinates[0]]
     }
 
     // MARK: - Private

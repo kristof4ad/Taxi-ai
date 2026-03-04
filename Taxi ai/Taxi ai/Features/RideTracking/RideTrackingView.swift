@@ -9,7 +9,9 @@ struct RideTrackingView: View {
         VStack(spacing: 0) {
             RideTrackingMapSection(viewModel: viewModel)
 
-            RideTrackingBottomCard(viewModel: viewModel)
+            RideTrackingBottomCard(viewModel: viewModel) {
+                // Navigate to Enter Vehicle screen
+            }
         }
         .ignoresSafeArea(edges: .top)
         .onAppear {
@@ -26,9 +28,11 @@ private struct RideTrackingMapSection: View {
     var body: some View {
         ZStack(alignment: .topTrailing) {
             Map(position: .constant(viewModel.cameraPosition)) {
-                // Pickup marker at user location
-                if let userLocation = viewModel.locationService.userLocation {
-                    Annotation("Pickup", coordinate: userLocation) {
+                // Pickup marker — hidden once the car arrives so it doesn't cover the car icon.
+                if case .arrivedAtPickup = viewModel.simulationState {
+                    // Car is at the pickup stop; don't show the pickup pin.
+                } else if let pickupLocation = viewModel.pickupStopLocation ?? viewModel.locationService.userLocation {
+                    Annotation("Pickup", coordinate: pickupLocation) {
                         PickupMarkerView()
                     }
                 }
@@ -53,10 +57,15 @@ private struct RideTrackingMapSection: View {
                         .stroke(.blue, lineWidth: 5)
                 }
 
-                // Animated car marker
+                // Animated car marker — shows "Pickup" label underneath when arrived.
                 if let carPosition = viewModel.pickupCarPosition {
+                    let arrived = {
+                        if case .arrivedAtPickup = viewModel.simulationState { return true }
+                        return false
+                    }()
+
                     Annotation("", coordinate: carPosition) {
-                        CarMarkerView()
+                        CarMarkerView(showPickupLabel: arrived)
                     }
                     .annotationTitles(.hidden)
                 }
@@ -111,6 +120,13 @@ private struct RouteButton: View {
 
 private struct RideTrackingBottomCard: View {
     var viewModel: TripViewModel
+    var onGoToVehicle: () -> Void
+
+    /// Whether the car has arrived at the pickup location.
+    private var hasArrived: Bool {
+        if case .arrivedAtPickup = viewModel.simulationState { return true }
+        return false
+    }
 
     /// Minutes remaining based on approach progress.
     private var minutesAway: Int {
@@ -121,33 +137,72 @@ private struct RideTrackingBottomCard: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 4) {
-                if case .arrivedAtPickup = viewModel.simulationState {
-                    ArrivedHeader()
-                } else {
-                    Text("Your ride is \(minutesAway) min away")
-                        .font(.title3.bold())
+        VStack(spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 4) {
+                    if hasArrived {
+                        ArrivedHeader()
+                    } else {
+                        Text("Your ride is \(minutesAway) min away")
+                            .font(.title3.bold())
+                    }
+
+                    Text("License Plate:")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+                        .frame(height: 4)
+
+                    TripTimeline(viewModel: viewModel)
+
+                    Divider()
+
+                    Text("Tips")
+                        .font(.callout.weight(.semibold))
                 }
-
-                Text("License Plate:")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-                    .frame(height: 4)
-
-                TripTimeline(viewModel: viewModel)
-
-                Divider()
-
-                Text("Tips")
-                    .font(.callout.weight(.semibold))
+                .padding()
             }
-            .padding()
+            .scrollIndicators(.hidden)
+
+            GoToVehicleButton(isEnabled: hasArrived, action: onGoToVehicle)
+                .padding()
         }
-        .scrollIndicators(.hidden)
         .background(.background)
+    }
+}
+
+// MARK: - Go to Vehicle Button
+
+private struct GoToVehicleButton: View {
+    var isEnabled: Bool
+    var action: () -> Void
+
+    /// Gold gradient start color.
+    private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
+    /// Gold gradient end color.
+    private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
+
+    var body: some View {
+        Button("Go to Vehicle", action: action)
+            .bold()
+            .foregroundStyle(isEnabled ? .white : .secondary)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(
+                isEnabled
+                    ? AnyShapeStyle(
+                        LinearGradient(
+                            colors: [Self.goldStart, Self.goldEnd],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    : AnyShapeStyle(.quaternary)
+            )
+            .clipShape(.rect(cornerRadius: 26))
+            .disabled(!isEnabled)
+            .animation(.easeInOut, value: isEnabled)
     }
 }
 
