@@ -28,7 +28,7 @@ struct CloseDoorsView: View {
 
             AppMenuOverlay(
                 isPresented: $isMenuPresented,
-                ridePhase: .riding,
+                ridePhase: .none,
                 onCancel: onCancel,
                 onShowRideHistory: onShowRideHistory
             )
@@ -93,10 +93,13 @@ private struct CarTopViewImage: View {
 
 // MARK: - Bottom Section
 
-/// Walking directions, Open Trunk, and Finish Ride buttons.
+/// Walking directions, trunk toggle, and Finish Ride buttons.
 private struct CloseDoorsBottomSection: View {
     var destinationName: String?
     var onFinishRide: () -> Void
+
+    @State private var isTrunkOpen = false
+    @State private var soundPlayer = SoundPlayer()
 
     var body: some View {
         VStack(spacing: 12) {
@@ -119,15 +122,16 @@ private struct CloseDoorsBottomSection: View {
             }
             .buttonStyle(.plain)
 
-            // Open Trunk button
+            // Trunk toggle button
             Button {
-                // Open trunk placeholder
+                soundPlayer.playTrunk()
+                isTrunkOpen.toggle()
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "shippingbox")
+                    Image(systemName: isTrunkOpen ? "car.rear.fill" : "car.rear")
                         .font(.body)
 
-                    Text("Open Trunk")
+                    Text(isTrunkOpen ? "Close Trunk" : "Open Trunk")
                         .font(.subheadline.weight(.semibold))
                 }
                 .foregroundStyle(.primary)
