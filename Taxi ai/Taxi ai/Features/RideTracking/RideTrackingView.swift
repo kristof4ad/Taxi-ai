@@ -109,12 +109,14 @@ private struct RouteButton: View {
 
     var body: some View {
         Button("Route", systemImage: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath", action: action)
-        .labelStyle(.iconOnly)
-        .font(.title3)
-        .foregroundStyle(.primary)
-        .frame(width: 40, height: 40)
-        .background(.background, in: .rect(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+            .labelStyle(.iconOnly)
+            .font(.title3)
+            .foregroundStyle(.primary)
+            .frame(width: 44, height: 44)
+            .contentShape(.rect(cornerRadius: 22))
+            .background(.background, in: .rect(cornerRadius: 22))
+            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+            .buttonStyle(.plain)
     }
 }
 
@@ -174,25 +176,29 @@ private struct GoToVehicleButton: View {
     private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
 
     var body: some View {
-        Button("Go to Vehicle", action: action)
-            .bold()
-            .foregroundStyle(isEnabled ? .white : .secondary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(
-                isEnabled
-                    ? AnyShapeStyle(
-                        LinearGradient(
-                            colors: [Self.goldStart, Self.goldEnd],
-                            startPoint: .top,
-                            endPoint: .bottom
+        Button(action: action) {
+            Text("Go to Vehicle")
+                .bold()
+                .foregroundStyle(isEnabled ? .white : .secondary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(
+                    isEnabled
+                        ? AnyShapeStyle(
+                            LinearGradient(
+                                colors: [Self.goldStart, Self.goldEnd],
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
                         )
-                    )
-                    : AnyShapeStyle(.quaternary)
-            )
-            .clipShape(.rect(cornerRadius: 26))
-            .disabled(!isEnabled)
-            .animation(.easeInOut, value: isEnabled)
+                        : AnyShapeStyle(.quaternary)
+                )
+                .clipShape(.rect(cornerRadius: 26))
+                .contentShape(.rect(cornerRadius: 26))
+        }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
+        .animation(.easeInOut, value: isEnabled)
     }
 }
 

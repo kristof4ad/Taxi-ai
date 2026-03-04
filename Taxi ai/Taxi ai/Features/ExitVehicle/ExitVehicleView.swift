@@ -59,7 +59,8 @@ private struct ExitVehicleTopRow: View {
                 }
                 .foregroundStyle(.primary)
                 .padding(.horizontal, 14)
-                .frame(height: 36)
+                .frame(height: 44)
+                .contentShape(.capsule)
                 .background(.background, in: .capsule)
             }
             .buttonStyle(.plain)
@@ -278,6 +279,7 @@ private struct ExitVehicleActionButtons: View {
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
+                .contentShape(.rect(cornerRadius: 16))
                 .background(.background, in: .rect(cornerRadius: 16))
             }
             .buttonStyle(.plain)
@@ -295,6 +297,7 @@ private struct ExitVehicleActionButtons: View {
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
+                .contentShape(.rect(cornerRadius: 16))
                 .background(.background, in: .rect(cornerRadius: 16))
             }
             .buttonStyle(.plain)

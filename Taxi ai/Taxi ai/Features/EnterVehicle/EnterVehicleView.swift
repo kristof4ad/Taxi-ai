@@ -228,10 +228,12 @@ private struct FindVehicleButton: View {
             .foregroundStyle(.primary)
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
+            .contentShape(.rect(cornerRadius: 20))
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(.separator, lineWidth: 1)
             )
+            .buttonStyle(.plain)
     }
 }
 
@@ -266,7 +268,9 @@ private struct VehicleActionButton: View {
             .labelStyle(.iconOnly)
             .foregroundStyle(.primary)
             .frame(width: 48, height: 48)
+            .contentShape(.circle)
             .background(.fill, in: .circle)
+            .buttonStyle(.plain)
     }
 }
 
@@ -317,18 +321,22 @@ private struct OpenDoorButton: View {
     private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
 
     var body: some View {
-        Button("Open the door", action: action)
-        .bold()
-        .foregroundStyle(.white)
-        .frame(maxWidth: .infinity)
-        .frame(height: 52)
-        .background(
-            LinearGradient(
-                colors: [Self.goldStart, Self.goldEnd],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-        )
-        .clipShape(.rect(cornerRadius: 26))
+        Button(action: action) {
+            Text("Open the door")
+                .bold()
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .background(
+                    LinearGradient(
+                        colors: [Self.goldStart, Self.goldEnd],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .clipShape(.rect(cornerRadius: 26))
+                .contentShape(.rect(cornerRadius: 26))
+        }
+        .buttonStyle(.plain)
     }
 }

@@ -43,11 +43,13 @@ private struct RateRideCloseButton: View {
                 .labelStyle(.iconOnly)
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.primary)
-                .frame(width: 36, height: 36)
+                .frame(width: 44, height: 44)
+                .contentShape(.rect(cornerRadius: 22))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 18)
+                    RoundedRectangle(cornerRadius: 22)
                         .stroke(.quaternary, lineWidth: 1)
                 )
+                .buttonStyle(.plain)
 
             Spacer()
         }
@@ -93,6 +95,8 @@ private struct StarRatingRow: View {
                     Image(systemName: index <= rating ? "star.fill" : "star")
                         .font(.title)
                         .foregroundStyle(index <= rating ? Self.starColor : .gray.opacity(0.3))
+                        .frame(width: 44, height: 44)
+                        .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
             }
@@ -205,6 +209,7 @@ private struct TipOptionButton: View {
             )
         }
         .buttonStyle(.plain)
+        .contentShape(.rect(cornerRadius: 12))
     }
 }
 

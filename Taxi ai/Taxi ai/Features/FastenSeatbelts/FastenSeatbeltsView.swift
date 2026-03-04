@@ -122,19 +122,23 @@ private struct FastenSeatbeltsActions: View {
                 )
             }
 
-            Button("Fastened", action: onFastened)
-                .bold()
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .background(
-                    LinearGradient(
-                        colors: [Self.goldStart, Self.goldEnd],
-                        startPoint: .top,
-                        endPoint: .bottom
+            Button(action: onFastened) {
+                Text("Fastened")
+                    .bold()
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 52)
+                    .background(
+                        LinearGradient(
+                            colors: [Self.goldStart, Self.goldEnd],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
                     )
-                )
-                .clipShape(.rect(cornerRadius: 26))
+                    .clipShape(.rect(cornerRadius: 26))
+                    .contentShape(.rect(cornerRadius: 26))
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 32)
@@ -164,6 +168,7 @@ private struct ActionGridButton: View {
             .foregroundStyle(.primary)
             .frame(maxWidth: .infinity)
             .frame(height: 56)
+            .contentShape(.rect(cornerRadius: 16))
             .background(.fill, in: .rect(cornerRadius: 16))
         }
         .buttonStyle(.plain)

@@ -367,13 +367,17 @@ private struct RideDetailFinishedButton: View {
     var onFinished: () -> Void
 
     var body: some View {
-        Button("Finished", action: onFinished)
-            .font(.headline)
-            .foregroundStyle(.primary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 56)
-            .overlay(Capsule().stroke(.quaternary, lineWidth: 1))
-            .padding(.horizontal, 16)
+        Button(action: onFinished) {
+            Text("Finished")
+                .font(.headline)
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .contentShape(.capsule)
+                .overlay(Capsule().stroke(.quaternary, lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
             .padding(.top, 16)
             .padding(.bottom, 40)
     }

@@ -60,7 +60,8 @@ private struct CloseDoorsTopRow: View {
                 }
                 .foregroundStyle(.primary)
                 .padding(.horizontal, 14)
-                .frame(height: 36)
+                .frame(height: 44)
+                .contentShape(.capsule)
                 .background(.background, in: .capsule)
             }
             .buttonStyle(.plain)
@@ -108,12 +109,13 @@ private struct CloseDoorsBottomSection: View {
     var onFinishRide: () -> Void
 
     @State private var soundPlayer = SoundPlayer()
+    @State private var showWalkingDirections = false
 
     var body: some View {
         VStack(spacing: 12) {
             // Walking directions button
             Button {
-                // Walking directions placeholder
+                showWalkingDirections = true
             } label: {
                 HStack(spacing: 8) {
                     Image(systemName: "figure.walk")
@@ -126,6 +128,7 @@ private struct CloseDoorsBottomSection: View {
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
+                .contentShape(.capsule)
                 .overlay(Capsule().stroke(.quaternary, lineWidth: 1))
             }
             .buttonStyle(.plain)
@@ -148,22 +151,33 @@ private struct CloseDoorsBottomSection: View {
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
+                .contentShape(.rect(cornerRadius: 16))
                 .background(.background, in: .rect(cornerRadius: 16))
             }
             .buttonStyle(.plain)
 
             // Finish Ride button
-            Button("Finish Ride", action: onFinishRide)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(.quaternary, lineWidth: 1)
-                )
+            Button(action: onFinishRide) {
+                Text("Finish Ride")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .contentShape(.rect(cornerRadius: 16))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(.quaternary, lineWidth: 1)
+                    )
+            }
+            .buttonStyle(.plain)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 32)
+        .sheet(isPresented: $showWalkingDirections) {
+            WalkingDirectionsView(
+                viewModel: viewModel,
+                onDismiss: { showWalkingDirections = false }
+            )
+        }
     }
 }

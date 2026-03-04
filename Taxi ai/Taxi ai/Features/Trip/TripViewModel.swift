@@ -11,6 +11,8 @@ final class TripViewModel {
     static let baseFare: Double = 2.00
     /// Per-mile rate in dollars.
     static let perMileRate: Double = 2.00
+    /// Distance in meters before the destination where the ride ends, leaving room for walking directions.
+    static let dropOffDistance: Double = 300
 
     // MARK: - State
 
@@ -28,6 +30,10 @@ final class TripViewModel {
 
     /// Whether the trunk is currently open, shared across exit and close-doors screens.
     var isTrunkOpen = false
+
+    /// The coordinate where the car actually stops, approximately 300 m before the destination.
+    /// Used later to show walking directions from here to the final destination.
+    var dropOffLocation: CLLocationCoordinate2D?
 
     // MARK: - Destination Change Pricing
 
@@ -249,9 +255,14 @@ final class TripViewModel {
     }
 
     /// Configures and starts the simulation engine for a given route.
+    /// The car stops approximately 300 m before the destination so walking directions can be shown.
     private func beginRideSimulation(with route: MKRoute) {
-        let coordinates = route.coordinates
-        simulationEngine.configure(with: coordinates)
+        let trimmedCoordinates = Self.trimmedRoute(
+            route.coordinates,
+            trailingMeters: Self.dropOffDistance
+        )
+        dropOffLocation = trimmedCoordinates.last
+        simulationEngine.configure(with: trimmedCoordinates)
         simulationEngine.start()
         simulationState = .simulating(progress: 0)
 
@@ -376,6 +387,7 @@ final class TripViewModel {
         tripInfo = nil
         cameraPosition = .userLocation(fallback: .automatic)
         isTrunkOpen = false
+        dropOffLocation = nil
         accumulatedDrivenDistance = 0
         originalTripDistance = nil
         originalTripPrice = nil

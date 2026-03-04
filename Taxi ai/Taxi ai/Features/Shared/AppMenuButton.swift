@@ -13,8 +13,10 @@ struct AppMenuButton: View {
         .labelStyle(.iconOnly)
         .font(.title3)
         .foregroundStyle(.primary)
-        .frame(width: 40, height: 40)
-        .background(.background, in: .rect(cornerRadius: 20))
+        .frame(width: 44, height: 44)
+        .contentShape(.rect(cornerRadius: 22))
+        .background(.background, in: .rect(cornerRadius: 22))
         .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+        .buttonStyle(.plain)
     }
 }

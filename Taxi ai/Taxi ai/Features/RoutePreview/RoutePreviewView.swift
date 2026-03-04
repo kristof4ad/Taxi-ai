@@ -87,9 +87,11 @@ private struct BackButton: View {
         Button("Back", systemImage: "chevron.left", action: action)
             .labelStyle(.iconOnly)
             .foregroundStyle(.primary)
-            .frame(width: 40, height: 40)
+            .frame(width: 44, height: 44)
+            .contentShape(.circle)
             .background(.background, in: .circle)
             .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+            .buttonStyle(.plain)
     }
 }
 
@@ -230,6 +232,7 @@ private struct BookButton: View {
                 )
             )
             .clipShape(.rect(cornerRadius: 26))
+            .contentShape(.rect(cornerRadius: 26))
         }
         .buttonStyle(.plain)
         .disabled(price == nil)

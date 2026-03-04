@@ -157,6 +157,7 @@ struct CategoryButton: View {
                     .font(.caption2.weight(.medium))
             }
             .foregroundStyle(isSelected ? Self.gold : .primary)
+            .contentShape(.rect)
         }
         .buttonStyle(.plain)
     }
@@ -220,6 +221,7 @@ struct DestinationBanner: View {
             .padding(.vertical, 12)
             .background(Self.gold.opacity(0.08))
             .clipShape(.rect(cornerRadius: 12))
+            .contentShape(.rect(cornerRadius: 12))
         }
         .buttonStyle(.plain)
     }
@@ -251,5 +253,6 @@ struct PlaceRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .contentShape(.rect)
     }
 }

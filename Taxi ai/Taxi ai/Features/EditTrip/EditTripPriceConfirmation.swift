@@ -66,12 +66,19 @@ struct EditTripPriceConfirmation: View {
                                 )
                             )
                             .clipShape(.rect(cornerRadius: 26))
+                            .contentShape(.rect(cornerRadius: 26))
                     }
                     .buttonStyle(.plain)
                     .disabled(newPrice == nil || isCalculating)
 
-                    Button("Cancel", action: onCancel)
-                        .foregroundStyle(.secondary)
+                    Button(action: onCancel) {
+                        Text("Cancel")
+                            .foregroundStyle(.secondary)
+                            .padding(.vertical, 8)
+                            .frame(maxWidth: .infinity)
+                            .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(24)

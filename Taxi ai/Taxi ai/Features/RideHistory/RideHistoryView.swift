@@ -33,9 +33,15 @@ private struct RideHistoryHeader: View {
 
             Spacer()
 
-            Button("Done", action: onDone)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.primary)
+            Button(action: onDone) {
+                Text("Done")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .contentShape(.rect)
+            }
+            .buttonStyle(.plain)
         }
         .padding(.top, 62)
         .padding(.horizontal, 16)

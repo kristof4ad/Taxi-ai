@@ -110,6 +110,7 @@ private struct StartRideCircle: View {
                     .tracking(4)
                     .foregroundStyle(.primary)
             }
+            .contentShape(.circle)
         }
         .buttonStyle(.plain)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -167,6 +168,7 @@ private struct StartRideActionButton: View {
             .foregroundStyle(.primary)
             .frame(maxWidth: .infinity)
             .frame(height: 48)
+            .contentShape(.rect(cornerRadius: 12))
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(.quaternary, lineWidth: 1)
