@@ -66,7 +66,6 @@ private struct RouteMapSection: View {
             }
             .mapStyle(.standard)
             .mapControls {}
-            .frame(height: 420)
 
             HStack {
                 BackButton(action: onBack)
@@ -123,8 +122,6 @@ private struct RouteDetailsCard: View {
                 .frame(height: 12)
 
             TripTimeline(viewModel: viewModel)
-
-            Spacer()
 
             BookButton(
                 price: viewModel.estimatedPrice,

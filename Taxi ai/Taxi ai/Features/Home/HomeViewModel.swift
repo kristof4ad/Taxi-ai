@@ -9,7 +9,7 @@ final class HomeViewModel {
     var selectedCategory: PlaceCategory = .bars
     var nearbyPlaces: [NearbyPlace] = []
     var isSearching = false
-    var estimatedArrival = 12
+    var estimatedArrival = 5
 
     /// History of completed rides, newest first.
     var completedRides: [CompletedRide] = []

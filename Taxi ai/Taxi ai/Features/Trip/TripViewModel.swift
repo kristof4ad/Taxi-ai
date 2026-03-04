@@ -196,6 +196,17 @@ final class TripViewModel {
         }
     }
 
+    /// Recenters the camera to show the full pickup approach route (car to pickup).
+    func recenterPickupCamera() {
+        guard let pickupRoute else { return }
+        let rect = pickupRoute.polyline.boundingMapRect
+        let padded = rect.insetBy(
+            dx: -rect.size.width * 0.5,
+            dy: -rect.size.height * 0.5
+        )
+        cameraPosition = .region(MKCoordinateRegion(padded))
+    }
+
     func startSimulation() {
         guard simulationState == .routeReady, let route else { return }
         beginRideSimulation(with: route)

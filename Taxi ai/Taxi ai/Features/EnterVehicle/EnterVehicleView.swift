@@ -12,6 +12,9 @@ struct EnterVehicleView: View {
 
     @State private var walkingRoute: MKRoute?
     @State private var isMenuPresented = false
+    @State private var flashTrigger = 0
+    @State private var hazardTrigger = 0
+    @State private var soundPlayer = SoundPlayer()
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -25,8 +28,15 @@ struct EnterVehicleView: View {
             EnterVehicleBottomSheet(
                 viewModel: viewModel,
                 onFindVehicle: onFindVehicle,
-                onOpenDoor: onOpenDoor
+                onOpenDoor: onOpenDoor,
+                onHorn: { soundPlayer.playHorn() },
+                onLights: { flashTrigger += 1 },
+                onUnlock: { soundPlayer.playLock() },
+                onHazard: { hazardTrigger += 1 }
             )
+
+            HeadlightFlashOverlay(trigger: flashTrigger)
+            HazardBlinkOverlay(trigger: hazardTrigger)
 
             AppMenuOverlay(
                 isPresented: $isMenuPresented,
@@ -153,12 +163,21 @@ private struct EnterVehicleBottomSheet: View {
     var viewModel: TripViewModel
     var onFindVehicle: () -> Void
     var onOpenDoor: () -> Void
+    var onHorn: () -> Void
+    var onLights: () -> Void
+    var onUnlock: () -> Void
+    var onHazard: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             EnterVehicleHeader(onFindVehicle: onFindVehicle)
 
-            VehicleActionButtons()
+            VehicleActionButtons(
+                onHorn: onHorn,
+                onLights: onLights,
+                onUnlock: onUnlock,
+                onHazard: onHazard
+            )
 
             Divider()
 
@@ -220,13 +239,18 @@ private struct FindVehicleButton: View {
 
 /// Row of circular action buttons for interacting with the vehicle.
 private struct VehicleActionButtons: View {
+    var onHorn: () -> Void
+    var onLights: () -> Void
+    var onUnlock: () -> Void
+    var onHazard: () -> Void
+
     var body: some View {
         HStack(spacing: 24) {
             Spacer()
-            VehicleActionButton(title: "Horn", icon: "speaker.wave.2")
-            VehicleActionButton(title: "Lights", icon: "lightbulb")
-            VehicleActionButton(title: "Unlock", icon: "lock")
-            VehicleActionButton(title: "Hazard", icon: "exclamationmark.triangle")
+            VehicleActionButton(title: "Horn", icon: "speaker.wave.2", action: onHorn)
+            VehicleActionButton(title: "Lights", icon: "lightbulb", action: onLights)
+            VehicleActionButton(title: "Unlock", icon: "lock", action: onUnlock)
+            VehicleActionButton(title: "Hazard", icon: "exclamationmark.triangle", action: onHazard)
             Spacer()
         }
     }
@@ -235,15 +259,14 @@ private struct VehicleActionButtons: View {
 private struct VehicleActionButton: View {
     var title: String
     var icon: String
+    var action: () -> Void
 
     var body: some View {
-        Button(title, systemImage: icon) {
-            // Action placeholder
-        }
-        .labelStyle(.iconOnly)
-        .foregroundStyle(.primary)
-        .frame(width: 48, height: 48)
-        .background(.fill, in: .circle)
+        Button(title, systemImage: icon, action: action)
+            .labelStyle(.iconOnly)
+            .foregroundStyle(.primary)
+            .frame(width: 48, height: 48)
+            .background(.fill, in: .circle)
     }
 }
 

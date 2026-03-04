@@ -14,7 +14,7 @@ enum PlaceCategory: String, CaseIterable, Identifiable, Sendable {
         switch self {
         case .bars: "Bars"
         case .food: "Food"
-        case .fast: "Fast"
+        case .fast: "Fast Food"
         case .fun: "Fun"
         case .shopping: "Shopping"
         }

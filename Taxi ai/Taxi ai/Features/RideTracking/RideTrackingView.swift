@@ -88,11 +88,10 @@ private struct RideTrackingMapSection: View {
             }
             .mapStyle(.standard)
             .mapControls {}
-            .frame(height: 380)
 
             VStack(spacing: 12) {
                 AppMenuButton(isPresented: $isMenuPresented)
-                RouteButton()
+                RouteButton(action: viewModel.recenterPickupCamera)
             }
             .padding(.top, 62)
             .padding(.trailing, 16)
@@ -103,10 +102,10 @@ private struct RideTrackingMapSection: View {
 // MARK: - Route Button
 
 private struct RouteButton: View {
+    var action: () -> Void
+
     var body: some View {
-        Button("Route", systemImage: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath") {
-            // Route action placeholder
-        }
+        Button("Route", systemImage: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath", action: action)
         .labelStyle(.iconOnly)
         .font(.title3)
         .foregroundStyle(.primary)
@@ -147,19 +146,7 @@ private struct RideTrackingBottomCard: View {
                             .font(.title3.bold())
                     }
 
-                    Text("License Plate:")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-
-                    Spacer()
-                        .frame(height: 4)
-
                     TripTimeline(viewModel: viewModel)
-
-                    Divider()
-
-                    Text("Tips")
-                        .font(.callout.weight(.semibold))
                 }
                 .padding()
             }
