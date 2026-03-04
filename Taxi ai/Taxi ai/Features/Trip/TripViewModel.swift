@@ -127,10 +127,10 @@ final class TripViewModel {
         currencyService.displayCurrencyCode
     }
 
-    /// Estimated arrival time at the destination.
+    /// Estimated arrival time at the destination (pickup time + travel duration).
     var estimatedArrivalTime: Date? {
         guard let tripInfo else { return nil }
-        return Date.now.addingTimeInterval(tripInfo.expectedTravelTime)
+        return estimatedPickupTime.addingTimeInterval(tripInfo.expectedTravelTime)
     }
 
     /// Estimated pickup time (now + a few minutes for driver to arrive).
