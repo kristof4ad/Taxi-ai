@@ -6,6 +6,7 @@ import SwiftUI
 struct EnterVehicleView: View {
     var viewModel: TripViewModel
     var onFindVehicle: () -> Void
+    var onOpenDoor: () -> Void
 
     @State private var walkingRoute: MKRoute?
 
@@ -19,7 +20,8 @@ struct EnterVehicleView: View {
 
             EnterVehicleBottomSheet(
                 viewModel: viewModel,
-                onFindVehicle: onFindVehicle
+                onFindVehicle: onFindVehicle,
+                onOpenDoor: onOpenDoor
             )
         }
         .task {
@@ -154,6 +156,7 @@ private struct MenuButton: View {
 private struct EnterVehicleBottomSheet: View {
     var viewModel: TripViewModel
     var onFindVehicle: () -> Void
+    var onOpenDoor: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -165,12 +168,7 @@ private struct EnterVehicleBottomSheet: View {
 
             PickupLocationRow(viewModel: viewModel)
 
-            Divider()
-
-            TipCard(
-                icon: "car.side",
-                text: "To open the door, push the wide part of the handle."
-            )
+            OpenDoorButton(action: onOpenDoor)
         }
         .padding()
         .background(
@@ -189,7 +187,7 @@ private struct EnterVehicleHeader: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Please enter the vehicle")
+                Text("Please walk to vehicle")
                     .font(.title3.bold())
 
                 Text("Vehicle will wait 7 min")
@@ -289,24 +287,29 @@ private struct PickupLocationRow: View {
     }
 }
 
-// MARK: - Tip Card
+// MARK: - Open Door Button
 
-private struct TipCard: View {
-    var icon: String
-    var text: String
+private struct OpenDoorButton: View {
+    var action: () -> Void
+
+    /// Gold gradient start color.
+    private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
+    /// Gold gradient end color.
+    private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
 
     var body: some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .foregroundStyle(.white)
-                .frame(width: 32, height: 32)
-                .background(.blue, in: .circle)
-
-            Text(text)
-                .font(.subheadline)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.blue.opacity(0.08), in: .rect(cornerRadius: 12))
+        Button("Open the door", action: action)
+        .bold()
+        .foregroundStyle(.white)
+        .frame(maxWidth: .infinity)
+        .frame(height: 52)
+        .background(
+            LinearGradient(
+                colors: [Self.goldStart, Self.goldEnd],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
+        .clipShape(.rect(cornerRadius: 26))
     }
 }

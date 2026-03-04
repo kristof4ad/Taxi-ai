@@ -8,6 +8,8 @@ enum AppScreen {
     case rideTracking
     case enterVehicle
     case pickupNavigation
+    case fastenSeatbelts
+    case startRide
     case ride
 }
 
@@ -71,6 +73,11 @@ struct Taxi_aiApp: App {
                             withAnimation {
                                 currentScreen = .pickupNavigation
                             }
+                        },
+                        onOpenDoor: {
+                            withAnimation {
+                                currentScreen = .fastenSeatbelts
+                            }
                         }
                     )
                 }
@@ -87,9 +94,27 @@ struct Taxi_aiApp: App {
                     )
                 }
 
+            case .fastenSeatbelts:
+                if let tripViewModel {
+                    FastenSeatbeltsView(viewModel: tripViewModel) {
+                        withAnimation {
+                            currentScreen = .startRide
+                        }
+                    }
+                }
+
+            case .startRide:
+                if let tripViewModel {
+                    StartRideView(viewModel: tripViewModel) {
+                        withAnimation {
+                            currentScreen = .ride
+                        }
+                    }
+                }
+
             case .ride:
                 if let tripViewModel {
-                    MapView(viewModel: tripViewModel)
+                    RideView(viewModel: tripViewModel)
                 }
             }
         }
