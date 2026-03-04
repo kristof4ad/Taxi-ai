@@ -15,10 +15,20 @@ enum RidePhase: Sendable {
         switch self {
         case .none:
             ""
+        case .ordering, .riding:
+            "Cancel this ride"
+        }
+    }
+
+    /// The message shown in the cancel confirmation alert.
+    var cancelMessage: String {
+        switch self {
+        case .none:
+            ""
         case .ordering:
-            "Cancel the order"
+            "You won't be charged if you cancel now."
         case .riding:
-            "Cancel the ride"
+            "You will be charged for this ride."
         }
     }
 }

@@ -1,8 +1,8 @@
 import SwiftUI
 
-/// Full-screen menu overlay with cancel and ride history options.
+/// Floating dropdown menu that appears below the hamburger button.
 ///
-/// Displays a translucent background with a bottom card containing menu actions.
+/// Displays menu actions anchored to the top-trailing corner.
 /// The cancel option label and visibility depend on the current ``RidePhase``.
 struct AppMenuOverlay: View {
     @Binding var isPresented: Bool
@@ -14,17 +14,18 @@ struct AppMenuOverlay: View {
 
     var body: some View {
         if isPresented {
-            ZStack(alignment: .bottom) {
-                // Dimmed background
-                Color.black.opacity(0.4)
+            ZStack(alignment: .topTrailing) {
+                // Transparent tap catcher to dismiss on tap outside
+                Color.clear
+                    .contentShape(.rect)
                     .ignoresSafeArea()
                     .onTapGesture {
-                        withAnimation {
+                        withAnimation(.easeOut(duration: 0.2)) {
                             isPresented = false
                         }
                     }
 
-                // Menu card
+                // Floating menu card
                 VStack(spacing: 0) {
                     if ridePhase != .none {
                         MenuRow(
@@ -43,37 +44,30 @@ struct AppMenuOverlay: View {
                         title: "List of rides",
                         icon: "list.bullet"
                     ) {
-                        withAnimation {
+                        withAnimation(.easeOut(duration: 0.2)) {
                             isPresented = false
                         }
                         onShowRideHistory()
                     }
-
-                    Divider()
-                        .padding(.horizontal)
-
-                    MenuRow(
-                        title: "Close",
-                        icon: "chevron.down"
-                    ) {
-                        withAnimation {
-                            isPresented = false
-                        }
-                    }
                 }
-                .background(.background, in: .rect(cornerRadii: .init(topLeading: 20, topTrailing: 20)))
-                .shadow(color: .black.opacity(0.15), radius: 20, y: -5)
+                .background(.background, in: .rect(cornerRadius: 14))
+                .shadow(color: .black.opacity(0.15), radius: 12, y: 4)
+                .fixedSize(horizontal: true, vertical: true)
+                .padding(.top, 62)
+                .padding(.trailing, 16)
             }
-            .transition(.opacity)
-            .alert("Are you sure you want to cancel?", isPresented: $showCancelConfirmation) {
+            .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .topTrailing)))
+            .alert("Cancel the ride", isPresented: $showCancelConfirmation) {
                 Button("Yes, cancel", role: .destructive) {
-                    withAnimation {
+                    withAnimation(.easeOut(duration: 0.2)) {
                         isPresented = false
                     }
                     onCancel()
                 }
 
                 Button("No", role: .cancel) { }
+            } message: {
+                Text(ridePhase.cancelMessage)
             }
         }
     }
@@ -81,7 +75,7 @@ struct AppMenuOverlay: View {
 
 // MARK: - Menu Row
 
-/// A single tappable row inside the menu overlay.
+/// A single tappable row inside the floating menu.
 private struct MenuRow: View {
     var title: String
     var icon: String
@@ -89,22 +83,23 @@ private struct MenuRow: View {
     var action: () -> Void
 
     var body: some View {
-        Button(role: role, action: action) {
+        Button(action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.body)
                     .frame(width: 24)
+                    .foregroundStyle(.primary)
 
                 Text(title)
                     .font(.body)
+                    .foregroundStyle(.primary)
 
                 Spacer()
             }
             .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.vertical, 14)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
-        .foregroundStyle(role == .destructive ? .red : .primary)
     }
 }

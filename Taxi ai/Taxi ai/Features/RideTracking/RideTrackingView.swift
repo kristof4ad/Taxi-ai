@@ -38,12 +38,12 @@ struct RideTrackingView: View {
 // MARK: - Map Section
 
 private struct RideTrackingMapSection: View {
-    var viewModel: TripViewModel
+    @Bindable var viewModel: TripViewModel
     @Binding var isMenuPresented: Bool
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
-            Map(position: .constant(viewModel.cameraPosition)) {
+            Map(position: $viewModel.cameraPosition) {
                 // Pickup marker — hidden once the car arrives so it doesn't cover the car icon.
                 if case .arrivedAtPickup = viewModel.simulationState {
                     // Car is at the pickup stop; don't show the pickup pin.

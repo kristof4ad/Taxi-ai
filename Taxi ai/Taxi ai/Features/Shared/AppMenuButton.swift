@@ -8,7 +8,7 @@ struct AppMenuButton: View {
 
     var body: some View {
         Button("Menu", systemImage: "line.3.horizontal") {
-            isPresented = true
+            isPresented.toggle()
         }
         .labelStyle(.iconOnly)
         .font(.title3)
