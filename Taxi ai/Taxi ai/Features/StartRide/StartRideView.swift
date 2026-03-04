@@ -9,6 +9,7 @@ struct StartRideView: View {
     var onShowRideHistory: () -> Void
 
     @State private var isMenuPresented = false
+    @State private var showEditTrip = false
 
     var body: some View {
         ZStack {
@@ -19,7 +20,7 @@ struct StartRideView: View {
 
                 StartRideCircle(onStartRide: onStartRide)
 
-                StartRideActionButtons()
+                StartRideActionButtons(onEditTrip: { showEditTrip = true })
             }
             .background(.background)
 
@@ -29,6 +30,21 @@ struct StartRideView: View {
                 onCancel: onCancel,
                 onShowRideHistory: onShowRideHistory
             )
+        }
+        .sheet(isPresented: $showEditTrip) {
+            if let origin = viewModel.currentRouteOrigin {
+                EditTripView(
+                    tripViewModel: viewModel,
+                    viewModel: EditTripViewModel(
+                        locationService: viewModel.locationService,
+                        currencyService: viewModel.currencyService,
+                        originalPrice: viewModel.estimatedPrice,
+                        routeOrigin: origin
+                    ),
+                    onConfirm: { showEditTrip = false },
+                    onDismiss: { showEditTrip = false }
+                )
+            }
         }
     }
 }
@@ -103,10 +119,12 @@ private struct StartRideCircle: View {
 
 /// Edit Trip and Lock buttons row.
 private struct StartRideActionButtons: View {
+    var onEditTrip: () -> Void
+
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                StartRideActionButton(title: "Edit Trip", icon: "pencil")
+                StartRideActionButton(title: "Edit Trip", icon: "pencil", action: onEditTrip)
                 StartRideActionButton(title: "Lock", icon: "lock")
             }
         }
@@ -120,10 +138,11 @@ private struct StartRideActionButtons: View {
 private struct StartRideActionButton: View {
     var title: String
     var icon: String?
+    var action: (() -> Void)?
 
     var body: some View {
         Button {
-            // Action placeholder
+            action?()
         } label: {
             HStack(spacing: 8) {
                 if let icon {

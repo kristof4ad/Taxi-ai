@@ -1,0 +1,262 @@
+import CoreLocation
+import MapKit
+import SwiftUI
+
+/// View model for the Edit Trip sheet, managing destination search and new route pricing.
+@MainActor
+@Observable
+final class EditTripViewModel {
+    // MARK: - Search State
+
+    var searchText = ""
+    var isSearchActive = false
+    var selectedCategory: PlaceCategory = .bars
+    var nearbyPlaces: [NearbyPlace] = []
+    var isSearching = false
+
+    /// The newly selected destination, pending confirmation.
+    var newDestination: NearbyPlace?
+
+    // MARK: - Route & Pricing State
+
+    var newRoute: MKRoute?
+    var newTripInfo: TripInfo?
+    var isCalculatingRoute = false
+
+    /// Whether the price confirmation overlay is shown.
+    var showPriceConfirmation = false
+
+    /// Set to true when a selected destination exceeds the maximum service distance.
+    var showTooFarAlert = false
+
+    // MARK: - Dependencies
+
+    private let locationService: LocationService
+    private let currencyService: CurrencyService
+    private let searchCompleterService = SearchCompleterService()
+    private let routeService = RouteService()
+
+    /// The original trip price before editing, used to calculate the difference.
+    private let originalPrice: Double?
+
+    /// The coordinate to route from (current taxi position or pickup location).
+    private let routeOrigin: CLLocationCoordinate2D
+
+    // MARK: - Init
+
+    /// Creates the view model with shared services from the active trip.
+    /// - Parameters:
+    ///   - locationService: Shared location service for user position and search biasing.
+    ///   - currencyService: Shared currency service for consistent price display.
+    ///   - originalPrice: The current trip's estimated price, for computing the difference.
+    ///   - routeOrigin: The coordinate to calculate the new route from.
+    init(
+        locationService: LocationService,
+        currencyService: CurrencyService,
+        originalPrice: Double?,
+        routeOrigin: CLLocationCoordinate2D
+    ) {
+        self.locationService = locationService
+        self.currencyService = currencyService
+        self.originalPrice = originalPrice
+        self.routeOrigin = routeOrigin
+    }
+
+    // MARK: - Computed Properties
+
+    /// Autocomplete suggestions from the search completer.
+    var currentCompletions: [SearchCompletion] {
+        searchCompleterService.completions
+    }
+
+    /// Estimated price for the new route in the user's currency.
+    var newEstimatedPrice: Double? {
+        guard let newTripInfo else { return nil }
+        let miles = Measurement(
+            value: newTripInfo.distance,
+            unit: UnitLength.meters
+        ).converted(to: .miles).value
+        let usd = TripViewModel.baseFare + TripViewModel.perMileRate * miles
+        return currencyService.convertFromUSD(usd)
+    }
+
+    /// The price difference between the new and original routes.
+    var priceDifference: Double? {
+        guard let newPrice = newEstimatedPrice,
+              let originalPrice else { return nil }
+        return newPrice - originalPrice
+    }
+
+    /// The currency code for display.
+    var displayCurrencyCode: String {
+        currencyService.displayCurrencyCode
+    }
+
+    // MARK: - Search
+
+    /// Called when the search text changes. Forwards the query to the completer.
+    func updateSearchText(_ newText: String) {
+        searchText = newText
+        if newText.isEmpty {
+            searchCompleterService.completions = []
+        } else {
+            if let userLocation = locationService.userLocation {
+                searchCompleterService.updateRegion(
+                    MKCoordinateRegion(
+                        center: userLocation,
+                        latitudinalMeters: 50_000,
+                        longitudinalMeters: 50_000
+                    )
+                )
+            }
+            searchCompleterService.updateQuery(newText)
+        }
+    }
+
+    /// Called when the user selects a completion from the autocomplete list.
+    func selectSearchCompletion(_ completion: SearchCompletion) async {
+        isSearchActive = false
+        isSearching = true
+
+        guard let resolvedPlace = await searchCompleterService.resolve(completion) else {
+            isSearching = false
+            return
+        }
+
+        // Recalculate distance from route origin.
+        var destination = resolvedPlace
+        let originLocation = CLLocation(
+            latitude: routeOrigin.latitude,
+            longitude: routeOrigin.longitude
+        )
+        let destLocation = CLLocation(
+            latitude: destination.coordinate.latitude,
+            longitude: destination.coordinate.longitude
+        )
+        destination = NearbyPlace(
+            id: destination.id,
+            name: destination.name,
+            address: destination.address,
+            coordinate: destination.coordinate,
+            distance: originLocation.distance(from: destLocation)
+        )
+
+        // Check service area.
+        let distanceMiles = Measurement(value: destination.distance, unit: UnitLength.meters)
+            .converted(to: .miles).value
+        if distanceMiles > HomeViewModel.maxDistanceMiles {
+            showTooFarAlert = true
+            isSearching = false
+            searchText = ""
+            return
+        }
+
+        isSearching = false
+        await selectNewDestination(destination)
+    }
+
+    /// Clears the search and resets to category browsing.
+    func clearSearch() {
+        searchText = ""
+        isSearchActive = false
+        newDestination = nil
+        newRoute = nil
+        newTripInfo = nil
+        showPriceConfirmation = false
+        searchCompleterService.completions = []
+    }
+
+    // MARK: - Categories
+
+    /// Searches for nearby places matching the given category.
+    func selectCategory(_ category: PlaceCategory) {
+        selectedCategory = category
+        Task {
+            await searchNearbyPlaces(for: category)
+        }
+    }
+
+    /// Loads places for the initial category.
+    func loadInitialPlaces() async {
+        await searchNearbyPlaces(for: selectedCategory)
+    }
+
+    // MARK: - Destination Selection
+
+    /// Called when a place is selected from the list or search results.
+    func selectNewDestination(_ place: NearbyPlace) async {
+        newDestination = place
+        searchText = place.name
+
+        // Calculate the route to the new destination.
+        isCalculatingRoute = true
+        do {
+            let calculatedRoute = try await routeService.calculateRoute(
+                from: routeOrigin,
+                to: place.coordinate
+            )
+            newRoute = calculatedRoute
+            newTripInfo = TripInfo(
+                distance: calculatedRoute.distance,
+                expectedTravelTime: calculatedRoute.expectedTravelTime,
+                routeName: calculatedRoute.name
+            )
+            showPriceConfirmation = true
+        } catch {
+            newRoute = nil
+            newTripInfo = nil
+        }
+        isCalculatingRoute = false
+    }
+
+    // MARK: - Private
+
+    /// Performs a local search for POIs near the route origin.
+    private func searchNearbyPlaces(for category: PlaceCategory) async {
+        isSearching = true
+
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = category.searchQuery
+        request.region = MKCoordinateRegion(
+            center: routeOrigin,
+            latitudinalMeters: 2000,
+            longitudinalMeters: 2000
+        )
+
+        do {
+            let search = MKLocalSearch(request: request)
+            let response = try await search.start()
+            let originLocation = CLLocation(
+                latitude: routeOrigin.latitude,
+                longitude: routeOrigin.longitude
+            )
+
+            nearbyPlaces = response.mapItems.prefix(10).map { item in
+                let itemLocation = item.location
+                let distance = originLocation.distance(from: itemLocation)
+
+                return NearbyPlace(
+                    id: item.identifier?.rawValue ?? item.name ?? UUID().uuidString,
+                    name: item.name ?? "Unknown",
+                    address: formatAddress(item),
+                    coordinate: itemLocation.coordinate,
+                    distance: distance
+                )
+            }
+            .sorted { $0.distance < $1.distance }
+        } catch {
+            nearbyPlaces = []
+        }
+
+        isSearching = false
+    }
+
+    /// Formats a map item into a short address string.
+    @available(iOS, deprecated: 26.0, message: "Migrate to MKAddressRepresentations when API stabilizes")
+    private func formatAddress(_ item: MKMapItem) -> String {
+        let placemark = item.placemark
+        return [placemark.subThoroughfare, placemark.thoroughfare, placemark.locality]
+            .compactMap { $0 }
+            .joined(separator: " ")
+    }
+}

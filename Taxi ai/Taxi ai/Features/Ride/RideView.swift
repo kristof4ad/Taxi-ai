@@ -10,6 +10,7 @@ struct RideView: View {
     var onShowRideHistory: () -> Void
 
     @State private var isMenuPresented = false
+    @State private var showEditTrip = false
 
     var body: some View {
         ZStack {
@@ -21,7 +22,7 @@ struct RideView: View {
 
                 RideMapSection(viewModel: viewModel)
 
-                RideActionButtons()
+                RideActionButtons(onEditTrip: { showEditTrip = true })
             }
             .background(.background)
 
@@ -40,6 +41,21 @@ struct RideView: View {
                 withAnimation {
                     onArrived()
                 }
+            }
+        }
+        .sheet(isPresented: $showEditTrip) {
+            if let origin = viewModel.currentRouteOrigin {
+                EditTripView(
+                    tripViewModel: viewModel,
+                    viewModel: EditTripViewModel(
+                        locationService: viewModel.locationService,
+                        currencyService: viewModel.currencyService,
+                        originalPrice: viewModel.estimatedPrice,
+                        routeOrigin: origin
+                    ),
+                    onConfirm: { showEditTrip = false },
+                    onDismiss: { showEditTrip = false }
+                )
             }
         }
     }
@@ -122,9 +138,11 @@ private struct RideMapSection: View {
 
 /// Edit Trip and Lock buttons at the bottom.
 private struct RideActionButtons: View {
+    var onEditTrip: () -> Void
+
     var body: some View {
         HStack(spacing: 12) {
-            RideActionButton(title: "Edit Trip", icon: "pencil")
+            RideActionButton(title: "Edit Trip", icon: "pencil", action: onEditTrip)
             RideActionButton(title: "Lock", icon: "lock")
         }
         .padding(.horizontal, 16)
@@ -138,10 +156,11 @@ private struct RideActionButtons: View {
 private struct RideActionButton: View {
     var title: String
     var icon: String?
+    var action: (() -> Void)?
 
     var body: some View {
         Button {
-            // Action placeholder
+            action?()
         } label: {
             HStack(spacing: 8) {
                 if let icon {

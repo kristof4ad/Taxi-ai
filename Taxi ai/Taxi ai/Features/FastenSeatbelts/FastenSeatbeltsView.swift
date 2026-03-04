@@ -9,6 +9,7 @@ struct FastenSeatbeltsView: View {
     var onShowRideHistory: () -> Void
 
     @State private var isMenuPresented = false
+    @State private var showEditTrip = false
 
     var body: some View {
         ZStack {
@@ -17,7 +18,10 @@ struct FastenSeatbeltsView: View {
 
                 SeatbeltIllustration()
 
-                FastenSeatbeltsActions(onFastened: onFastened)
+                FastenSeatbeltsActions(
+                    onFastened: onFastened,
+                    onEditTrip: { showEditTrip = true }
+                )
             }
             .background(.background)
 
@@ -27,6 +31,21 @@ struct FastenSeatbeltsView: View {
                 onCancel: onCancel,
                 onShowRideHistory: onShowRideHistory
             )
+        }
+        .sheet(isPresented: $showEditTrip) {
+            if let origin = viewModel.currentRouteOrigin {
+                EditTripView(
+                    tripViewModel: viewModel,
+                    viewModel: EditTripViewModel(
+                        locationService: viewModel.locationService,
+                        currencyService: viewModel.currencyService,
+                        originalPrice: viewModel.estimatedPrice,
+                        routeOrigin: origin
+                    ),
+                    onConfirm: { showEditTrip = false },
+                    onDismiss: { showEditTrip = false }
+                )
+            }
         }
     }
 }
@@ -81,6 +100,9 @@ private struct SeatbeltIllustration: View {
 /// Edit/Lock row and gold "Fastened" button.
 private struct FastenSeatbeltsActions: View {
     var onFastened: () -> Void
+    var onEditTrip: () -> Void
+
+    @State private var soundPlayer = SoundPlayer()
 
     private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
     private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
@@ -88,8 +110,8 @@ private struct FastenSeatbeltsActions: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                ActionGridButton(title: "Edit Trip", icon: "pencil")
-                ActionGridButton(title: "Lock", icon: "lock")
+                ActionGridButton(title: "Edit Trip", icon: "pencil", action: onEditTrip)
+                ActionGridButton(title: "Lock", icon: "lock", action: { soundPlayer.playLock() })
             }
 
             Button("Fastened", action: onFastened)
@@ -116,10 +138,11 @@ private struct FastenSeatbeltsActions: View {
 private struct ActionGridButton: View {
     var title: String
     var icon: String?
+    var action: (() -> Void)?
 
     var body: some View {
         Button {
-            // Action placeholder
+            action?()
         } label: {
             HStack(spacing: 8) {
                 if let icon {

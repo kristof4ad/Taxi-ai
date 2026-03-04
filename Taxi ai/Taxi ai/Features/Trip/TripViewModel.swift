@@ -243,6 +243,60 @@ final class TripViewModel {
         }
     }
 
+    /// The best coordinate to route from when changing destinations mid-trip.
+    /// Uses the taxi's current simulation position if riding, the pickup stop if pre-ride,
+    /// or the user's location as a fallback.
+    var currentRouteOrigin: CLLocationCoordinate2D? {
+        if let currentPos = simulationEngine.currentPosition, simulationEngine.isRunning {
+            return currentPos
+        }
+        if let pickupStop = pickupStopLocation {
+            return pickupStop
+        }
+        return locationService.userLocation
+    }
+
+    /// Changes the trip destination to a new place. Recalculates the route from the
+    /// current position and restarts the simulation if the ride is in progress.
+    func changeDestination(to place: NearbyPlace) async {
+        guard let origin = currentRouteOrigin else { return }
+
+        destinationName = place.name
+        destinationAddress = place.address
+        destination = place.coordinate
+
+        do {
+            let calculatedRoute = try await routeService.calculateRoute(
+                from: origin,
+                to: place.coordinate
+            )
+            route = calculatedRoute
+            tripInfo = TripInfo(
+                distance: calculatedRoute.distance,
+                expectedTravelTime: calculatedRoute.expectedTravelTime,
+                routeName: calculatedRoute.name
+            )
+
+            // Zoom camera to show the new route.
+            let mapRect = calculatedRoute.polyline.boundingMapRect
+            let paddedRect = mapRect.insetBy(
+                dx: -mapRect.size.width * 0.3,
+                dy: -mapRect.size.height * 0.3
+            )
+            cameraPosition = .region(MKCoordinateRegion(paddedRect))
+
+            // If the ride simulation is running, restart it with the new route.
+            if simulationEngine.isRunning {
+                simulationEngine.reset()
+                beginRideSimulation(with: calculatedRoute)
+            } else {
+                simulationState = .routeReady
+            }
+        } catch {
+            simulationState = .error(error.localizedDescription)
+        }
+    }
+
     func resetTrip() {
         simulationEngine.reset()
         pickupSimulationEngine.reset()
