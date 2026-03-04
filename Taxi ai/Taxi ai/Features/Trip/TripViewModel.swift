@@ -37,6 +37,7 @@ final class TripViewModel {
     // MARK: - Services
 
     let locationService: LocationService
+    let currencyService = CurrencyService()
     let simulationEngine = SimulationEngine()
     private let routeService = RouteService()
 
@@ -45,6 +46,9 @@ final class TripViewModel {
     /// Creates a trip view model, optionally sharing a location service from the home screen.
     init(locationService: LocationService = LocationService()) {
         self.locationService = locationService
+        Task {
+            await currencyService.fetchExchangeRate()
+        }
     }
 
     // MARK: - Computed Properties
@@ -74,14 +78,25 @@ final class TripViewModel {
         return nil
     }
 
-    /// Estimated trip price based on distance: $2 base + $2/mile.
-    var estimatedPrice: Double? {
+    /// Estimated trip price in USD based on distance: $2 base + $2/mile.
+    private var estimatedPriceUSD: Double? {
         guard let tripInfo else { return nil }
         let miles = Measurement(
             value: tripInfo.distance,
             unit: UnitLength.meters
         ).converted(to: .miles).value
         return Self.baseFare + Self.perMileRate * miles
+    }
+
+    /// Estimated trip price converted to the user's local currency.
+    var estimatedPrice: Double? {
+        guard let usd = estimatedPriceUSD else { return nil }
+        return currencyService.convertFromUSD(usd)
+    }
+
+    /// The currency code to use when displaying prices.
+    var displayCurrencyCode: String {
+        currencyService.displayCurrencyCode
     }
 
     /// Estimated arrival time at the destination.

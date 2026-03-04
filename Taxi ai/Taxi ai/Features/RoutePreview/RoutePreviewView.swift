@@ -124,7 +124,11 @@ private struct RouteDetailsCard: View {
 
             Spacer()
 
-            BookButton(price: viewModel.estimatedPrice, action: onBook)
+            BookButton(
+                price: viewModel.estimatedPrice,
+                currencyCode: viewModel.displayCurrencyCode,
+                action: onBook
+            )
         }
         .padding(.init(top: 20, leading: 16, bottom: 24, trailing: 16))
         .background(.background)
@@ -157,7 +161,7 @@ private struct TripTimeline: View {
             // Connector line
             HStack {
                 Rectangle()
-                    .fill(Color(.systemGray4))
+                    .fill(.quaternary)
                     .frame(width: 2, height: 20)
                     .padding(.leading, 21)
                 Spacer()
@@ -191,7 +195,7 @@ private struct TripTimeline: View {
         }
         .overlay {
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(.systemGray4), lineWidth: 1)
+                .stroke(.quaternary, lineWidth: 1)
         }
     }
 }
@@ -200,13 +204,14 @@ private struct TripTimeline: View {
 
 private struct BookButton: View {
     var price: Double?
+    var currencyCode: String
     var action: () -> Void
 
     var body: some View {
         Button(action: action) {
             Group {
                 if let price {
-                    Text("Book Ride \u{00B7} \(price, format: .currency(code: "USD"))")
+                    Text("Book Ride \u{00B7} \(price, format: .currency(code: currencyCode))")
                 } else {
                     ProgressView()
                 }

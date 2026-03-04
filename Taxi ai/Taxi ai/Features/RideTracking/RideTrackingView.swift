@@ -4,14 +4,13 @@ import SwiftUI
 /// Screen showing the car approaching the pickup location on a map with trip details below.
 struct RideTrackingView: View {
     @Bindable var viewModel: TripViewModel
+    var onGoToVehicle: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             RideTrackingMapSection(viewModel: viewModel)
 
-            RideTrackingBottomCard(viewModel: viewModel) {
-                // Navigate to Enter Vehicle screen
-            }
+            RideTrackingBottomCard(viewModel: viewModel, onGoToVehicle: onGoToVehicle)
         }
         .ignoresSafeArea(edges: .top)
         .onAppear {

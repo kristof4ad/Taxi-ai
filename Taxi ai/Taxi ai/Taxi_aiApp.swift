@@ -6,6 +6,8 @@ enum AppScreen {
     case home
     case routePreview
     case rideTracking
+    case enterVehicle
+    case pickupNavigation
     case ride
 }
 
@@ -54,7 +56,35 @@ struct Taxi_aiApp: App {
 
             case .rideTracking:
                 if let tripViewModel {
-                    RideTrackingView(viewModel: tripViewModel)
+                    RideTrackingView(viewModel: tripViewModel) {
+                        withAnimation {
+                            currentScreen = .enterVehicle
+                        }
+                    }
+                }
+
+            case .enterVehicle:
+                if let tripViewModel {
+                    EnterVehicleView(
+                        viewModel: tripViewModel,
+                        onFindVehicle: {
+                            withAnimation {
+                                currentScreen = .pickupNavigation
+                            }
+                        }
+                    )
+                }
+
+            case .pickupNavigation:
+                if let tripViewModel {
+                    PickupNavigationView(
+                        viewModel: tripViewModel,
+                        onDismiss: {
+                            withAnimation {
+                                currentScreen = .enterVehicle
+                            }
+                        }
+                    )
                 }
 
             case .ride:
