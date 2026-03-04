@@ -6,22 +6,36 @@ struct RoutePreviewView: View {
     @Bindable var viewModel: TripViewModel
     var onBook: () -> Void
     var onBack: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            RouteMapSection(
-                cameraPosition: $viewModel.cameraPosition,
-                route: viewModel.route,
-                destination: viewModel.destination,
-                onBack: onBack
-            )
+        ZStack {
+            VStack(spacing: 0) {
+                RouteMapSection(
+                    cameraPosition: $viewModel.cameraPosition,
+                    route: viewModel.route,
+                    destination: viewModel.destination,
+                    onBack: onBack,
+                    isMenuPresented: $isMenuPresented
+                )
 
-            RouteDetailsCard(
-                viewModel: viewModel,
-                onBook: onBook
+                RouteDetailsCard(
+                    viewModel: viewModel,
+                    onBook: onBook
+                )
+            }
+            .ignoresSafeArea(edges: .top)
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .ordering,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
             )
         }
-        .ignoresSafeArea(edges: .top)
     }
 }
 
@@ -32,6 +46,7 @@ private struct RouteMapSection: View {
     var route: MKRoute?
     var destination: CLLocationCoordinate2D?
     var onBack: () -> Void
+    @Binding var isMenuPresented: Bool
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -56,7 +71,7 @@ private struct RouteMapSection: View {
             HStack {
                 BackButton(action: onBack)
                 Spacer()
-                MenuBadge()
+                AppMenuButton(isPresented: $isMenuPresented)
             }
             .padding(.top, 62)
             .padding(.horizontal, 16)
@@ -75,19 +90,6 @@ private struct BackButton: View {
             .foregroundStyle(.primary)
             .frame(width: 40, height: 40)
             .background(.background, in: .circle)
-            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
-    }
-}
-
-// MARK: - Menu Badge
-
-private struct MenuBadge: View {
-    var body: some View {
-        Image(systemName: "line.3.horizontal")
-            .font(.title3)
-            .foregroundStyle(.primary)
-            .frame(width: 44, height: 44)
-            .background(.background, in: .rect(cornerRadius: 8))
             .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
     }
 }

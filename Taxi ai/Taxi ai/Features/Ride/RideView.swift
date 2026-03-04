@@ -6,16 +6,32 @@ import SwiftUI
 struct RideView: View {
     @Bindable var viewModel: TripViewModel
     var onArrived: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            RideTopSection(viewModel: viewModel)
+        ZStack {
+            VStack(spacing: 0) {
+                RideTopSection(
+                    viewModel: viewModel,
+                    isMenuPresented: $isMenuPresented
+                )
 
-            RideMapSection(viewModel: viewModel)
+                RideMapSection(viewModel: viewModel)
 
-            RideActionButtons()
+                RideActionButtons()
+            }
+            .background(.background)
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .riding,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
+            )
         }
-        .background(.background)
         .onAppear {
             viewModel.startRide()
         }
@@ -34,6 +50,7 @@ struct RideView: View {
 /// Menu button and destination heading.
 private struct RideTopSection: View {
     var viewModel: TripViewModel
+    @Binding var isMenuPresented: Bool
 
     private static let goldText = Color(red: 0.831, green: 0.659, blue: 0.294)
 
@@ -42,15 +59,7 @@ private struct RideTopSection: View {
             HStack {
                 Spacer()
 
-                Button("Menu", systemImage: "line.3.horizontal") {
-                    // Menu action placeholder
-                }
-                .labelStyle(.iconOnly)
-                .font(.title3)
-                .foregroundStyle(.primary)
-                .frame(width: 40, height: 40)
-                .background(.background, in: .rect(cornerRadius: 20))
-                .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                AppMenuButton(isPresented: $isMenuPresented)
             }
             .padding(.top, 62)
             .padding(.horizontal, 16)

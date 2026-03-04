@@ -5,21 +5,34 @@ import SwiftUI
 struct CloseDoorsView: View {
     var viewModel: TripViewModel
     var onFinishRide: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            CloseDoorsTopRow()
+        ZStack {
+            VStack(spacing: 0) {
+                CloseDoorsTopRow(isMenuPresented: $isMenuPresented)
 
-            CloseDoorsTitle()
+                CloseDoorsTitle()
 
-            CarTopViewImage()
+                CarTopViewImage()
 
-            CloseDoorsBottomSection(
-                destinationName: viewModel.destinationName,
-                onFinishRide: onFinishRide
+                CloseDoorsBottomSection(
+                    destinationName: viewModel.destinationName,
+                    onFinishRide: onFinishRide
+                )
+            }
+            .background(.gray.opacity(0.1))
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .riding,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
             )
         }
-        .background(.gray.opacity(0.1))
     }
 }
 
@@ -27,6 +40,8 @@ struct CloseDoorsView: View {
 
 /// "Rate Your Ride" chip and menu button.
 private struct CloseDoorsTopRow: View {
+    @Binding var isMenuPresented: Bool
+
     var body: some View {
         HStack {
             HStack(spacing: 6) {
@@ -43,15 +58,7 @@ private struct CloseDoorsTopRow: View {
 
             Spacer()
 
-            Button("Menu", systemImage: "line.3.horizontal") {
-                // Menu action placeholder
-            }
-            .labelStyle(.iconOnly)
-            .font(.title3)
-            .foregroundStyle(.primary)
-            .frame(width: 40, height: 40)
-            .background(.background, in: .rect(cornerRadius: 20))
-            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+            AppMenuButton(isPresented: $isMenuPresented)
         }
         .padding(.top, 62)
         .padding(.horizontal, 16)

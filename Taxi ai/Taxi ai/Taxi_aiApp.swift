@@ -43,6 +43,11 @@ struct Taxi_aiApp: App {
                         tripViewModel = trip
                         trip.setDestination(from: place)
                         currentScreen = .routePreview
+                    },
+                    onShowRideHistory: {
+                        withAnimation {
+                            currentScreen = .rideHistory
+                        }
                     }
                 )
 
@@ -56,17 +61,32 @@ struct Taxi_aiApp: App {
                         onBack: {
                             self.tripViewModel = nil
                             currentScreen = .home
+                        },
+                        onCancel: {
+                            cancelOrder()
+                        },
+                        onShowRideHistory: {
+                            showRideHistoryPreRide()
                         }
                     )
                 }
 
             case .rideTracking:
                 if let tripViewModel {
-                    RideTrackingView(viewModel: tripViewModel) {
-                        withAnimation {
-                            currentScreen = .enterVehicle
+                    RideTrackingView(
+                        viewModel: tripViewModel,
+                        onGoToVehicle: {
+                            withAnimation {
+                                currentScreen = .enterVehicle
+                            }
+                        },
+                        onCancel: {
+                            cancelOrder()
+                        },
+                        onShowRideHistory: {
+                            showRideHistoryPreRide()
                         }
-                    }
+                    )
                 }
 
             case .enterVehicle:
@@ -82,6 +102,12 @@ struct Taxi_aiApp: App {
                             withAnimation {
                                 currentScreen = .fastenSeatbelts
                             }
+                        },
+                        onCancel: {
+                            cancelOrder()
+                        },
+                        onShowRideHistory: {
+                            showRideHistoryPreRide()
                         }
                     )
                 }
@@ -100,27 +126,60 @@ struct Taxi_aiApp: App {
 
             case .fastenSeatbelts:
                 if let tripViewModel {
-                    FastenSeatbeltsView(viewModel: tripViewModel) {
-                        withAnimation {
-                            currentScreen = .startRide
+                    FastenSeatbeltsView(
+                        viewModel: tripViewModel,
+                        onFastened: {
+                            withAnimation {
+                                currentScreen = .startRide
+                            }
+                        },
+                        onCancel: {
+                            cancelOrder()
+                        },
+                        onShowRideHistory: {
+                            showRideHistoryPreRide()
                         }
-                    }
+                    )
                 }
 
             case .startRide:
                 if let tripViewModel {
-                    StartRideView(viewModel: tripViewModel) {
-                        withAnimation {
-                            currentScreen = .ride
+                    StartRideView(
+                        viewModel: tripViewModel,
+                        onStartRide: {
+                            withAnimation {
+                                currentScreen = .ride
+                            }
+                        },
+                        onCancel: {
+                            cancelOrder()
+                        },
+                        onShowRideHistory: {
+                            showRideHistoryPreRide()
                         }
-                    }
+                    )
                 }
 
             case .ride:
                 if let tripViewModel {
-                    RideView(viewModel: tripViewModel) {
-                        currentScreen = .exitVehicle
-                    }
+                    RideView(
+                        viewModel: tripViewModel,
+                        onArrived: {
+                            currentScreen = .exitVehicle
+                        },
+                        onCancel: {
+                            // During ride: go through safe exit flow
+                            withAnimation {
+                                currentScreen = .exitVehicle
+                            }
+                        },
+                        onShowRideHistory: {
+                            // Same as cancel — must exit safely first
+                            withAnimation {
+                                currentScreen = .exitVehicle
+                            }
+                        }
+                    )
                 }
 
             case .exitVehicle:
@@ -134,36 +193,58 @@ struct Taxi_aiApp: App {
                             withAnimation {
                                 currentScreen = .closeDoors
                             }
+                        },
+                        onCancel: {
+                            // Skip to ride detail so ride gets recorded
+                            withAnimation {
+                                currentScreen = .rideDetail
+                            }
+                        },
+                        onShowRideHistory: {
+                            withAnimation {
+                                currentScreen = .rideDetail
+                            }
                         }
                     )
                 }
 
             case .closeDoors:
                 if let tripViewModel {
-                    CloseDoorsView(viewModel: tripViewModel) {
-                        withAnimation {
-                            currentScreen = .rideDetail
+                    CloseDoorsView(
+                        viewModel: tripViewModel,
+                        onFinishRide: {
+                            withAnimation {
+                                currentScreen = .rideDetail
+                            }
+                        },
+                        onCancel: {
+                            // Skip to ride detail so ride gets recorded
+                            withAnimation {
+                                currentScreen = .rideDetail
+                            }
+                        },
+                        onShowRideHistory: {
+                            withAnimation {
+                                currentScreen = .rideDetail
+                            }
                         }
-                    }
+                    )
                 }
 
             case .rideDetail:
                 if let tripViewModel {
-                    RideDetailView(viewModel: tripViewModel) {
-                        // Save the completed ride to history
-                        let completedRide = CompletedRide(
-                            date: .now,
-                            pickupName: "Pickup",
-                            destinationName: tripViewModel.destinationName ?? "Destination",
-                            price: tripViewModel.estimatedPrice ?? 0,
-                            currencyCode: tripViewModel.displayCurrencyCode
-                        )
-                        homeViewModel.addCompletedRide(completedRide)
-                        withAnimation {
-                            self.tripViewModel = nil
-                            currentScreen = .rideHistory
+                    RideDetailView(
+                        viewModel: tripViewModel,
+                        onFinished: {
+                            recordRideAndShowHistory(tripViewModel)
+                        },
+                        onCancel: {
+                            recordRideAndShowHistory(tripViewModel)
+                        },
+                        onShowRideHistory: {
+                            recordRideAndShowHistory(tripViewModel)
                         }
-                    }
+                    )
                 }
 
             case .rideHistory:
@@ -173,6 +254,40 @@ struct Taxi_aiApp: App {
                     }
                 }
             }
+        }
+    }
+
+    // MARK: - Menu Actions
+
+    /// Cancels a pre-ride order, clearing the trip and returning to Home.
+    private func cancelOrder() {
+        withAnimation {
+            tripViewModel = nil
+            currentScreen = .home
+        }
+    }
+
+    /// Shows ride history from a pre-ride screen, clearing the active trip.
+    private func showRideHistoryPreRide() {
+        withAnimation {
+            tripViewModel = nil
+            currentScreen = .rideHistory
+        }
+    }
+
+    /// Records the completed ride to history and navigates to the ride history screen.
+    private func recordRideAndShowHistory(_ trip: TripViewModel) {
+        let completedRide = CompletedRide(
+            date: .now,
+            pickupName: "Pickup",
+            destinationName: trip.destinationName ?? "Destination",
+            price: trip.estimatedPrice ?? 0,
+            currencyCode: trip.displayCurrencyCode
+        )
+        homeViewModel.addCompletedRide(completedRide)
+        withAnimation {
+            tripViewModel = nil
+            currentScreen = .rideHistory
         }
     }
 }

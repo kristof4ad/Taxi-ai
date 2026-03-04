@@ -5,16 +5,29 @@ import SwiftUI
 struct FastenSeatbeltsView: View {
     var viewModel: TripViewModel
     var onFastened: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            FastenSeatbeltsHeader()
+        ZStack {
+            VStack(spacing: 0) {
+                FastenSeatbeltsHeader(isMenuPresented: $isMenuPresented)
 
-            SeatbeltIllustration()
+                SeatbeltIllustration()
 
-            FastenSeatbeltsActions(onFastened: onFastened)
+                FastenSeatbeltsActions(onFastened: onFastened)
+            }
+            .background(.background)
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .ordering,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
+            )
         }
-        .background(.background)
     }
 }
 
@@ -22,12 +35,14 @@ struct FastenSeatbeltsView: View {
 
 /// Top section with menu button, subtitle, and title.
 private struct FastenSeatbeltsHeader: View {
+    @Binding var isMenuPresented: Bool
+
     var body: some View {
         VStack(spacing: 0) {
             // Menu row
             HStack {
                 Spacer()
-                MenuButton()
+                AppMenuButton(isPresented: $isMenuPresented)
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -45,22 +60,6 @@ private struct FastenSeatbeltsHeader: View {
             .padding(.horizontal, 20)
             .padding(.top, 8)
         }
-    }
-}
-
-// MARK: - Menu Button
-
-private struct MenuButton: View {
-    var body: some View {
-        Button("Menu", systemImage: "line.3.horizontal") {
-            // Menu action placeholder
-        }
-        .labelStyle(.iconOnly)
-        .font(.title3)
-        .foregroundStyle(.primary)
-        .frame(width: 40, height: 40)
-        .background(.background, in: .rect(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
     }
 }
 

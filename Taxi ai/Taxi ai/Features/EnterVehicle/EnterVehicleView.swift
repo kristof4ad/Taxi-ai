@@ -7,14 +7,18 @@ struct EnterVehicleView: View {
     var viewModel: TripViewModel
     var onFindVehicle: () -> Void
     var onOpenDoor: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
 
     @State private var walkingRoute: MKRoute?
+    @State private var isMenuPresented = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
             EnterVehicleMapSection(
                 viewModel: viewModel,
-                walkingRoute: walkingRoute
+                walkingRoute: walkingRoute,
+                isMenuPresented: $isMenuPresented
             )
             .ignoresSafeArea(edges: .top)
 
@@ -22,6 +26,13 @@ struct EnterVehicleView: View {
                 viewModel: viewModel,
                 onFindVehicle: onFindVehicle,
                 onOpenDoor: onOpenDoor
+            )
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .ordering,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
             )
         }
         .task {
@@ -55,6 +66,7 @@ struct EnterVehicleView: View {
 private struct EnterVehicleMapSection: View {
     var viewModel: TripViewModel
     var walkingRoute: MKRoute?
+    @Binding var isMenuPresented: Bool
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -85,7 +97,7 @@ private struct EnterVehicleMapSection: View {
             .mapControls {}
 
             VStack(spacing: 12) {
-                MenuButton()
+                AppMenuButton(isPresented: $isMenuPresented)
             }
             .padding(.top, 62)
             .padding(.trailing, 16)
@@ -132,22 +144,6 @@ private struct UserLocationMarker: View {
                     Circle().stroke(.white, lineWidth: 3)
                 )
         }
-    }
-}
-
-// MARK: - Menu Button
-
-private struct MenuButton: View {
-    var body: some View {
-        Button("Menu", systemImage: "line.3.horizontal") {
-            // Menu action placeholder
-        }
-        .labelStyle(.iconOnly)
-        .font(.title3)
-        .foregroundStyle(.primary)
-        .frame(width: 40, height: 40)
-        .background(.background, in: .rect(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
     }
 }
 

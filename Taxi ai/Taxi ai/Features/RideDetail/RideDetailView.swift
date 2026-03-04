@@ -5,45 +5,62 @@ import SwiftUI
 struct RideDetailView: View {
     var viewModel: TripViewModel
     var onFinished: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                RideDetailTopRow()
+        ZStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    RideDetailTopRow(isMenuPresented: $isMenuPresented)
 
-                RideDetailMap(viewModel: viewModel)
+                    RideDetailMap(viewModel: viewModel)
 
-                RideDetailStats(viewModel: viewModel)
+                    RideDetailStats(viewModel: viewModel)
 
-                RideDetailLabels()
+                    RideDetailLabels()
 
-                RideDetailRouteCard(viewModel: viewModel)
+                    RideDetailRouteCard(viewModel: viewModel)
 
-                RideDetailPayment(viewModel: viewModel)
+                    RideDetailPayment(viewModel: viewModel)
 
-                Divider()
-                    .padding(.horizontal, 16)
+                    Divider()
+                        .padding(.horizontal, 16)
 
-                RideDetailLostItem()
+                    RideDetailLostItem()
 
-                RideDetailFinishedButton(onFinished: onFinished)
+                    RideDetailFinishedButton(onFinished: onFinished)
+                }
             }
+            .scrollIndicators(.hidden)
+            .background(.background)
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .riding,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
+            )
         }
-        .scrollIndicators(.hidden)
-        .background(.background)
     }
 }
 
 // MARK: - Top Row
 
-/// Ride date header.
+/// Ride date header with menu button.
 private struct RideDetailTopRow: View {
+    @Binding var isMenuPresented: Bool
+
     var body: some View {
         HStack(spacing: 8) {
             Text(Date.now, format: .dateTime.month(.wide).day().year().hour().minute())
                 .font(.subheadline.weight(.medium))
 
             Spacer()
+
+            AppMenuButton(isPresented: $isMenuPresented)
         }
         .padding(.top, 62)
         .padding(.horizontal, 16)

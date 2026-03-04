@@ -5,37 +5,44 @@ import SwiftUI
 struct StartRideView: View {
     var viewModel: TripViewModel
     var onStartRide: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            StartRideTopBar()
+        ZStack {
+            VStack(spacing: 0) {
+                StartRideTopBar(isMenuPresented: $isMenuPresented)
 
-            StartRideHeading(destinationName: viewModel.destinationName)
+                StartRideHeading(destinationName: viewModel.destinationName)
 
-            StartRideCircle(onStartRide: onStartRide)
+                StartRideCircle(onStartRide: onStartRide)
 
-            StartRideActionButtons()
+                StartRideActionButtons()
+            }
+            .background(.background)
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .ordering,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
+            )
         }
-        .background(.background)
     }
 }
 
 // MARK: - Top Bar
 
 private struct StartRideTopBar: View {
+    @Binding var isMenuPresented: Bool
+
     var body: some View {
         HStack {
             Spacer()
 
-            Button("Menu", systemImage: "line.3.horizontal") {
-                // Menu action placeholder
-            }
-            .labelStyle(.iconOnly)
-            .font(.title3)
-            .foregroundStyle(.primary)
-            .frame(width: 40, height: 40)
-            .background(.background, in: .rect(cornerRadius: 20))
-            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+            AppMenuButton(isPresented: $isMenuPresented)
         }
         .padding(.top, 62)
         .padding(.horizontal, 16)

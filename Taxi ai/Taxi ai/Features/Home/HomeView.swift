@@ -5,20 +5,33 @@ import SwiftUI
 struct HomeView: View {
     @Bindable var viewModel: HomeViewModel
     var onPlaceSelected: (NearbyPlace) -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            HomeMapSection(
-                cameraPosition: $viewModel.cameraPosition,
-                selectedDestination: viewModel.selectedDestination
-            )
+        ZStack {
+            VStack(spacing: 0) {
+                HomeMapSection(
+                    cameraPosition: $viewModel.cameraPosition,
+                    selectedDestination: viewModel.selectedDestination,
+                    isMenuPresented: $isMenuPresented
+                )
 
-            BottomSheetSection(
-                viewModel: viewModel,
-                onPlaceSelected: onPlaceSelected
+                BottomSheetSection(
+                    viewModel: viewModel,
+                    onPlaceSelected: onPlaceSelected
+                )
+            }
+            .ignoresSafeArea(edges: .top)
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .none,
+                onCancel: { },
+                onShowRideHistory: onShowRideHistory
             )
         }
-        .ignoresSafeArea(edges: .top)
         .task {
             viewModel.onAppear()
             await viewModel.loadInitialPlaces()
@@ -36,6 +49,7 @@ struct HomeView: View {
 private struct HomeMapSection: View {
     @Binding var cameraPosition: MapCameraPosition
     var selectedDestination: NearbyPlace?
+    @Binding var isMenuPresented: Bool
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -52,26 +66,10 @@ private struct HomeMapSection: View {
             .mapControls {}
             .frame(height: 420)
 
-            MenuButton()
+            AppMenuButton(isPresented: $isMenuPresented)
                 .padding(.top, 62)
                 .padding(.trailing, 16)
         }
-    }
-}
-
-// MARK: - Menu Button
-
-private struct MenuButton: View {
-    var body: some View {
-        Button("Menu", systemImage: "line.3.horizontal") {
-            // Menu action placeholder
-        }
-        .labelStyle(.iconOnly)
-        .font(.title3)
-        .foregroundStyle(.primary)
-        .frame(width: 44, height: 44)
-        .background(.background, in: .rect(cornerRadius: 8))
-        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
     }
 }
 
@@ -422,6 +420,7 @@ private struct PlaceRow: View {
 #Preview {
     HomeView(
         viewModel: HomeViewModel(),
-        onPlaceSelected: { _ in }
+        onPlaceSelected: { _ in },
+        onShowRideHistory: { }
     )
 }

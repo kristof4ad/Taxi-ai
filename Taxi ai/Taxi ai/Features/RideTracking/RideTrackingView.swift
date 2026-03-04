@@ -5,14 +5,30 @@ import SwiftUI
 struct RideTrackingView: View {
     @Bindable var viewModel: TripViewModel
     var onGoToVehicle: () -> Void
+    var onCancel: () -> Void
+    var onShowRideHistory: () -> Void
+
+    @State private var isMenuPresented = false
 
     var body: some View {
-        VStack(spacing: 0) {
-            RideTrackingMapSection(viewModel: viewModel)
+        ZStack {
+            VStack(spacing: 0) {
+                RideTrackingMapSection(
+                    viewModel: viewModel,
+                    isMenuPresented: $isMenuPresented
+                )
 
-            RideTrackingBottomCard(viewModel: viewModel, onGoToVehicle: onGoToVehicle)
+                RideTrackingBottomCard(viewModel: viewModel, onGoToVehicle: onGoToVehicle)
+            }
+            .ignoresSafeArea(edges: .top)
+
+            AppMenuOverlay(
+                isPresented: $isMenuPresented,
+                ridePhase: .ordering,
+                onCancel: onCancel,
+                onShowRideHistory: onShowRideHistory
+            )
         }
-        .ignoresSafeArea(edges: .top)
         .onAppear {
             viewModel.startPickupApproach()
         }
@@ -23,6 +39,7 @@ struct RideTrackingView: View {
 
 private struct RideTrackingMapSection: View {
     var viewModel: TripViewModel
+    @Binding var isMenuPresented: Bool
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -74,28 +91,12 @@ private struct RideTrackingMapSection: View {
             .frame(height: 380)
 
             VStack(spacing: 12) {
-                MenuButton()
+                AppMenuButton(isPresented: $isMenuPresented)
                 RouteButton()
             }
             .padding(.top, 62)
             .padding(.trailing, 16)
         }
-    }
-}
-
-// MARK: - Menu Button
-
-private struct MenuButton: View {
-    var body: some View {
-        Button("Menu", systemImage: "line.3.horizontal") {
-            // Menu action placeholder
-        }
-        .labelStyle(.iconOnly)
-        .font(.title3)
-        .foregroundStyle(.primary)
-        .frame(width: 40, height: 40)
-        .background(.background, in: .rect(cornerRadius: 20))
-        .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
     }
 }
 
