@@ -129,7 +129,7 @@ private struct RideMapSection: View {
 
             if let position = viewModel.simulationEngine.currentPosition {
                 Annotation("Taxi", coordinate: position) {
-                    CarMarkerView()
+                    CarMarkerView(bearing: viewModel.simulationEngine.currentBearing)
                 }
             }
         }

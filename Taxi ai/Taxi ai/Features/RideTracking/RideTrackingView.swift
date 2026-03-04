@@ -81,7 +81,10 @@ private struct RideTrackingMapSection: View {
                     }()
 
                     Annotation("", coordinate: carPosition) {
-                        CarMarkerView(showPickupLabel: arrived)
+                        CarMarkerView(
+                            showPickupLabel: arrived,
+                            bearing: viewModel.pickupSimulationEngine.currentBearing
+                        )
                     }
                     .annotationTitles(.hidden)
                 }

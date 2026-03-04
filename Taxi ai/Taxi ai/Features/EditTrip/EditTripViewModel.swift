@@ -14,6 +14,9 @@ final class EditTripViewModel {
     var nearbyPlaces: [NearbyPlace] = []
     var isSearching = false
 
+    /// When set, the user is exploring POIs around this destination before confirming.
+    var selectedDestination: NearbyPlace?
+
     /// The newly selected destination, pending confirmation.
     var newDestination: NearbyPlace?
 
@@ -170,28 +173,39 @@ final class EditTripViewModel {
             return
         }
 
-        isSearching = false
-        await selectNewDestination(destination)
+        // Enter exploration mode — show destination banner and POIs around it.
+        selectedDestination = destination
+        searchText = destination.name
+
+        await searchNearbyPlacesAround(destination.coordinate, for: selectedCategory)
     }
 
-    /// Clears the search and resets to category browsing.
+    /// Clears the search and resets to category browsing around the route origin.
     func clearSearch() {
         searchText = ""
         isSearchActive = false
+        selectedDestination = nil
         newDestination = nil
         newRoute = nil
         newTripInfo = nil
         showPriceConfirmation = false
         searchCompleterService.completions = []
+        Task {
+            await searchNearbyPlaces(for: selectedCategory)
+        }
     }
 
     // MARK: - Categories
 
-    /// Searches for nearby places matching the given category.
+    /// Searches for nearby places matching the given category, respecting destination mode.
     func selectCategory(_ category: PlaceCategory) {
         selectedCategory = category
         Task {
-            await searchNearbyPlaces(for: category)
+            if let destination = selectedDestination {
+                await searchNearbyPlacesAround(destination.coordinate, for: category)
+            } else {
+                await searchNearbyPlaces(for: category)
+            }
         }
     }
 
@@ -253,6 +267,49 @@ final class EditTripViewModel {
             nearbyPlaces = response.mapItems.prefix(10).map { item in
                 let itemLocation = item.location
                 let distance = originLocation.distance(from: itemLocation)
+
+                return NearbyPlace(
+                    id: item.identifier?.rawValue ?? item.name ?? UUID().uuidString,
+                    name: item.name ?? "Unknown",
+                    address: formatAddress(item),
+                    coordinate: itemLocation.coordinate,
+                    distance: distance
+                )
+            }
+            .sorted { $0.distance < $1.distance }
+        } catch {
+            nearbyPlaces = []
+        }
+
+        isSearching = false
+    }
+
+    /// Searches for POIs around a specific coordinate (used when exploring a destination).
+    private func searchNearbyPlacesAround(
+        _ center: CLLocationCoordinate2D,
+        for category: PlaceCategory
+    ) async {
+        isSearching = true
+
+        let request = MKLocalSearch.Request()
+        request.naturalLanguageQuery = category.searchQuery
+        request.region = MKCoordinateRegion(
+            center: center,
+            latitudinalMeters: 2000,
+            longitudinalMeters: 2000
+        )
+
+        do {
+            let search = MKLocalSearch(request: request)
+            let response = try await search.start()
+            let centerLocation = CLLocation(
+                latitude: center.latitude,
+                longitude: center.longitude
+            )
+
+            nearbyPlaces = response.mapItems.prefix(10).map { item in
+                let itemLocation = item.location
+                let distance = centerLocation.distance(from: itemLocation)
 
                 return NearbyPlace(
                     id: item.identifier?.rawValue ?? item.name ?? UUID().uuidString,

@@ -135,29 +135,13 @@ private struct DirectionArrow: View {
             return 0
         }
 
-        let bearing = Self.bearing(from: userLocation, to: carLocation)
+        let bearing = userLocation.bearing(to: carLocation)
         var angle = (bearing - heading).truncatingRemainder(dividingBy: 360)
         if angle > 180 { angle -= 360 }
         if angle < -180 { angle += 360 }
         return angle
     }
 
-    /// Calculates the geographic bearing (in degrees, 0 = north, 90 = east) from one coordinate to another.
-    private static func bearing(
-        from start: CLLocationCoordinate2D,
-        to end: CLLocationCoordinate2D
-    ) -> Double {
-        let lat1 = start.latitude * .pi / 180
-        let lat2 = end.latitude * .pi / 180
-        let deltaLon = (end.longitude - start.longitude) * .pi / 180
-
-        let y = sin(deltaLon) * cos(lat2)
-        let x = cos(lat1) * sin(lat2) - sin(lat1) * cos(lat2) * cos(deltaLon)
-        let radians = atan2(y, x)
-
-        let degrees = (radians * 180 / .pi).truncatingRemainder(dividingBy: 360)
-        return degrees < 0 ? degrees + 360 : degrees
-    }
 }
 
 // MARK: - Close Button

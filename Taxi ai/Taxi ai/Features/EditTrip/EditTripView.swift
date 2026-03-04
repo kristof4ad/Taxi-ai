@@ -12,7 +12,10 @@ struct EditTripView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                EditTripMapSection(tripViewModel: tripViewModel)
+                EditTripMapSection(
+                    tripViewModel: tripViewModel,
+                    exploredDestination: viewModel.selectedDestination
+                )
 
                 EditTripSearchSection(
                     viewModel: viewModel,
@@ -58,9 +61,12 @@ struct EditTripView: View {
 
 // MARK: - Map Section
 
-/// Map showing the current route and taxi position.
+/// Map showing the current route, taxi position, and explored destination.
 private struct EditTripMapSection: View {
     var tripViewModel: TripViewModel
+    var exploredDestination: NearbyPlace?
+
+    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
 
     var body: some View {
         Map(position: .constant(tripViewModel.cameraPosition)) {
@@ -78,6 +84,14 @@ private struct EditTripMapSection: View {
             if let position = tripViewModel.simulationEngine.currentPosition {
                 Annotation("Taxi", coordinate: position) {
                     CarMarkerView()
+                }
+            }
+
+            if let explored = exploredDestination {
+                Annotation(explored.name, coordinate: explored.coordinate) {
+                    Image(systemName: "mappin.circle.fill")
+                        .font(.title)
+                        .foregroundStyle(Self.gold)
                 }
             }
 
@@ -117,10 +131,25 @@ private struct EditTripSearchSection: View {
                         viewModel.updateSearchText(newValue)
                     }
 
+                    // Destination banner when exploring a searched destination
+                    if let destination = viewModel.selectedDestination {
+                        DestinationBanner(
+                            destination: destination,
+                            onGoDirectly: { onPlaceSelected(destination) },
+                            onClear: { viewModel.clearSearch() }
+                        )
+                    }
+
                     CategoriesRow(
                         selected: viewModel.selectedCategory,
                         onSelect: { viewModel.selectCategory($0) }
                     )
+
+                    if viewModel.selectedDestination != nil {
+                        Text("Places nearby")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
 
                     Divider()
 

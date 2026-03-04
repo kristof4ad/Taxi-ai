@@ -181,6 +181,50 @@ struct PlacesList: View {
     }
 }
 
+// MARK: - Destination Banner
+
+/// Banner showing the selected destination — tap the gold arrow to go directly there.
+struct DestinationBanner: View {
+    var destination: NearbyPlace
+    var onGoDirectly: () -> Void
+    var onClear: () -> Void
+
+    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
+
+    var body: some View {
+        Button {
+            onGoDirectly()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: "mappin.and.ellipse")
+                    .foregroundStyle(Self.gold)
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(destination.name)
+                        .font(.subheadline.weight(.semibold))
+
+                    if !destination.address.isEmpty {
+                        Text(destination.address)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "arrow.right.circle.fill")
+                    .font(.title2)
+                    .foregroundStyle(Self.gold)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(Self.gold.opacity(0.08))
+            .clipShape(.rect(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 // MARK: - Place Row
 
 /// A single place row with icon, name, address, and distance.

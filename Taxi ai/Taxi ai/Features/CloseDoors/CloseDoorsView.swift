@@ -122,10 +122,10 @@ private struct CloseDoorsBottomSection: View {
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
                 }
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
-                .background(.primary, in: .capsule)
+                .overlay(Capsule().stroke(.quaternary, lineWidth: 1))
             }
             .buttonStyle(.plain)
 

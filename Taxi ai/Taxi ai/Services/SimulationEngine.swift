@@ -7,6 +7,9 @@ final class SimulationEngine {
     /// Current position of the simulated vehicle.
     var currentPosition: CLLocationCoordinate2D?
 
+    /// Current bearing of the vehicle in degrees (0 = north, 90 = east).
+    var currentBearing: Double = 0
+
     /// Progress from 0.0 to 1.0 along the route.
     var progress: Double = 0
 
@@ -50,6 +53,7 @@ final class SimulationEngine {
         isRunning = true
         progress = 0
         currentPosition = routeCoordinates.first
+        currentBearing = segmentBearing(at: 0)
 
         simulationTask = Task {
             let startTime = ContinuousClock.now
@@ -61,6 +65,7 @@ final class SimulationEngine {
 
                 self.progress = newProgress
                 self.currentPosition = interpolatedCoordinate(at: newProgress)
+                self.currentBearing = segmentBearing(at: newProgress)
 
                 if newProgress >= 1.0 {
                     self.isRunning = false
@@ -100,6 +105,7 @@ final class SimulationEngine {
 
                 self.progress = newProgress
                 self.currentPosition = interpolatedCoordinate(at: newProgress)
+                self.currentBearing = segmentBearing(at: newProgress)
 
                 if newProgress >= 1.0 {
                     self.isRunning = false
@@ -125,6 +131,7 @@ final class SimulationEngine {
         pausedProgress = nil
         progress = 0
         currentPosition = nil
+        currentBearing = 0
         routeCoordinates = []
         cumulativeDistances = []
         totalDistance = 0
@@ -181,6 +188,42 @@ final class SimulationEngine {
         let startIndex = min(segmentIndex + 1, routeCoordinates.count - 1)
         remaining.append(contentsOf: routeCoordinates[startIndex...])
         return remaining
+    }
+
+    /// Returns the bearing (in degrees) for the route segment at the given progress.
+    ///
+    /// If the current segment has zero length (duplicate coordinates),
+    /// scans ahead for the next distinct coordinate to determine direction.
+    private func segmentBearing(at progress: Double) -> Double {
+        guard routeCoordinates.count >= 2, totalDistance > 0 else { return currentBearing }
+
+        let targetDistance = progress * totalDistance
+
+        var segmentIndex = 0
+        for i in 1..<cumulativeDistances.count {
+            if cumulativeDistances[i] >= targetDistance {
+                segmentIndex = i - 1
+                break
+            }
+            segmentIndex = i - 1
+        }
+
+        let nextIndex = min(segmentIndex + 1, routeCoordinates.count - 1)
+        let from = routeCoordinates[segmentIndex]
+        let to = routeCoordinates[nextIndex]
+
+        // If the segment is zero-length, look ahead for a distinct point.
+        if from.latitude == to.latitude, from.longitude == to.longitude {
+            for i in (nextIndex + 1)..<routeCoordinates.count {
+                let ahead = routeCoordinates[i]
+                if ahead.latitude != from.latitude || ahead.longitude != from.longitude {
+                    return from.bearing(to: ahead)
+                }
+            }
+            return currentBearing
+        }
+
+        return from.bearing(to: to)
     }
 
     /// Returns the interpolated coordinate at a given progress fraction (0.0 to 1.0).
