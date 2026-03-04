@@ -92,12 +92,26 @@ private struct RideHistoryList: View {
 private struct RideHistoryRow: View {
     var ride: CompletedRide
 
+    /// Amber gold color for star ratings.
+    private static let starColor = Color(red: 0.961, green: 0.620, blue: 0.043)
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             // Date
             Text(ride.date, format: .dateTime.month(.abbreviated).day().year().hour().minute())
                 .font(.caption)
                 .foregroundStyle(.secondary)
+
+            // Star rating (shown only if the rider submitted a rating)
+            if let stars = ride.starRating {
+                HStack(spacing: 2) {
+                    ForEach(1...5, id: \.self) { index in
+                        Image(systemName: index <= stars ? "star.fill" : "star")
+                            .font(.caption2)
+                            .foregroundStyle(index <= stars ? Self.starColor : .gray.opacity(0.3))
+                    }
+                }
+            }
 
             // Route
             HStack(spacing: 8) {

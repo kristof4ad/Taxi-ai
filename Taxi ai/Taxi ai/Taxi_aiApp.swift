@@ -22,9 +22,12 @@ struct Taxi_aiApp: App {
     @State private var homeViewModel = HomeViewModel()
     @State private var tripViewModel: TripViewModel?
     @State private var currentScreen: AppScreen = .welcome
+    @State private var isRatingPresented = false
+    @State private var pendingRating: RideRating?
 
     var body: some Scene {
         WindowGroup {
+            Group {
             switch currentScreen {
             case .welcome:
                 WelcomeView {
@@ -187,7 +190,7 @@ struct Taxi_aiApp: App {
                     ExitVehicleView(
                         viewModel: tripViewModel,
                         onRateRide: {
-                            // Rate ride flow placeholder
+                            isRatingPresented = true
                         },
                         onOpenDoor: {
                             withAnimation {
@@ -212,6 +215,9 @@ struct Taxi_aiApp: App {
                 if let tripViewModel {
                     CloseDoorsView(
                         viewModel: tripViewModel,
+                        onRateRide: {
+                            isRatingPresented = true
+                        },
                         onFinishRide: {
                             withAnimation {
                                 currentScreen = .rideDetail
@@ -235,6 +241,7 @@ struct Taxi_aiApp: App {
                 if let tripViewModel {
                     RideDetailView(
                         viewModel: tripViewModel,
+                        rating: pendingRating,
                         onFinished: {
                             recordRideAndShowHistory(tripViewModel)
                         },
@@ -252,6 +259,25 @@ struct Taxi_aiApp: App {
                     withAnimation {
                         currentScreen = .home
                     }
+                }
+            }
+            }
+            .sheet(isPresented: $isRatingPresented) {
+                if let tripViewModel {
+                    RateRideView(
+                        viewModel: RateRideViewModel(
+                            ridePrice: tripViewModel.estimatedPrice ?? 0,
+                            currencyCode: tripViewModel.displayCurrencyCode,
+                            existingRating: pendingRating
+                        ),
+                        onSubmit: { rating in
+                            pendingRating = rating
+                            isRatingPresented = false
+                        },
+                        onDismiss: {
+                            isRatingPresented = false
+                        }
+                    )
                 }
             }
         }
@@ -277,16 +303,26 @@ struct Taxi_aiApp: App {
 
     /// Records the completed ride to history and navigates to the ride history screen.
     private func recordRideAndShowHistory(_ trip: TripViewModel) {
-        let completedRide = CompletedRide(
+        var completedRide = CompletedRide(
             date: .now,
-            pickupName: "Pickup",
+            pickupName: trip.pickupAddress ?? "Pickup",
             destinationName: trip.destinationName ?? "Destination",
             price: trip.estimatedPrice ?? 0,
             currencyCode: trip.displayCurrencyCode
         )
+
+        // Attach rating data if the user rated during this ride.
+        if let rating = pendingRating {
+            completedRide.starRating = rating.starRating
+            completedRide.feedbackText = rating.feedbackText.isEmpty ? nil : rating.feedbackText
+            completedRide.tipPercentage = rating.tipPercentage
+            completedRide.tipAmount = rating.tipAmount
+        }
+
         homeViewModel.addCompletedRide(completedRide)
         withAnimation {
             tripViewModel = nil
+            pendingRating = nil
             currentScreen = .rideHistory
         }
     }

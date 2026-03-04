@@ -43,7 +43,9 @@ struct RideView: View {
                 }
             }
         }
-        .sheet(isPresented: $showEditTrip) {
+        .sheet(isPresented: $showEditTrip, onDismiss: {
+            viewModel.simulationEngine.resume()
+        }) {
             if let origin = viewModel.currentRouteOrigin {
                 EditTripView(
                     tripViewModel: viewModel,
@@ -51,11 +53,18 @@ struct RideView: View {
                         locationService: viewModel.locationService,
                         currencyService: viewModel.currencyService,
                         originalPrice: viewModel.estimatedPrice,
-                        routeOrigin: origin
+                        routeOrigin: origin,
+                        distanceAlreadyDriven: viewModel.totalDistanceDriven,
+                        minimumPrice: viewModel.minimumRidePrice
                     ),
                     onConfirm: { showEditTrip = false },
                     onDismiss: { showEditTrip = false }
                 )
+            }
+        }
+        .onChange(of: showEditTrip) { _, isShowing in
+            if isShowing {
+                viewModel.simulationEngine.pause()
             }
         }
     }
@@ -140,10 +149,20 @@ private struct RideMapSection: View {
 private struct RideActionButtons: View {
     var onEditTrip: () -> Void
 
+    @State private var isLocked = true
+    @State private var soundPlayer = SoundPlayer()
+
     var body: some View {
         HStack(spacing: 12) {
             RideActionButton(title: "Edit Trip", icon: "pencil", action: onEditTrip)
-            RideActionButton(title: "Lock", icon: "lock")
+            RideActionButton(
+                title: isLocked ? "Lock" : "Unlock",
+                icon: isLocked ? "lock" : "lock.open",
+                action: {
+                    soundPlayer.playLock()
+                    isLocked.toggle()
+                }
+            )
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)

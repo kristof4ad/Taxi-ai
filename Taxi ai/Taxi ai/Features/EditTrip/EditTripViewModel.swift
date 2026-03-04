@@ -42,6 +42,13 @@ final class EditTripViewModel {
     /// The coordinate to route from (current taxi position or pickup location).
     private let routeOrigin: CLLocationCoordinate2D
 
+    /// Distance already driven in meters before this destination change, for accurate pricing.
+    private let distanceAlreadyDriven: CLLocationDistance
+
+    /// The minimum price for the trip (original price before any mid-ride changes).
+    /// When set, the new price will never drop below this value.
+    private let minimumPrice: Double?
+
     // MARK: - Init
 
     /// Creates the view model with shared services from the active trip.
@@ -50,16 +57,22 @@ final class EditTripViewModel {
     ///   - currencyService: Shared currency service for consistent price display.
     ///   - originalPrice: The current trip's estimated price, for computing the difference.
     ///   - routeOrigin: The coordinate to calculate the new route from.
+    ///   - distanceAlreadyDriven: Meters already driven before this change (0 for pre-ride edits).
+    ///   - minimumPrice: Price floor to enforce during active rides (nil for pre-ride edits).
     init(
         locationService: LocationService,
         currencyService: CurrencyService,
         originalPrice: Double?,
-        routeOrigin: CLLocationCoordinate2D
+        routeOrigin: CLLocationCoordinate2D,
+        distanceAlreadyDriven: CLLocationDistance = 0,
+        minimumPrice: Double? = nil
     ) {
         self.locationService = locationService
         self.currencyService = currencyService
         self.originalPrice = originalPrice
         self.routeOrigin = routeOrigin
+        self.distanceAlreadyDriven = distanceAlreadyDriven
+        self.minimumPrice = minimumPrice
     }
 
     // MARK: - Computed Properties
@@ -70,14 +83,20 @@ final class EditTripViewModel {
     }
 
     /// Estimated price for the new route in the user's currency.
+    /// Includes distance already driven and enforces the minimum price floor when set.
     var newEstimatedPrice: Double? {
         guard let newTripInfo else { return nil }
+        let totalMeters = distanceAlreadyDriven + newTripInfo.distance
         let miles = Measurement(
-            value: newTripInfo.distance,
+            value: totalMeters,
             unit: UnitLength.meters
         ).converted(to: .miles).value
         let usd = TripViewModel.baseFare + TripViewModel.perMileRate * miles
-        return currencyService.convertFromUSD(usd)
+        let converted = currencyService.convertFromUSD(usd)
+        if let minimumPrice {
+            return max(converted, minimumPrice)
+        }
+        return converted
     }
 
     /// The price difference between the new and original routes.

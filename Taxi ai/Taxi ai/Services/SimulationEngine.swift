@@ -13,6 +13,12 @@ final class SimulationEngine {
     /// Whether the simulation is actively running.
     var isRunning = false
 
+    /// Whether the simulation is currently paused and can be resumed.
+    private(set) var isPaused = false
+
+    /// Stored progress when the simulation is paused, allowing it to resume from this point.
+    private var pausedProgress: Double?
+
     private var simulationTask: Task<Void, Never>?
 
     /// Duration of the simulation in seconds (faster than real time for demo purposes).
@@ -25,7 +31,12 @@ final class SimulationEngine {
     private var cumulativeDistances: [CLLocationDistance] = []
 
     /// Total route length in meters.
-    private var totalDistance: CLLocationDistance = 0
+    private(set) var totalDistance: CLLocationDistance = 0
+
+    /// Distance traveled so far in meters, based on current progress.
+    var distanceTraveled: CLLocationDistance {
+        progress * totalDistance
+    }
 
     /// Configures the engine with route coordinates.
     func configure(with coordinates: [CLLocationCoordinate2D]) {
@@ -61,6 +72,45 @@ final class SimulationEngine {
         }
     }
 
+    /// Pauses the simulation, preserving current progress so it can be resumed later.
+    func pause() {
+        guard isRunning else { return }
+        pausedProgress = progress
+        isPaused = true
+        simulationTask?.cancel()
+        simulationTask = nil
+        isRunning = false
+    }
+
+    /// Resumes the simulation from where it was paused.
+    func resume() {
+        guard let savedProgress = pausedProgress, !routeCoordinates.isEmpty else { return }
+        pausedProgress = nil
+        isPaused = false
+        isRunning = true
+
+        let resumeFrom = savedProgress
+        simulationTask = Task {
+            let startTime = ContinuousClock.now
+
+            while !Task.isCancelled {
+                let elapsed = ContinuousClock.now - startTime
+                let elapsedSeconds = elapsed / .seconds(1)
+                let newProgress = min(resumeFrom + elapsedSeconds / simulationDuration, 1.0)
+
+                self.progress = newProgress
+                self.currentPosition = interpolatedCoordinate(at: newProgress)
+
+                if newProgress >= 1.0 {
+                    self.isRunning = false
+                    return
+                }
+
+                try? await Task.sleep(for: .milliseconds(16))
+            }
+        }
+    }
+
     /// Stops the simulation.
     func stop() {
         simulationTask?.cancel()
@@ -71,6 +121,8 @@ final class SimulationEngine {
     /// Resets all simulation state.
     func reset() {
         stop()
+        isPaused = false
+        pausedProgress = nil
         progress = 0
         currentPosition = nil
         routeCoordinates = []

@@ -18,9 +18,37 @@ final class TripViewModel {
     var destination: CLLocationCoordinate2D?
     var destinationName: String?
     var destinationAddress: String?
+    /// The rider's pickup address (street + city), captured via reverse geocoding when the ride starts.
+    var pickupAddress: String?
+    /// The date and time the ride started, used to calculate pickup and dropoff times.
+    var rideStartDate: Date?
     var route: MKRoute?
     var tripInfo: TripInfo?
     var cameraPosition: MapCameraPosition = .userLocation(fallback: .automatic)
+
+    /// Whether the trunk is currently open, shared across exit and close-doors screens.
+    var isTrunkOpen = false
+
+    // MARK: - Destination Change Pricing
+
+    /// Total meters driven across completed route segments (before the current one).
+    private var accumulatedDrivenDistance: CLLocationDistance = 0
+
+    /// The original route distance in meters, saved on the first mid-ride destination change.
+    private var originalTripDistance: CLLocationDistance?
+
+    /// The estimated price before any mid-ride destination changes, used as a price floor.
+    private(set) var originalTripPrice: Double?
+
+    /// Total distance driven so far: accumulated from previous segments plus current segment progress.
+    var totalDistanceDriven: CLLocationDistance {
+        accumulatedDrivenDistance + simulationEngine.distanceTraveled
+    }
+
+    /// The minimum ride price (the original trip price before any mid-ride changes).
+    var minimumRidePrice: Double? {
+        originalTripPrice ?? estimatedPrice
+    }
 
     // MARK: - Pickup Approach State
 
@@ -215,6 +243,8 @@ final class TripViewModel {
     /// Starts the ride simulation from any state. Called when the ride screen appears.
     func startRide() {
         guard let route, !simulationEngine.isRunning else { return }
+        rideStartDate = .now
+        reverseGeocodePickupLocation()
         beginRideSimulation(with: route)
     }
 
@@ -233,10 +263,13 @@ final class TripViewModel {
         )
         cameraPosition = .region(MKCoordinateRegion(paddedRect))
 
-        // Monitor progress updates.
+        // Monitor progress updates. Keep looping while running or paused so a
+        // pause doesn't prematurely mark the ride as completed.
         Task {
-            while simulationEngine.isRunning {
-                simulationState = .simulating(progress: simulationEngine.progress)
+            while simulationEngine.isRunning || simulationEngine.isPaused {
+                if simulationEngine.isRunning {
+                    simulationState = .simulating(progress: simulationEngine.progress)
+                }
                 try? await Task.sleep(for: .milliseconds(100))
             }
             simulationState = .completed
@@ -247,7 +280,8 @@ final class TripViewModel {
     /// Uses the taxi's current simulation position if riding, the pickup stop if pre-ride,
     /// or the user's location as a fallback.
     var currentRouteOrigin: CLLocationCoordinate2D? {
-        if let currentPos = simulationEngine.currentPosition, simulationEngine.isRunning {
+        if let currentPos = simulationEngine.currentPosition,
+           simulationEngine.isRunning || simulationEngine.isPaused {
             return currentPos
         }
         if let pickupStop = pickupStopLocation {
@@ -258,8 +292,22 @@ final class TripViewModel {
 
     /// Changes the trip destination to a new place. Recalculates the route from the
     /// current position and restarts the simulation if the ride is in progress.
+    ///
+    /// When the ride is active, the new price accounts for distance already driven
+    /// and is floored at the original trip price so it never decreases mid-ride.
     func changeDestination(to place: NearbyPlace) async {
         guard let origin = currentRouteOrigin else { return }
+
+        let isRideActive = simulationEngine.isRunning || simulationEngine.isPaused
+
+        // Capture distance driven in the current segment before resetting.
+        if isRideActive {
+            if originalTripPrice == nil {
+                originalTripPrice = estimatedPrice
+                originalTripDistance = tripInfo?.distance
+            }
+            accumulatedDrivenDistance += simulationEngine.distanceTraveled
+        }
 
         destinationName = place.name
         destinationAddress = place.address
@@ -271,8 +319,22 @@ final class TripViewModel {
                 to: place.coordinate
             )
             route = calculatedRoute
+
+            // For an active ride, the effective distance is total driven + remaining,
+            // floored at the original trip distance so the price never drops.
+            let effectiveDistance: CLLocationDistance
+            if isRideActive {
+                let originalDistance = originalTripDistance ?? calculatedRoute.distance
+                effectiveDistance = max(
+                    accumulatedDrivenDistance + calculatedRoute.distance,
+                    originalDistance
+                )
+            } else {
+                effectiveDistance = calculatedRoute.distance
+            }
+
             tripInfo = TripInfo(
-                distance: calculatedRoute.distance,
+                distance: effectiveDistance,
                 expectedTravelTime: calculatedRoute.expectedTravelTime,
                 routeName: calculatedRoute.name
             )
@@ -285,8 +347,8 @@ final class TripViewModel {
             )
             cameraPosition = .region(MKCoordinateRegion(paddedRect))
 
-            // If the ride simulation is running, restart it with the new route.
-            if simulationEngine.isRunning {
+            // If the ride simulation is running or paused, restart it with the new route.
+            if isRideActive {
                 simulationEngine.reset()
                 beginRideSimulation(with: calculatedRoute)
             } else {
@@ -308,9 +370,15 @@ final class TripViewModel {
         destination = nil
         destinationName = nil
         destinationAddress = nil
+        pickupAddress = nil
+        rideStartDate = nil
         route = nil
         tripInfo = nil
         cameraPosition = .userLocation(fallback: .automatic)
+        isTrunkOpen = false
+        accumulatedDrivenDistance = 0
+        originalTripDistance = nil
+        originalTripPrice = nil
         simulationState = .selectingDestination
     }
 
@@ -378,6 +446,24 @@ final class TripViewModel {
     }
 
     // MARK: - Private
+
+    /// Reverse geocodes the user's current location to capture the pickup address.
+    private func reverseGeocodePickupLocation() {
+        guard let location = locationService.userLocation else { return }
+
+        let clLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
+        guard let request = MKReverseGeocodingRequest(location: clLocation) else { return }
+
+        request.getMapItems { [weak self] items, _ in
+            guard let self,
+                  let address = items?.first?.addressRepresentations?.fullAddress(
+                    includingRegion: false, singleLine: true
+                  ) else { return }
+            Task { @MainActor in
+                self.pickupAddress = address
+            }
+        }
+    }
 
     private func calculateRoute() async {
         guard let origin = locationService.userLocation,

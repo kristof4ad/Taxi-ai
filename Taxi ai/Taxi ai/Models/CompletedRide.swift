@@ -8,4 +8,10 @@ struct CompletedRide: Identifiable, Sendable {
     let destinationName: String
     let price: Double
     let currencyCode: String
+
+    // Rating data (nil if the rider did not submit a rating)
+    var starRating: Int?
+    var feedbackText: String?
+    var tipPercentage: Int?
+    var tipAmount: Double?
 }

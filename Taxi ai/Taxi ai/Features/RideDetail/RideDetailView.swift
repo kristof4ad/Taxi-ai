@@ -4,6 +4,7 @@ import SwiftUI
 /// Summary screen shown after a ride is complete with route, payment, and trip details.
 struct RideDetailView: View {
     var viewModel: TripViewModel
+    var rating: RideRating?
     var onFinished: () -> Void
     var onCancel: () -> Void
     var onShowRideHistory: () -> Void
@@ -25,6 +26,16 @@ struct RideDetailView: View {
                     RideDetailRouteCard(viewModel: viewModel)
 
                     RideDetailPayment(viewModel: viewModel)
+
+                    if let rating {
+                        Divider()
+                            .padding(.horizontal, 16)
+
+                        RideDetailRatingSection(
+                            rating: rating,
+                            currencyCode: viewModel.displayCurrencyCode
+                        )
+                    }
 
                     Divider()
                         .padding(.horizontal, 16)
@@ -163,7 +174,7 @@ private struct RideDetailRouteCard: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
 
-                Text("Pickup")
+                Text(viewModel.pickupAddress ?? "Pickup")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -174,8 +185,10 @@ private struct RideDetailRouteCard: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    Text(Date.now, format: .dateTime.hour().minute())
-                        .font(.subheadline.weight(.medium))
+                    if let startDate = viewModel.rideStartDate {
+                        Text(startDate, format: .dateTime.hour().minute())
+                            .font(.subheadline.weight(.medium))
+                    }
                 }
             }
 
@@ -200,9 +213,20 @@ private struct RideDetailRouteCard: View {
 
                 Spacer()
 
-                Text("Dropoff")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("Dropoff")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    if let startDate = viewModel.rideStartDate,
+                       let travelTime = viewModel.tripInfo?.expectedTravelTime {
+                        Text(
+                            startDate.addingTimeInterval(travelTime),
+                            format: .dateTime.hour().minute()
+                        )
+                        .font(.subheadline.weight(.medium))
+                    }
+                }
             }
         }
         .padding(16)
@@ -282,6 +306,56 @@ private struct RideDetailLostItem: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
+    }
+}
+
+// MARK: - Rating Section
+
+/// Shows the rider's submitted rating, feedback, and tip.
+private struct RideDetailRatingSection: View {
+    var rating: RideRating
+    var currencyCode: String
+
+    /// Amber gold color for star ratings.
+    private static let starColor = Color(red: 0.961, green: 0.620, blue: 0.043)
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Your Rating")
+                .font(.headline)
+
+            HStack(spacing: 4) {
+                ForEach(1...5, id: \.self) { index in
+                    Image(systemName: index <= rating.starRating ? "star.fill" : "star")
+                        .foregroundStyle(
+                            index <= rating.starRating ? Self.starColor : .gray.opacity(0.3)
+                        )
+                }
+            }
+
+            if !rating.feedbackText.isEmpty {
+                Text(rating.feedbackText)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.gray.opacity(0.08), in: .rect(cornerRadius: 8))
+            }
+
+            if let tipAmount = rating.tipAmount, let tipPct = rating.tipPercentage {
+                HStack {
+                    Text("Tip (\(tipPct)%)")
+                        .font(.subheadline)
+
+                    Spacer()
+
+                    Text(tipAmount, format: .currency(code: currencyCode))
+                        .font(.subheadline.weight(.medium))
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
     }
 }
 

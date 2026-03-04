@@ -121,11 +121,21 @@ private struct StartRideCircle: View {
 private struct StartRideActionButtons: View {
     var onEditTrip: () -> Void
 
+    @State private var isLocked = true
+    @State private var soundPlayer = SoundPlayer()
+
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 StartRideActionButton(title: "Edit Trip", icon: "pencil", action: onEditTrip)
-                StartRideActionButton(title: "Lock", icon: "lock")
+                StartRideActionButton(
+                    title: isLocked ? "Lock" : "Unlock",
+                    icon: isLocked ? "lock" : "lock.open",
+                    action: {
+                        soundPlayer.playLock()
+                        isLocked.toggle()
+                    }
+                )
             }
         }
         .padding(.horizontal, 16)

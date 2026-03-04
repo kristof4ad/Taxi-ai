@@ -22,7 +22,10 @@ struct ExitVehicleView: View {
 
                 DoorIllustrationView()
 
-                ExitVehicleActionButtons(onOpenDoor: onOpenDoor)
+                ExitVehicleActionButtons(
+                    viewModel: viewModel,
+                    onOpenDoor: onOpenDoor
+                )
             }
             .background(.gray.opacity(0.1))
 
@@ -250,11 +253,33 @@ private struct DoorHandleShape: Shape {
 
 /// Open Trunk and Open Door buttons.
 private struct ExitVehicleActionButtons: View {
+    var viewModel: TripViewModel
     var onOpenDoor: () -> Void
+
+    @State private var soundPlayer = SoundPlayer()
 
     var body: some View {
         HStack(spacing: 12) {
-            ExitVehicleActionButton(title: "Open Trunk", icon: "shippingbox")
+            Button {
+                soundPlayer.playTrunk()
+                viewModel.isTrunkOpen.toggle()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(viewModel.isTrunkOpen ? "OpenTrunk" : "ClosedTrunk")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .clipShape(.rect(cornerRadius: 4))
+
+                    Text(viewModel.isTrunkOpen ? "Close Trunk" : "Open Trunk")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(.background, in: .rect(cornerRadius: 16))
+            }
+            .buttonStyle(.plain)
 
             Button {
                 onOpenDoor()
@@ -278,30 +303,3 @@ private struct ExitVehicleActionButtons: View {
     }
 }
 
-// MARK: - Action Button
-
-private struct ExitVehicleActionButton: View {
-    var title: String
-    var icon: String?
-
-    var body: some View {
-        Button {
-            // Action placeholder
-        } label: {
-            HStack(spacing: 8) {
-                if let icon {
-                    Image(systemName: icon)
-                        .font(.body)
-                }
-
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-            }
-            .foregroundStyle(.primary)
-            .frame(maxWidth: .infinity)
-            .frame(height: 56)
-            .background(.background, in: .rect(cornerRadius: 16))
-        }
-        .buttonStyle(.plain)
-    }
-}

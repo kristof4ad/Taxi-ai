@@ -102,6 +102,7 @@ private struct FastenSeatbeltsActions: View {
     var onFastened: () -> Void
     var onEditTrip: () -> Void
 
+    @State private var isLocked = true
     @State private var soundPlayer = SoundPlayer()
 
     private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
@@ -111,7 +112,14 @@ private struct FastenSeatbeltsActions: View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 ActionGridButton(title: "Edit Trip", icon: "pencil", action: onEditTrip)
-                ActionGridButton(title: "Lock", icon: "lock", action: { soundPlayer.playLock() })
+                ActionGridButton(
+                    title: isLocked ? "Lock" : "Unlock",
+                    icon: isLocked ? "lock" : "lock.open",
+                    action: {
+                        soundPlayer.playLock()
+                        isLocked.toggle()
+                    }
+                )
             }
 
             Button("Fastened", action: onFastened)

@@ -4,6 +4,7 @@ import SwiftUI
 /// Shows a top-down car image with doors open.
 struct CloseDoorsView: View {
     var viewModel: TripViewModel
+    var onRateRide: () -> Void
     var onFinishRide: () -> Void
     var onCancel: () -> Void
     var onShowRideHistory: () -> Void
@@ -13,14 +14,17 @@ struct CloseDoorsView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                CloseDoorsTopRow(isMenuPresented: $isMenuPresented)
+                CloseDoorsTopRow(
+                    onRateRide: onRateRide,
+                    isMenuPresented: $isMenuPresented
+                )
 
                 CloseDoorsTitle()
 
                 CarTopViewImage()
 
                 CloseDoorsBottomSection(
-                    destinationName: viewModel.destinationName,
+                    viewModel: viewModel,
                     onFinishRide: onFinishRide
                 )
             }
@@ -38,23 +42,27 @@ struct CloseDoorsView: View {
 
 // MARK: - Top Row
 
-/// "Rate Your Ride" chip and menu button.
+/// "Rate Your Ride" chip button and menu button.
 private struct CloseDoorsTopRow: View {
+    var onRateRide: () -> Void
     @Binding var isMenuPresented: Bool
 
     var body: some View {
         HStack {
-            HStack(spacing: 6) {
-                Image(systemName: "bolt")
-                    .font(.caption)
+            Button(action: onRateRide) {
+                HStack(spacing: 6) {
+                    Image(systemName: "bolt")
+                        .font(.caption)
 
-                Text("Rate Your Ride")
-                    .font(.subheadline.weight(.semibold))
+                    Text("Rate Your Ride")
+                        .font(.subheadline.weight(.semibold))
+                }
+                .foregroundStyle(.primary)
+                .padding(.horizontal, 14)
+                .frame(height: 36)
+                .background(.background, in: .capsule)
             }
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 14)
-            .frame(height: 36)
-            .background(.background, in: .capsule)
+            .buttonStyle(.plain)
 
             Spacer()
 
@@ -95,10 +103,9 @@ private struct CarTopViewImage: View {
 
 /// Walking directions, trunk toggle, and Finish Ride buttons.
 private struct CloseDoorsBottomSection: View {
-    var destinationName: String?
+    var viewModel: TripViewModel
     var onFinishRide: () -> Void
 
-    @State private var isTrunkOpen = false
     @State private var soundPlayer = SoundPlayer()
 
     var body: some View {
@@ -111,7 +118,7 @@ private struct CloseDoorsBottomSection: View {
                     Image(systemName: "figure.walk")
                         .font(.body)
 
-                    Text("Walking Directions to \(destinationName ?? "Destination")")
+                    Text("Walking Directions to \(viewModel.destinationName ?? "Destination")")
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
                 }
@@ -125,13 +132,16 @@ private struct CloseDoorsBottomSection: View {
             // Trunk toggle button
             Button {
                 soundPlayer.playTrunk()
-                isTrunkOpen.toggle()
+                viewModel.isTrunkOpen.toggle()
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: isTrunkOpen ? "car.rear.fill" : "car.rear")
-                        .font(.body)
+                    Image(viewModel.isTrunkOpen ? "OpenTrunk" : "ClosedTrunk")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 28, height: 28)
+                        .clipShape(.rect(cornerRadius: 4))
 
-                    Text(isTrunkOpen ? "Close Trunk" : "Open Trunk")
+                    Text(viewModel.isTrunkOpen ? "Close Trunk" : "Open Trunk")
                         .font(.subheadline.weight(.semibold))
                 }
                 .foregroundStyle(.primary)

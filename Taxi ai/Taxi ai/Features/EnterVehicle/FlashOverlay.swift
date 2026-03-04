@@ -2,24 +2,21 @@ import SwiftUI
 
 // MARK: - White Flash Overlay
 
-/// Phases for a brief white screen flash (simulating headlights blinking).
+/// Phases for the headlight flash: three on/off pulses matching the hazard blink timing.
 enum HeadlightFlashPhase: CaseIterable {
-    case idle
-    case bright
-    case fadeOut
+    case off1, on1, off2, on2, off3, on3, done
 
     var opacity: Double {
         switch self {
-        case .idle: 0
-        case .bright: 1
-        case .fadeOut: 0
+        case .off1, .off2, .off3, .done: 0
+        case .on1, .on2, .on3: 1
         }
     }
 }
 
-/// Full-screen white flash that simulates car headlights blinking.
+/// Full-screen white flash that simulates car headlights blinking three times.
 struct HeadlightFlashOverlay: View {
-    /// Increment this value to trigger a flash.
+    /// Increment this value to trigger three flashes.
     var trigger: Int
 
     var body: some View {
@@ -30,9 +27,12 @@ struct HeadlightFlashOverlay: View {
                 content.opacity(phase.opacity)
             } animation: { phase in
                 switch phase {
-                case .idle: .easeOut(duration: 0.3)
-                case .bright: .easeIn(duration: 0.05)
-                case .fadeOut: .easeOut(duration: 0.3)
+                case .on1, .on2, .on3:
+                    .easeIn(duration: 0.1)
+                case .off1, .off2, .off3:
+                    .easeOut(duration: 0.15)
+                case .done:
+                    .easeOut(duration: 0.2)
                 }
             }
     }
