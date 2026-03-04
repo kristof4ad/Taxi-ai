@@ -25,6 +25,7 @@ struct RideView: View {
                 RideActionButtons(onEditTrip: { showEditTrip = true })
             }
             .background(.background)
+            .ignoresSafeArea(edges: .top)
 
             AppMenuOverlay(
                 isPresented: $isMenuPresented,

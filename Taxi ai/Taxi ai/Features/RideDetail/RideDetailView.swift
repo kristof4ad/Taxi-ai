@@ -47,6 +47,7 @@ struct RideDetailView: View {
             }
             .scrollIndicators(.hidden)
             .background(.background)
+            .ignoresSafeArea(edges: .top)
 
             AppMenuOverlay(
                 isPresented: $isMenuPresented,

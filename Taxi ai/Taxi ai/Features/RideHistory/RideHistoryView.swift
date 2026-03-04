@@ -16,6 +16,7 @@ struct RideHistoryView: View {
             }
         }
         .background(.gray.opacity(0.06))
+        .ignoresSafeArea(edges: .top)
     }
 }
 

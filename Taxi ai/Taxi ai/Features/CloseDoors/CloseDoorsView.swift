@@ -29,6 +29,7 @@ struct CloseDoorsView: View {
                 )
             }
             .background(.gray.opacity(0.1))
+            .ignoresSafeArea(edges: .top)
 
             AppMenuOverlay(
                 isPresented: $isMenuPresented,
