@@ -11,6 +11,10 @@ enum AppScreen {
     case fastenSeatbelts
     case startRide
     case ride
+    case exitVehicle
+    case closeDoors
+    case rideDetail
+    case rideHistory
 }
 
 @main
@@ -114,7 +118,59 @@ struct Taxi_aiApp: App {
 
             case .ride:
                 if let tripViewModel {
-                    RideView(viewModel: tripViewModel)
+                    RideView(viewModel: tripViewModel) {
+                        currentScreen = .exitVehicle
+                    }
+                }
+
+            case .exitVehicle:
+                if let tripViewModel {
+                    ExitVehicleView(
+                        viewModel: tripViewModel,
+                        onRateRide: {
+                            // Rate ride flow placeholder
+                        },
+                        onOpenDoor: {
+                            withAnimation {
+                                currentScreen = .closeDoors
+                            }
+                        }
+                    )
+                }
+
+            case .closeDoors:
+                if let tripViewModel {
+                    CloseDoorsView(viewModel: tripViewModel) {
+                        withAnimation {
+                            currentScreen = .rideDetail
+                        }
+                    }
+                }
+
+            case .rideDetail:
+                if let tripViewModel {
+                    RideDetailView(viewModel: tripViewModel) {
+                        // Save the completed ride to history
+                        let completedRide = CompletedRide(
+                            date: .now,
+                            pickupName: "Pickup",
+                            destinationName: tripViewModel.destinationName ?? "Destination",
+                            price: tripViewModel.estimatedPrice ?? 0,
+                            currencyCode: tripViewModel.displayCurrencyCode
+                        )
+                        homeViewModel.addCompletedRide(completedRide)
+                        withAnimation {
+                            self.tripViewModel = nil
+                            currentScreen = .rideHistory
+                        }
+                    }
+                }
+
+            case .rideHistory:
+                RideHistoryView(rides: homeViewModel.completedRides) {
+                    withAnimation {
+                        currentScreen = .home
+                    }
                 }
             }
         }

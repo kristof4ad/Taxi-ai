@@ -198,11 +198,29 @@ final class TripViewModel {
 
     func startSimulation() {
         guard simulationState == .routeReady, let route else { return }
+        beginRideSimulation(with: route)
+    }
 
+    /// Starts the ride simulation from any state. Called when the ride screen appears.
+    func startRide() {
+        guard let route, !simulationEngine.isRunning else { return }
+        beginRideSimulation(with: route)
+    }
+
+    /// Configures and starts the simulation engine for a given route.
+    private func beginRideSimulation(with route: MKRoute) {
         let coordinates = route.coordinates
         simulationEngine.configure(with: coordinates)
         simulationEngine.start()
         simulationState = .simulating(progress: 0)
+
+        // Zoom camera to show the route.
+        let mapRect = route.polyline.boundingMapRect
+        let paddedRect = mapRect.insetBy(
+            dx: -mapRect.size.width * 0.3,
+            dy: -mapRect.size.height * 0.3
+        )
+        cameraPosition = .region(MKCoordinateRegion(paddedRect))
 
         // Monitor progress updates.
         Task {

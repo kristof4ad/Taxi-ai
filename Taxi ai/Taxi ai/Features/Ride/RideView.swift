@@ -5,6 +5,7 @@ import SwiftUI
 /// Provides a consistent layout matching the rest of the app.
 struct RideView: View {
     @Bindable var viewModel: TripViewModel
+    var onArrived: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -16,7 +17,14 @@ struct RideView: View {
         }
         .background(.background)
         .onAppear {
-            viewModel.onAppear()
+            viewModel.startRide()
+        }
+        .onChange(of: viewModel.simulationState) { _, newState in
+            if newState == .completed {
+                withAnimation {
+                    onArrived()
+                }
+            }
         }
     }
 }
@@ -87,7 +95,7 @@ private struct RideMapSection: View {
 
             if let position = viewModel.simulationEngine.currentPosition {
                 Annotation("Taxi", coordinate: position) {
-                    SimulationDotView()
+                    CarMarkerView()
                 }
             }
         }
