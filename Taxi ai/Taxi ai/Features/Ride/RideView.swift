@@ -46,7 +46,7 @@ struct RideView: View {
         }
         .sheet(isPresented: $showEditTrip, onDismiss: {
             viewModel.simulationEngine.resume()
-        }) {
+        }, content: {
             if let origin = viewModel.currentRouteOrigin {
                 EditTripView(
                     tripViewModel: viewModel,
@@ -62,7 +62,7 @@ struct RideView: View {
                     onDismiss: { showEditTrip = false }
                 )
             }
-        }
+        })
         .onChange(of: showEditTrip) { _, isShowing in
             if isShowing {
                 viewModel.simulationEngine.pause()

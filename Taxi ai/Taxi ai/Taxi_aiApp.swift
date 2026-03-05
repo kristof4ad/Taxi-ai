@@ -19,6 +19,7 @@ enum AppScreen {
 }
 
 @main
+// swiftlint:disable:next type_name
 struct Taxi_aiApp: App {
     @State private var homeViewModel = HomeViewModel()
 

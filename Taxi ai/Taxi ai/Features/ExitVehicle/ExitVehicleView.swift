@@ -338,4 +338,3 @@ private struct ExitVehicleActionButtons: View {
         .padding(.bottom, 32)
     }
 }
-

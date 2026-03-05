@@ -57,7 +57,10 @@ struct EnterVehicleView: View {
 
         let request = MKDirections.Request()
         request.source = MKMapItem(location: CLLocation(latitude: userLocation.latitude, longitude: userLocation.longitude), address: nil)
-        request.destination = MKMapItem(location: CLLocation(latitude: carLocation.latitude, longitude: carLocation.longitude), address: nil)
+        request.destination = MKMapItem(
+            location: CLLocation(latitude: carLocation.latitude, longitude: carLocation.longitude),
+            address: nil
+        )
         request.transportType = .walking
 
         do {
