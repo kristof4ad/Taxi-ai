@@ -1,4 +1,5 @@
 import MapKit
+import SwiftUI
 
 // MARK: - Pickup Approach & Route Helpers
 
@@ -132,6 +133,7 @@ extension TripViewModel {
     }
 
     /// Reverse geocodes the user's current location to capture a short pickup address (street + city).
+    @available(iOS, deprecated: 26.0, message: "Migrate to MKAddressRepresentations when API stabilizes")
     func reverseGeocodePickupLocation() {
         guard let location = locationService.userLocation else { return }
 
