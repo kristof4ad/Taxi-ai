@@ -16,14 +16,16 @@ struct AppMenuOverlay: View {
         if isPresented {
             ZStack(alignment: .topTrailing) {
                 // Transparent tap catcher to dismiss on tap outside
-                Color.clear
-                    .contentShape(.rect)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        withAnimation(.easeOut(duration: 0.2)) {
-                            isPresented = false
-                        }
+                Button {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        isPresented = false
                     }
+                } label: {
+                    Color.clear
+                        .contentShape(.rect)
+                        .ignoresSafeArea()
+                }
+                .buttonStyle(.plain)
 
                 // Floating menu card
                 VStack(spacing: 0) {

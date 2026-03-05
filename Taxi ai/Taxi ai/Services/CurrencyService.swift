@@ -43,7 +43,7 @@ final class CurrencyService {
         defer { isLoading = false }
 
         do {
-            let url = URL(string: "https://open.er-api.com/v6/latest/USD")!
+            guard let url = URL(string: "https://open.er-api.com/v6/latest/USD") else { return }
             let (data, _) = try await URLSession.shared.data(from: url)
             let response = try JSONDecoder().decode(ExchangeRateResponse.self, from: data)
 
