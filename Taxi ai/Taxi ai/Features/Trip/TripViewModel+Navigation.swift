@@ -142,10 +142,9 @@ extension TripViewModel {
 
         request.getMapItems { [weak self] items, _ in
             guard let self,
-                  let placemark = items?.first?.placemark else { return }
-            let address = [placemark.subThoroughfare, placemark.thoroughfare, placemark.locality]
-                .compactMap { $0 }
-                .joined(separator: " ")
+                  let shortAddress = items?.first?.address?.shortAddress,
+                  !shortAddress.isEmpty else { return }
+            let address = shortAddress
             guard !address.isEmpty else { return }
             Task { @MainActor in
                 self.pickupAddress = address

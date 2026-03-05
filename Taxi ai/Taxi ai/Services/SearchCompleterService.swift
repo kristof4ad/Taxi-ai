@@ -63,11 +63,7 @@ final class SearchCompleterService: NSObject, MKLocalSearchCompleterDelegate {
 
     // MARK: - Private
 
-    // TODO: Migrate to MKAddressRepresentations when API stabilizes
     private func formatAddress(_ item: MKMapItem) -> String {
-        let placemark = item.placemark
-        return [placemark.subThoroughfare, placemark.thoroughfare, placemark.locality]
-            .compactMap { $0 }
-            .joined(separator: " ")
+        item.address?.shortAddress ?? ""
     }
 }

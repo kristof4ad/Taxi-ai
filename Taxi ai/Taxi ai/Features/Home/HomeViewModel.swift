@@ -1,4 +1,3 @@
-import Contacts
 import MapKit
 import SwiftUI
 
@@ -241,12 +240,8 @@ final class HomeViewModel {
 
     // MARK: - Private
 
-    // TODO: Migrate to MKAddressRepresentations when API stabilizes
-    /// Formats a map item into a short address string using placemark data.
+    /// Formats a map item into a short address string.
     private func formatAddress(_ item: MKMapItem) -> String {
-        let placemark = item.placemark
-        return [placemark.subThoroughfare, placemark.thoroughfare, placemark.locality]
-            .compactMap { $0 }
-            .joined(separator: " ")
+        item.address?.shortAddress ?? ""
     }
 }
