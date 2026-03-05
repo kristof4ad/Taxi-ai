@@ -15,12 +15,12 @@ struct RideView: View {
     var body: some View {
         ZStack {
             VStack(spacing: 0) {
-                RideTopSection(
+                RideTopSection(viewModel: viewModel)
+
+                RideMapSection(
                     viewModel: viewModel,
                     isMenuPresented: $isMenuPresented
                 )
-
-                RideMapSection(viewModel: viewModel)
 
                 RideActionButtons(onEditTrip: { showEditTrip = true })
             }
@@ -73,39 +73,28 @@ struct RideView: View {
 
 // MARK: - Top Section
 
-/// Menu button and destination heading.
+/// Destination heading.
 private struct RideTopSection: View {
     var viewModel: TripViewModel
-    @Binding var isMenuPresented: Bool
 
     private static let goldText = Color(red: 0.831, green: 0.659, blue: 0.294)
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Spacer()
+        VStack(spacing: 4) {
+            Text("Heading to")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
 
-                AppMenuButton(isPresented: $isMenuPresented)
-            }
-            .padding(.top, 62)
-            .padding(.horizontal, 16)
-
-            VStack(spacing: 4) {
-                Text("Heading to")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                Text(viewModel.destinationName ?? "Destination")
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(Self.goldText)
-                    .multilineTextAlignment(.center)
-                    .frame(maxWidth: 300)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 12)
-            .padding(.bottom, 16)
-            .padding(.horizontal, 16)
+            Text(viewModel.destinationName ?? "Destination")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(Self.goldText)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: 300)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 62)
+        .padding(.bottom, 16)
+        .padding(.horizontal, 16)
     }
 }
 
@@ -114,33 +103,59 @@ private struct RideTopSection: View {
 /// Interactive map displaying the route, destination, and simulation position.
 private struct RideMapSection: View {
     @Bindable var viewModel: TripViewModel
+    @Binding var isMenuPresented: Bool
 
     var body: some View {
-        Map(position: $viewModel.cameraPosition) {
-            if let destination = viewModel.destination {
-                Annotation("Destination", coordinate: destination) {
-                    DestinationMarkerView()
+        ZStack(alignment: .topTrailing) {
+            Map(position: $viewModel.cameraPosition) {
+                if let destination = viewModel.destination {
+                    Annotation("Destination", coordinate: destination) {
+                        DestinationMarkerView()
+                    }
+                }
+
+                if let route = viewModel.route {
+                    MapPolyline(route)
+                        .stroke(.blue, lineWidth: 5)
+                }
+
+                if let position = viewModel.simulationEngine.currentPosition {
+                    Annotation("Taxi", coordinate: position) {
+                        CarMarkerView(bearing: viewModel.simulationEngine.currentBearing)
+                    }
                 }
             }
+            .mapStyle(.standard)
+            .mapControls {}
+            .clipShape(.rect(cornerRadius: 16))
 
-            if let route = viewModel.route {
-                MapPolyline(route)
-                    .stroke(.blue, lineWidth: 5)
+            VStack(spacing: 12) {
+                AppMenuButton(isPresented: $isMenuPresented)
+                RideRouteButton(action: viewModel.recenterRideCamera)
             }
-
-            if let position = viewModel.simulationEngine.currentPosition {
-                Annotation("Taxi", coordinate: position) {
-                    CarMarkerView(bearing: viewModel.simulationEngine.currentBearing)
-                }
-            }
+            .padding(.top, 12)
+            .padding(.trailing, 12)
         }
-        .mapStyle(.standard)
-        .mapControls {
-            MapUserLocationButton()
-            MapCompass()
-        }
-        .clipShape(.rect(cornerRadius: 16))
         .padding(.horizontal, 16)
+    }
+}
+
+// MARK: - Route Button
+
+/// Button that recenters the map to show the full ride route.
+private struct RideRouteButton: View {
+    var action: () -> Void
+
+    var body: some View {
+        Button("Route", systemImage: "point.topright.arrow.triangle.backward.to.point.bottomleft.scurvepath", action: action)
+            .labelStyle(.iconOnly)
+            .font(.title3)
+            .foregroundStyle(.primary)
+            .frame(width: 44, height: 44)
+            .contentShape(.rect(cornerRadius: 22))
+            .background(.background, in: .rect(cornerRadius: 22))
+            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+            .buttonStyle(.plain)
     }
 }
 

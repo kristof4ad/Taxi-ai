@@ -8,6 +8,8 @@ struct RideHistoryView: View {
 
     var onDone: () -> Void
 
+    @State private var selectedRide: CompletedRide?
+
     var body: some View {
         VStack(spacing: 0) {
             RideHistoryHeader(onDone: onDone)
@@ -15,11 +17,17 @@ struct RideHistoryView: View {
             if rides.isEmpty {
                 RideHistoryEmptyState()
             } else {
-                RideHistoryList(rides: rides)
+                RideHistoryList(rides: rides, onSelectRide: { selectedRide = $0 })
             }
         }
         .background(.gray.opacity(0.06))
         .ignoresSafeArea(edges: .top)
+        .sheet(item: $selectedRide) { ride in
+            CompletedRideDetailView(ride: ride) {
+                selectedRide = nil
+            }
+            .presentationDragIndicator(.visible)
+        }
     }
 }
 
@@ -80,12 +88,18 @@ private struct RideHistoryEmptyState: View {
 /// Scrollable list of completed ride rows.
 private struct RideHistoryList: View {
     var rides: [CompletedRide]
+    var onSelectRide: (CompletedRide) -> Void
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 12) {
                 ForEach(rides) { ride in
-                    RideHistoryRow(ride: ride)
+                    Button {
+                        onSelectRide(ride)
+                    } label: {
+                        RideHistoryRow(ride: ride)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, 16)

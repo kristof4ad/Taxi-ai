@@ -8,6 +8,12 @@ final class SoundPlayer {
     private var trunkPlayer: AVAudioPlayer?
 
     init() {
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback)
+        } catch {
+            print("Failed to configure audio session: \(error)")
+        }
+
         hornPlayer = Self.loadPlayer(for: "car-horn", type: "mp3")
         lockPlayer = Self.loadPlayer(for: "car-lock", type: "mp3")
         // Falls back to lock sound if dedicated trunk sound is not available.

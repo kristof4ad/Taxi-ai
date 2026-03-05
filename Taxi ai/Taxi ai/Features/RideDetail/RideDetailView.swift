@@ -21,8 +21,6 @@ struct RideDetailView: View {
 
                     RideDetailStats(viewModel: viewModel)
 
-                    RideDetailLabels()
-
                     RideDetailRouteCard(viewModel: viewModel)
 
                     RideDetailPayment(viewModel: viewModel)
@@ -136,27 +134,6 @@ private struct RideDetailStats: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
-        .padding(.bottom, 12)
-    }
-}
-
-// MARK: - Labels Row
-
-/// "License Plate" and "Total" labels beneath the stats.
-private struct RideDetailLabels: View {
-    var body: some View {
-        HStack {
-            Text("License Plate:")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-
-            Spacer()
-
-            Text("Total")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 16)
         .padding(.bottom, 12)
     }
 }
@@ -367,17 +344,8 @@ private struct RideDetailFinishedButton: View {
     var onFinished: () -> Void
 
     var body: some View {
-        Button(action: onFinished) {
-            Text("Finished")
-                .font(.headline)
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .contentShape(.capsule)
-                .overlay(Capsule().stroke(.quaternary, lineWidth: 1))
-        }
-        .buttonStyle(.plain)
-        .padding(.horizontal, 16)
+        GoldButton(title: "Finished", action: onFinished)
+            .padding(.horizontal, 16)
             .padding(.top, 16)
             .padding(.bottom, 40)
     }

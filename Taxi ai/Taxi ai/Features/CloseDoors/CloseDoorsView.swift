@@ -80,7 +80,7 @@ private struct CloseDoorsTopRow: View {
 /// Bold title asking user to close doors and trunk.
 private struct CloseDoorsTitle: View {
     var body: some View {
-        Text("Please close all doors and trunk\nwhen finished")
+        Text("Please close all doors and trunk when finished")
             .font(.title2.bold())
             .multilineTextAlignment(.center)
             .frame(maxWidth: .infinity)
@@ -157,19 +157,7 @@ private struct CloseDoorsBottomSection: View {
             .buttonStyle(.plain)
 
             // Finish Ride button
-            Button(action: onFinishRide) {
-                Text("Finish Ride")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .contentShape(.rect(cornerRadius: 16))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(.quaternary, lineWidth: 1)
-                    )
-            }
-            .buttonStyle(.plain)
+            GoldButton(title: "Finish Ride", action: onFinishRide)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 32)

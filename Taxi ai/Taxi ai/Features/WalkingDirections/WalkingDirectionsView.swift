@@ -21,6 +21,7 @@ struct WalkingDirectionsView: View {
 
             WalkingDirectionsBottomCard(
                 viewModel: viewModel,
+                walkingRoute: walkingRoute,
                 onFindDestination: { showFindDestination = true },
                 onDismiss: onDismiss
             )
@@ -32,6 +33,7 @@ struct WalkingDirectionsView: View {
         .fullScreenCover(isPresented: $showFindDestination) {
             FindDestinationView(
                 viewModel: viewModel,
+                walkingRoute: walkingRoute,
                 onDismiss: { showFindDestination = false }
             )
         }
@@ -83,7 +85,7 @@ private struct WalkingDirectionsMapSection: View {
             // Final destination
             if let destination = viewModel.destination {
                 Annotation("Destination", coordinate: destination) {
-                    DropoffMarkerView()
+                    DropoffMarkerView(name: viewModel.destinationName ?? "Destination")
                 }
                 .annotationTitles(.hidden)
             }
@@ -127,12 +129,13 @@ private struct WalkingDirectionsMapSection: View {
 /// Bottom card with destination info, find destination button, and close button.
 private struct WalkingDirectionsBottomCard: View {
     var viewModel: TripViewModel
+    var walkingRoute: MKRoute?
     var onFindDestination: () -> Void
     var onDismiss: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            WalkingDirectionsHeader(onFindDestination: onFindDestination)
+            WalkingDirectionsHeader(walkingRoute: walkingRoute, onFindDestination: onFindDestination)
 
             Divider()
 
@@ -152,7 +155,15 @@ private struct WalkingDirectionsBottomCard: View {
 // MARK: - Header
 
 private struct WalkingDirectionsHeader: View {
+    var walkingRoute: MKRoute?
     var onFindDestination: () -> Void
+
+    /// Formatted walking distance from the route.
+    private var distanceText: String? {
+        guard let distance = walkingRoute?.distance else { return nil }
+        let measurement = Measurement(value: distance, unit: UnitLength.meters)
+        return measurement.formatted(.measurement(width: .abbreviated, usage: .road))
+    }
 
     var body: some View {
         HStack {
@@ -160,9 +171,15 @@ private struct WalkingDirectionsHeader: View {
                 Text("Walk to your destination")
                     .font(.title3.bold())
 
-                Text("Follow the route on the map")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                if let distanceText {
+                    Text("\(distanceText) walk")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Follow the route on the map")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             Spacer()
@@ -237,12 +254,14 @@ private struct WalkingDirectionsCloseButton: View {
 /// with a dynamic directional arrow, similar to `PickupNavigationView`.
 private struct FindDestinationView: View {
     var viewModel: TripViewModel
+    var walkingRoute: MKRoute?
     var onDismiss: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
             FindDestinationDirectionSection(
                 viewModel: viewModel,
+                walkingRoute: walkingRoute,
                 onDismiss: onDismiss
             )
 
@@ -262,6 +281,7 @@ private struct FindDestinationView: View {
 /// Arrow and distance display pointing toward the destination.
 private struct FindDestinationDirectionSection: View {
     var viewModel: TripViewModel
+    var walkingRoute: MKRoute?
     var onDismiss: () -> Void
 
     var body: some View {
@@ -293,18 +313,10 @@ private struct FindDestinationDirectionSection: View {
         }
     }
 
-    /// Formatted distance from the user to the destination, using the device's locale units.
+    /// Formatted walking distance from the route, matching the map sheet display.
     private var distanceText: String {
-        guard let user = viewModel.locationService.userLocation,
-              let destination = viewModel.destination else {
-            return "--"
-        }
-
-        let userLoc = CLLocation(latitude: user.latitude, longitude: user.longitude)
-        let destLoc = CLLocation(latitude: destination.latitude, longitude: destination.longitude)
-        let meters = userLoc.distance(from: destLoc)
-        let measurement = Measurement(value: meters, unit: UnitLength.meters)
-
+        guard let distance = walkingRoute?.distance else { return "--" }
+        let measurement = Measurement(value: distance, unit: UnitLength.meters)
         return measurement.formatted(.measurement(width: .abbreviated, usage: .road))
     }
 }

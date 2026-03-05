@@ -1,9 +1,11 @@
 import SwiftUI
 
-/// Black pill-shaped "Dropoff" label used as a map annotation.
+/// Black pill-shaped label used as a map annotation for the destination.
 struct DropoffMarkerView: View {
+    var name: String = "Dropoff"
+
     var body: some View {
-        Label("Dropoff", systemImage: "circle.fill")
+        Label(name, systemImage: "circle.fill")
             .labelStyle(.titleOnly)
             .font(.caption.weight(.semibold))
             .foregroundStyle(.white)

@@ -241,6 +241,17 @@ final class TripViewModel {
         cameraPosition = .region(MKCoordinateRegion(padded))
     }
 
+    /// Recenters the camera to show the full ride route.
+    func recenterRideCamera() {
+        guard let route else { return }
+        let rect = route.polyline.boundingMapRect
+        let padded = rect.insetBy(
+            dx: -rect.size.width * 0.3,
+            dy: -rect.size.height * 0.3
+        )
+        cameraPosition = .region(MKCoordinateRegion(padded))
+    }
+
     func startSimulation() {
         guard simulationState == .routeReady, let route else { return }
         beginRideSimulation(with: route)

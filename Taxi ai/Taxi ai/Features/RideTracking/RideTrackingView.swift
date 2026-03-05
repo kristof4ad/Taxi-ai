@@ -53,10 +53,10 @@ private struct RideTrackingMapSection: View {
                     }
                 }
 
-                // Dropoff marker at destination
+                // Destination marker
                 if let destination = viewModel.destination {
-                    Annotation("Dropoff", coordinate: destination) {
-                        DropoffMarkerView()
+                    Annotation("Destination", coordinate: destination) {
+                        DropoffMarkerView(name: viewModel.destinationName ?? "Destination")
                     }
                 }
 
