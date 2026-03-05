@@ -327,8 +327,8 @@ final class EditTripViewModel {
         isSearching = false
     }
 
+    // TODO: Migrate to MKAddressRepresentations when API stabilizes
     /// Formats a map item into a short address string.
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKAddressRepresentations when API stabilizes")
     private func formatAddress(_ item: MKMapItem) -> String {
         let placemark = item.placemark
         return [placemark.subThoroughfare, placemark.thoroughfare, placemark.locality]

@@ -63,7 +63,7 @@ final class SearchCompleterService: NSObject, MKLocalSearchCompleterDelegate {
 
     // MARK: - Private
 
-    @available(iOS, deprecated: 26.0, message: "Migrate to MKAddressRepresentations when API stabilizes")
+    // TODO: Migrate to MKAddressRepresentations when API stabilizes
     private func formatAddress(_ item: MKMapItem) -> String {
         let placemark = item.placemark
         return [placemark.subThoroughfare, placemark.thoroughfare, placemark.locality]
