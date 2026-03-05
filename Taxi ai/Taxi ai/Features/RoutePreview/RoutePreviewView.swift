@@ -125,6 +125,9 @@ private struct RouteDetailsCard: View {
 
             TripTimeline(viewModel: viewModel)
 
+            Spacer()
+                .frame(height: 16)
+
             BookButton(
                 price: viewModel.estimatedPrice,
                 currencyCode: viewModel.displayCurrencyCode,

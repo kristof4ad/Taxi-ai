@@ -100,20 +100,48 @@ private struct StartRideCircle: View {
 
     var body: some View {
         Button(action: onStartRide) {
-            ZStack {
-                Circle()
-                    .stroke(.quaternary, lineWidth: 3)
-                    .frame(width: 200, height: 200)
-
-                Text("START RIDE")
-                    .font(.body.weight(.semibold))
-                    .tracking(4)
-                    .foregroundStyle(.primary)
-            }
-            .contentShape(.circle)
+            Text("START RIDE")
+                .font(.body.weight(.semibold))
+                .tracking(4)
+                .foregroundStyle(.white)
+                .frame(width: 200, height: 200)
+                .contentShape(.circle)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(StartRideButtonStyle())
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+/// Custom button style that shows a gold circle with a darker pressed state.
+private struct StartRideButtonStyle: ButtonStyle {
+    private static let goldGradient = LinearGradient(
+        colors: [
+            Color(red: 0.83, green: 0.66, blue: 0.29),
+            Color(red: 0.72, green: 0.58, blue: 0.29)
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+
+    private static let goldGradientPressed = LinearGradient(
+        colors: [
+            Color(red: 0.66, green: 0.53, blue: 0.23),
+            Color(red: 0.58, green: 0.46, blue: 0.23)
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .background(
+                configuration.isPressed
+                    ? Self.goldGradientPressed
+                    : Self.goldGradient,
+                in: .circle
+            )
+            .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
+            .animation(.easeInOut(duration: 0.15), value: configuration.isPressed)
     }
 }
 

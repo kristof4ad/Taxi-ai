@@ -13,37 +13,39 @@ struct RideDetailView: View {
 
     var body: some View {
         ZStack {
-            ScrollView {
-                VStack(spacing: 0) {
-                    RideDetailTopRow(isMenuPresented: $isMenuPresented)
+            VStack(spacing: 0) {
+                ScrollView {
+                    VStack(spacing: 0) {
+                        RideDetailTopRow(isMenuPresented: $isMenuPresented)
 
-                    RideDetailMap(viewModel: viewModel)
+                        RideDetailMap(viewModel: viewModel)
 
-                    RideDetailStats(viewModel: viewModel)
+                        RideDetailStats(viewModel: viewModel)
 
-                    RideDetailRouteCard(viewModel: viewModel)
+                        RideDetailRouteCard(viewModel: viewModel)
 
-                    RideDetailPayment(viewModel: viewModel)
+                        RideDetailPayment(viewModel: viewModel)
 
-                    if let rating {
+                        if let rating {
+                            Divider()
+                                .padding(.horizontal, 16)
+
+                            RideDetailRatingSection(
+                                rating: rating,
+                                currencyCode: viewModel.displayCurrencyCode
+                            )
+                        }
+
                         Divider()
                             .padding(.horizontal, 16)
 
-                        RideDetailRatingSection(
-                            rating: rating,
-                            currencyCode: viewModel.displayCurrencyCode
-                        )
+                        RideDetailLostItem()
                     }
-
-                    Divider()
-                        .padding(.horizontal, 16)
-
-                    RideDetailLostItem()
-
-                    RideDetailFinishedButton(onFinished: onFinished)
                 }
+                .scrollIndicators(.hidden)
+
+                RideDetailFinishedButton(onFinished: onFinished)
             }
-            .scrollIndicators(.hidden)
             .background(.background)
             .ignoresSafeArea(edges: .top)
 
@@ -346,7 +348,6 @@ private struct RideDetailFinishedButton: View {
     var body: some View {
         GoldButton(title: "Finished", action: onFinished)
             .padding(.horizontal, 16)
-            .padding(.top, 16)
-            .padding(.bottom, 40)
+            .padding(.vertical, 16)
     }
 }

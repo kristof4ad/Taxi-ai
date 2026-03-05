@@ -11,6 +11,10 @@ final class CompletedRide: Identifiable {
     var price: Double = 0
     var currencyCode: String = "USD"
 
+    /// PNG snapshot of the map showing the completed route.
+    @Attribute(.externalStorage)
+    var mapSnapshotData: Data?
+
     // Rating data (nil if the rider did not submit a rating)
     var starRating: Int?
     var feedbackText: String?
@@ -23,6 +27,7 @@ final class CompletedRide: Identifiable {
         destinationName: String,
         price: Double,
         currencyCode: String,
+        mapSnapshotData: Data? = nil,
         starRating: Int? = nil,
         feedbackText: String? = nil,
         tipPercentage: Int? = nil,
@@ -34,6 +39,7 @@ final class CompletedRide: Identifiable {
         self.destinationName = destinationName
         self.price = price
         self.currencyCode = currencyCode
+        self.mapSnapshotData = mapSnapshotData
         self.starRating = starRating
         self.feedbackText = feedbackText
         self.tipPercentage = tipPercentage

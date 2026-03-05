@@ -253,36 +253,57 @@ private struct DoorHandleShape: Shape {
 
 // MARK: - Action Buttons
 
-/// Open Trunk and Open Door buttons.
+/// Open Trunk and Unlock buttons, plus a gold Open Door button below.
 private struct ExitVehicleActionButtons: View {
     var viewModel: TripViewModel
     var onOpenDoor: () -> Void
 
     @State private var soundPlayer = SoundPlayer()
+    @State private var isUnlocked = false
 
     var body: some View {
-        HStack(spacing: 12) {
-            Button {
-                soundPlayer.playTrunk()
-                viewModel.isTrunkOpen.toggle()
-            } label: {
-                HStack(spacing: 8) {
-                    Image(viewModel.isTrunkOpen ? "OpenTrunk" : "ClosedTrunk")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 28, height: 28)
-                        .clipShape(.rect(cornerRadius: 4))
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                Button {
+                    soundPlayer.playTrunk()
+                    viewModel.isTrunkOpen.toggle()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(viewModel.isTrunkOpen ? "OpenTrunk" : "ClosedTrunk")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                            .clipShape(.rect(cornerRadius: 4))
 
-                    Text(viewModel.isTrunkOpen ? "Close Trunk" : "Open Trunk")
-                        .font(.subheadline.weight(.semibold))
+                        Text(viewModel.isTrunkOpen ? "Close Trunk" : "Open Trunk")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .contentShape(.rect(cornerRadius: 16))
+                    .background(.background, in: .rect(cornerRadius: 16))
                 }
-                .foregroundStyle(.primary)
-                .frame(maxWidth: .infinity)
-                .frame(height: 56)
-                .contentShape(.rect(cornerRadius: 16))
-                .background(.background, in: .rect(cornerRadius: 16))
+                .buttonStyle(.plain)
+
+                Button {
+                    isUnlocked.toggle()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: isUnlocked ? "lock.open" : "lock")
+                            .font(.body)
+
+                        Text(isUnlocked ? "Lock" : "Unlock")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(.primary)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 56)
+                    .contentShape(.rect(cornerRadius: 16))
+                    .background(.background, in: .rect(cornerRadius: 16))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
 
             Button {
                 onOpenDoor()
@@ -294,11 +315,21 @@ private struct ExitVehicleActionButtons: View {
                     Text("Open Door")
                         .font(.subheadline.weight(.semibold))
                 }
-                .foregroundStyle(.primary)
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .contentShape(.rect(cornerRadius: 16))
-                .background(.background, in: .rect(cornerRadius: 16))
+                .background(
+                    LinearGradient(
+                        colors: [
+                            Color(red: 0.831, green: 0.659, blue: 0.294),
+                            Color(red: 0.722, green: 0.581, blue: 0.290)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    in: .rect(cornerRadius: 16)
+                )
             }
             .buttonStyle(.plain)
         }

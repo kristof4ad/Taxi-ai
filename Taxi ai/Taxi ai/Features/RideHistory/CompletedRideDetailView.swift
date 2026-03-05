@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Detail view for a completed ride shown when tapping a row in ride history.
 struct CompletedRideDetailView: View {
@@ -17,6 +18,8 @@ struct CompletedRideDetailView: View {
         ScrollView {
             VStack(spacing: 0) {
                 CompletedRideDetailHeader(ride: ride, onDismiss: onDismiss)
+
+                CompletedRideDetailMapSnapshot(data: ride.mapSnapshotData)
 
                 CompletedRideDetailPrice(ride: ride)
 
@@ -63,6 +66,25 @@ private struct CompletedRideDetailHeader: View {
         .padding(.horizontal, 16)
         .padding(.top, 20)
         .padding(.bottom, 8)
+    }
+}
+
+// MARK: - Map Snapshot
+
+/// Displays the saved map snapshot image of the completed route.
+private struct CompletedRideDetailMapSnapshot: View {
+    var data: Data?
+
+    var body: some View {
+        if let data, let uiImage = UIImage(data: data) {
+            Image(uiImage: uiImage)
+                .resizable()
+                .scaledToFill()
+                .frame(height: 200)
+                .clipped()
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
+        }
     }
 }
 

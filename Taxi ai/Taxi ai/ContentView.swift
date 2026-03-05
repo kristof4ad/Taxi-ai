@@ -285,29 +285,42 @@ struct ContentView: View {
     }
 
     /// Records the completed ride to SwiftData and navigates to the ride history screen.
+    /// Takes a map snapshot of the route before clearing the trip data.
     private func recordRideAndShowHistory(_ trip: TripViewModel) {
-        let completedRide = CompletedRide(
-            date: .now,
-            pickupName: trip.pickupAddress ?? "Pickup",
-            destinationName: trip.destinationName ?? "Destination",
-            price: trip.estimatedPrice ?? 0,
-            currencyCode: trip.displayCurrencyCode
-        )
+        Task {
+            // Capture a map snapshot while the route data is still available.
+            var snapshotData: Data?
+            if let route = trip.route, let destination = trip.destination {
+                snapshotData = await MapSnapshotService.takeSnapshot(
+                    route: route,
+                    destination: destination
+                )
+            }
 
-        // Attach rating data if the user rated during this ride.
-        if let rating = pendingRating {
-            completedRide.starRating = rating.starRating
-            completedRide.feedbackText = rating.feedbackText.isEmpty ? nil : rating.feedbackText
-            completedRide.tipPercentage = rating.tipPercentage
-            completedRide.tipAmount = rating.tipAmount
-        }
+            let completedRide = CompletedRide(
+                date: .now,
+                pickupName: trip.pickupAddress ?? "Pickup",
+                destinationName: trip.destinationName ?? "Destination",
+                price: trip.estimatedPrice ?? 0,
+                currencyCode: trip.displayCurrencyCode,
+                mapSnapshotData: snapshotData
+            )
 
-        modelContext.insert(completedRide)
+            // Attach rating data if the user rated during this ride.
+            if let rating = pendingRating {
+                completedRide.starRating = rating.starRating
+                completedRide.feedbackText = rating.feedbackText.isEmpty ? nil : rating.feedbackText
+                completedRide.tipPercentage = rating.tipPercentage
+                completedRide.tipAmount = rating.tipAmount
+            }
 
-        withAnimation {
-            tripViewModel = nil
-            pendingRating = nil
-            currentScreen = .rideHistory
+            modelContext.insert(completedRide)
+
+            withAnimation {
+                tripViewModel = nil
+                pendingRating = nil
+                currentScreen = .rideHistory
+            }
         }
     }
 }
