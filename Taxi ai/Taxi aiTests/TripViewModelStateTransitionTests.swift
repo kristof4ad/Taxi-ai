@@ -237,7 +237,8 @@ struct TripViewModelStateTransitionTests {
             CLLocationCoordinate2D(latitude: 1, longitude: 1),
         ]
         vm.simulationEngine.configure(with: coords)
-        vm.simulationEngine.start()
+        vm.simulationEngine.isRunning = true
+        vm.simulationEngine.progress = 0.5
 
         vm.resetTrip()
 
@@ -253,7 +254,7 @@ struct TripViewModelStateTransitionTests {
             CLLocationCoordinate2D(latitude: 1, longitude: 1),
         ]
         vm.pickupSimulationEngine.configure(with: coords)
-        vm.pickupSimulationEngine.start()
+        vm.pickupSimulationEngine.isRunning = true
 
         vm.resetTrip()
 

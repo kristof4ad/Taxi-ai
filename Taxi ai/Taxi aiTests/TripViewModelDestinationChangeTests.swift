@@ -69,22 +69,16 @@ struct TripViewModelDestinationChangeTests {
         let vm = TripViewModel()
         vm.pickupStopLocation = CLLocationCoordinate2D(latitude: 52.23, longitude: 21.01)
 
-        let coords: [CLLocationCoordinate2D] = [
-            CLLocationCoordinate2D(latitude: 50.0, longitude: 20.0),
-            CLLocationCoordinate2D(latitude: 51.0, longitude: 21.0),
-        ]
-        vm.simulationEngine.configure(with: coords)
-        vm.simulationEngine.start()
+        // Simulate a running engine with a known position, without spawning async tasks.
+        vm.simulationEngine.currentPosition = CLLocationCoordinate2D(latitude: 50.5, longitude: 20.5)
+        vm.simulationEngine.isRunning = true
 
         // When the simulation is running and has a current position,
         // it should take priority over the pickup stop.
-        if let origin = vm.currentRouteOrigin {
-            // If engine is running with a current position, it should use that.
-            // If not, pickup stop is the fallback.
-            #expect(origin.latitude != 0 || origin.longitude != 0)
-        }
-
-        vm.simulationEngine.reset()
+        let origin = vm.currentRouteOrigin
+        #expect(origin != nil)
+        #expect(abs(origin!.latitude - 50.5) < 0.0001)
+        #expect(abs(origin!.longitude - 20.5) < 0.0001)
     }
 
     // MARK: - resetTrip Clears Destination Change State
@@ -195,7 +189,8 @@ struct TripViewModelDestinationChangeTests {
             CLLocationCoordinate2D(latitude: 1, longitude: 1),
         ]
         vm.simulationEngine.configure(with: coords)
-        vm.simulationEngine.start()
+        vm.simulationEngine.isRunning = true
+        vm.simulationEngine.progress = 0.5
 
         vm.resetTrip()
 
@@ -212,7 +207,7 @@ struct TripViewModelDestinationChangeTests {
             CLLocationCoordinate2D(latitude: 1, longitude: 1),
         ]
         vm.pickupSimulationEngine.configure(with: coords)
-        vm.pickupSimulationEngine.start()
+        vm.pickupSimulationEngine.isRunning = true
 
         vm.resetTrip()
 
