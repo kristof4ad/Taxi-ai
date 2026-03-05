@@ -19,7 +19,7 @@ struct RideDetailView: View {
 
                         RideDetailMap(viewModel: viewModel)
 
-                        RideDetailStats(viewModel: viewModel)
+                        RideDetailStats(viewModel: viewModel, tipAmount: rating?.tipAmount)
 
                         RideDetailRouteCard(viewModel: viewModel)
 
@@ -106,9 +106,16 @@ private struct RideDetailMap: View {
 
 // MARK: - Stats Row
 
-/// Distance/duration and total price.
+/// Distance/duration and total price including tip.
 private struct RideDetailStats: View {
     var viewModel: TripViewModel
+    var tipAmount: Double?
+
+    /// Total price including tip, if any.
+    private var totalPrice: Double? {
+        guard let price = viewModel.estimatedPrice else { return nil }
+        return price + (tipAmount ?? 0)
+    }
 
     var body: some View {
         HStack {
@@ -128,8 +135,8 @@ private struct RideDetailStats: View {
 
             Spacer()
 
-            if let price = viewModel.estimatedPrice {
-                Text(price, format: .currency(code: viewModel.displayCurrencyCode))
+            if let totalPrice {
+                Text(totalPrice, format: .currency(code: viewModel.displayCurrencyCode))
                     .font(.title3.bold())
             }
         }

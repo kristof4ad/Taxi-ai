@@ -99,28 +99,40 @@ private struct RideHistoryEmptyState: View {
 
 // MARK: - Ride List
 
-/// Scrollable list of completed ride rows.
+/// Scrollable list of completed ride rows with swipe-to-delete support.
 private struct RideHistoryList: View {
+    @Environment(\.modelContext) private var modelContext
+
     var rides: [CompletedRide]
     var onSelectRide: (CompletedRide) -> Void
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 12) {
-                ForEach(rides) { ride in
-                    Button {
-                        onSelectRide(ride)
+        List {
+            ForEach(rides) { ride in
+                Button {
+                    onSelectRide(ride)
+                } label: {
+                    RideHistoryRow(ride: ride)
+                }
+                .buttonStyle(.plain)
+                .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                .listRowSeparator(.hidden)
+                .listRowBackground(Color.clear)
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        deleteRide(ride)
                     } label: {
-                        RideHistoryRow(ride: ride)
+                        Label("Delete", systemImage: "trash")
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .padding(.bottom, 32)
         }
+        .listStyle(.plain)
         .scrollIndicators(.hidden)
+    }
+
+    private func deleteRide(_ ride: CompletedRide) {
+        modelContext.delete(ride)
     }
 }
 
@@ -179,8 +191,8 @@ private struct RideHistoryRow: View {
 
                 Spacer()
 
-                // Price
-                Text(ride.price, format: .currency(code: ride.currencyCode))
+                // Price (including tip)
+                Text(ride.totalPrice, format: .currency(code: ride.currencyCode))
                     .font(.headline)
             }
         }

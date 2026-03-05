@@ -94,7 +94,7 @@ private struct CompletedRideDetailPrice: View {
 
             Spacer()
 
-            Text(ride.price, format: .currency(code: ride.currencyCode))
+            Text(ride.totalPrice, format: .currency(code: ride.currencyCode))
                 .font(.title3.bold())
         }
         .padding(.horizontal, 16)

@@ -21,6 +21,11 @@ final class CompletedRide: Identifiable {
     var tipPercentage: Int?
     var tipAmount: Double?
 
+    /// Total price including tip, if any.
+    var totalPrice: Double {
+        price + (tipAmount ?? 0)
+    }
+
     init(
         date: Date,
         pickupName: String,

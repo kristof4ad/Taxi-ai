@@ -62,6 +62,48 @@ struct CompletedRideTests {
         #expect(ride.tipAmount == 3.00)
     }
 
+    // MARK: - Total Price
+
+    @Test func totalPriceEqualsPriceWhenNoTip() {
+        let ride = CompletedRide(
+            date: .now,
+            pickupName: "A",
+            destinationName: "B",
+            price: 25.50,
+            currencyCode: "USD"
+        )
+
+        #expect(ride.totalPrice == 25.50)
+    }
+
+    @Test func totalPriceIncludesTipAmount() {
+        let ride = CompletedRide(
+            date: .now,
+            pickupName: "A",
+            destinationName: "B",
+            price: 20.0,
+            currencyCode: "GBP",
+            tipPercentage: 30,
+            tipAmount: 6.0
+        )
+
+        #expect(ride.totalPrice == 26.0)
+    }
+
+    @Test func totalPriceWithZeroTip() {
+        let ride = CompletedRide(
+            date: .now,
+            pickupName: "A",
+            destinationName: "B",
+            price: 15.0,
+            currencyCode: "USD",
+            tipPercentage: 0,
+            tipAmount: 0
+        )
+
+        #expect(ride.totalPrice == 15.0)
+    }
+
     @Test func eachInstanceGetsUniqueID() {
         let ride1 = CompletedRide(
             date: .now,

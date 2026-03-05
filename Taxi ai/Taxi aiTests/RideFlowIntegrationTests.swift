@@ -236,6 +236,7 @@ struct RideFlowIntegrationTests {
         #expect(ride.feedbackText == "Perfect!")
         #expect(ride.tipPercentage == 30)
         #expect(abs(ride.tipAmount! - 6.0) < 0.01) // 30% of $20
+        #expect(abs(ride.totalPrice - 26.0) < 0.01) // $20 + $6 tip
     }
 
     // MARK: - State Machine Flow
