@@ -4,7 +4,6 @@ import UIKit
 /// Detail view for a completed ride shown when tapping a row in ride history.
 struct CompletedRideDetailView: View {
     var ride: CompletedRide
-    var onDismiss: () -> Void
 
     private var tripFare: Double {
         ride.price * 0.97
@@ -17,7 +16,7 @@ struct CompletedRideDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                CompletedRideDetailHeader(ride: ride, onDismiss: onDismiss)
+                CompletedRideDetailHeader(ride: ride)
 
                 CompletedRideDetailMapSnapshot(data: ride.mapSnapshotData)
 
@@ -46,10 +45,9 @@ struct CompletedRideDetailView: View {
 
 // MARK: - Header
 
-/// Date and close button.
+/// Date header.
 private struct CompletedRideDetailHeader: View {
     var ride: CompletedRide
-    var onDismiss: () -> Void
 
     var body: some View {
         HStack {
@@ -57,11 +55,6 @@ private struct CompletedRideDetailHeader: View {
                 .font(.subheadline.weight(.medium))
 
             Spacer()
-
-            Button("Close", systemImage: "xmark.circle.fill", action: onDismiss)
-                .labelStyle(.iconOnly)
-                .font(.title2)
-                .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 16)
         .padding(.top, 20)
@@ -90,12 +83,15 @@ private struct CompletedRideDetailMapSnapshot: View {
 
 // MARK: - Price
 
-/// Large total price display.
+/// Large total price display with label.
 private struct CompletedRideDetailPrice: View {
     var ride: CompletedRide
 
     var body: some View {
         HStack {
+            Text("Total")
+                .font(.title3.bold())
+
             Spacer()
 
             Text(ride.price, format: .currency(code: ride.currencyCode))

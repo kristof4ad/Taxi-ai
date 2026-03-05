@@ -287,6 +287,7 @@ private struct ExitVehicleActionButtons: View {
                 .buttonStyle(.plain)
 
                 Button {
+                    soundPlayer.playLock()
                     isUnlocked.toggle()
                 } label: {
                     HStack(spacing: 8) {

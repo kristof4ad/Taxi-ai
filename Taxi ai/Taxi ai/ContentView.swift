@@ -229,9 +229,6 @@ struct ContentView: View {
                         onFinished: {
                             recordRideAndShowHistory(tripViewModel)
                         },
-                        onCancel: {
-                            recordRideAndShowHistory(tripViewModel)
-                        },
                         onShowRideHistory: {
                             recordRideAndShowHistory(tripViewModel)
                         }

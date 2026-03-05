@@ -6,7 +6,6 @@ struct RideDetailView: View {
     var viewModel: TripViewModel
     var rating: RideRating?
     var onFinished: () -> Void
-    var onCancel: () -> Void
     var onShowRideHistory: () -> Void
 
     @State private var isMenuPresented = false
@@ -51,8 +50,8 @@ struct RideDetailView: View {
 
             AppMenuOverlay(
                 isPresented: $isMenuPresented,
-                ridePhase: .riding,
-                onCancel: onCancel,
+                ridePhase: .none,
+                onCancel: {},
                 onShowRideHistory: onShowRideHistory
             )
         }

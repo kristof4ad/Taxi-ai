@@ -10,22 +10,25 @@ struct RideHistoryView: View {
 
     @State private var selectedRide: CompletedRide?
 
+    /// Gold color matching the app's branding.
+    private static let goldColor = Color(red: 0.835, green: 0.627, blue: 0.094)
+
     var body: some View {
         VStack(spacing: 0) {
-            RideHistoryHeader(onDone: onDone)
+            RideHistoryHeader()
 
             if rides.isEmpty {
                 RideHistoryEmptyState()
             } else {
                 RideHistoryList(rides: rides, onSelectRide: { selectedRide = $0 })
             }
+
+            RideHistoryDoneButton(color: Self.goldColor, onDone: onDone)
         }
         .background(.gray.opacity(0.06))
         .ignoresSafeArea(edges: .top)
         .sheet(item: $selectedRide) { ride in
-            CompletedRideDetailView(ride: ride) {
-                selectedRide = nil
-            }
+            CompletedRideDetailView(ride: ride)
             .presentationDragIndicator(.visible)
         }
     }
@@ -33,30 +36,41 @@ struct RideHistoryView: View {
 
 // MARK: - Header
 
-/// Top bar with title and close button.
+/// Top bar with title.
 private struct RideHistoryHeader: View {
-    var onDone: () -> Void
-
     var body: some View {
         HStack {
             Text("Ride History")
                 .font(.title2.bold())
 
             Spacer()
-
-            Button(action: onDone) {
-                Text("Done")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .contentShape(.rect)
-            }
-            .buttonStyle(.plain)
         }
         .padding(.top, 62)
         .padding(.horizontal, 16)
         .padding(.bottom, 16)
+        .background(.background)
+    }
+}
+
+// MARK: - Done Button
+
+/// Golden done button pinned to the bottom of the screen.
+private struct RideHistoryDoneButton: View {
+    var color: Color
+    var onDone: () -> Void
+
+    var body: some View {
+        Button(action: onDone) {
+            Text("Done")
+                .font(.headline)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+                .background(color, in: .rect(cornerRadius: 14))
+        }
+        .buttonStyle(.plain)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(.background)
     }
 }
