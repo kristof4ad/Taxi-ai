@@ -144,6 +144,12 @@ final class SimulationEngine {
     /// Without this, the dot would move unevenly because route segments vary in length.
     /// Highway segments might span hundreds of meters while city turns span only a few.
     private func buildDistanceTable() {
+        guard routeCoordinates.count >= 2 else {
+            cumulativeDistances = []
+            totalDistance = 0
+            return
+        }
+
         cumulativeDistances = [0]
         var running: CLLocationDistance = 0
 
