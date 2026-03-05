@@ -1,8 +1,11 @@
+import SwiftData
 import SwiftUI
 
 /// List of completed rides showing date, pickup, destination, and price.
 struct RideHistoryView: View {
-    var rides: [CompletedRide]
+    @Query(sort: \CompletedRide.date, order: .reverse)
+    private var rides: [CompletedRide]
+
     var onDone: () -> Void
 
     var body: some View {

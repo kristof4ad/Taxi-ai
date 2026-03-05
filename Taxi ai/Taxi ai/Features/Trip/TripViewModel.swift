@@ -12,7 +12,7 @@ final class TripViewModel {
     /// Per-mile rate in dollars.
     static let perMileRate: Double = 2.00
     /// Distance in meters before the destination where the ride ends, leaving room for walking directions.
-    static let dropOffDistance: Double = 300
+    static let dropOffDistance: Double = 100
 
     // MARK: - State
 
@@ -459,7 +459,7 @@ final class TripViewModel {
 
     // MARK: - Private
 
-    /// Reverse geocodes the user's current location to capture the pickup address.
+    /// Reverse geocodes the user's current location to capture a short pickup address (street + city).
     private func reverseGeocodePickupLocation() {
         guard let location = locationService.userLocation else { return }
 
@@ -468,9 +468,11 @@ final class TripViewModel {
 
         request.getMapItems { [weak self] items, _ in
             guard let self,
-                  let address = items?.first?.addressRepresentations?.fullAddress(
-                    includingRegion: false, singleLine: true
-                  ) else { return }
+                  let placemark = items?.first?.placemark else { return }
+            let address = [placemark.subThoroughfare, placemark.thoroughfare, placemark.locality]
+                .compactMap { $0 }
+                .joined(separator: " ")
+            guard !address.isEmpty else { return }
             Task { @MainActor in
                 self.pickupAddress = address
             }

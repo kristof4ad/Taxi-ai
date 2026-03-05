@@ -11,14 +11,6 @@ final class HomeViewModel {
     var isSearching = false
     var estimatedArrival = 5
 
-    /// History of completed rides, newest first.
-    var completedRides: [CompletedRide] = []
-
-    /// Records a finished ride to the history.
-    func addCompletedRide(_ ride: CompletedRide) {
-        completedRides.insert(ride, at: 0)
-    }
-
     // MARK: - Search State
 
     var searchText = ""

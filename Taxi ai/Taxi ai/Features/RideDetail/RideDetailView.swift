@@ -209,7 +209,7 @@ private struct RideDetailRouteCard: View {
                     .font(.caption2)
                     .foregroundStyle(.secondary)
 
-                Text(viewModel.destinationAddress ?? viewModel.destinationName ?? "Destination")
+                Text(viewModel.destinationName ?? viewModel.destinationAddress ?? "Destination")
                     .font(.subheadline.weight(.medium))
 
                 Spacer()
@@ -271,7 +271,7 @@ private struct RideDetailPayment: View {
 
             // Tax
             HStack {
-                Text("SF Traffic Congestion Mitigation Tax")
+                Text("Congestion Charge")
                     .font(.subheadline)
 
                 Spacer()
@@ -281,7 +281,7 @@ private struct RideDetailPayment: View {
             }
 
             // Card
-            Text("AMEX · ****")
+            Text("VISA · ****")
                 .font(.subheadline)
         }
         .padding(.horizontal, 16)

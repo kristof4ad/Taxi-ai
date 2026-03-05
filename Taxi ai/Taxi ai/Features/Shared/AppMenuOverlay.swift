@@ -41,7 +41,7 @@ struct AppMenuOverlay: View {
                     }
 
                     MenuRow(
-                        title: "List of rides",
+                        title: "Ride History",
                         icon: "list.bullet"
                     ) {
                         withAnimation(.easeOut(duration: 0.2)) {

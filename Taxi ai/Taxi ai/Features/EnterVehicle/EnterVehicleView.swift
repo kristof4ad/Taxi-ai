@@ -168,14 +168,20 @@ private struct EnterVehicleBottomSheet: View {
     var onUnlock: () -> Void
     var onHazard: () -> Void
 
+    @State private var isUnlocked = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             EnterVehicleHeader(onFindVehicle: onFindVehicle)
 
             VehicleActionButtons(
+                isUnlocked: isUnlocked,
                 onHorn: onHorn,
                 onLights: onLights,
-                onUnlock: onUnlock,
+                onUnlock: {
+                    isUnlocked.toggle()
+                    onUnlock()
+                },
                 onHazard: onHazard
             )
 
@@ -241,6 +247,7 @@ private struct FindVehicleButton: View {
 
 /// Row of circular action buttons for interacting with the vehicle.
 private struct VehicleActionButtons: View {
+    var isUnlocked: Bool
     var onHorn: () -> Void
     var onLights: () -> Void
     var onUnlock: () -> Void
@@ -251,7 +258,7 @@ private struct VehicleActionButtons: View {
             Spacer()
             VehicleActionButton(title: "Horn", icon: "speaker.wave.2", action: onHorn)
             VehicleActionButton(title: "Lights", icon: "lightbulb", action: onLights)
-            VehicleActionButton(title: "Unlock", icon: "lock", action: onUnlock)
+            VehicleActionButton(title: isUnlocked ? "Lock" : "Unlock", icon: isUnlocked ? "lock.open" : "lock", action: onUnlock)
             VehicleActionButton(title: "Hazard", icon: "exclamationmark.triangle", action: onHazard)
             Spacer()
         }
