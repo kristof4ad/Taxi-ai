@@ -31,7 +31,7 @@ struct WelcomeView: View {
 private struct LogoView: View {
     var body: some View {
         Text("Taxi ai")
-            .font(.system(size: 36, weight: .light, design: .default))
+            .font(.custom("ZenDots-Regular", size: 36))
             .tracking(4)
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
