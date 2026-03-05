@@ -163,7 +163,7 @@ private struct DoorIllustrationView: View {
                     .foregroundStyle(.gray)
                     .frame(width: 35, height: 50)
             }
-            .background(Color(white: 0.93), in: .rect(cornerRadius: 6))
+            .background(.gray.opacity(0.2), in: .rect(cornerRadius: 6))
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(.gray.opacity(0.3), lineWidth: 1)

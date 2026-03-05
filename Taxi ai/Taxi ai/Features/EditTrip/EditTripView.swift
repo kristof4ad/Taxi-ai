@@ -82,7 +82,7 @@ private struct EditTripMapSection: View {
             }
 
             if let position = tripViewModel.simulationEngine.currentPosition {
-                Annotation("Taxi", coordinate: position) {
+                Annotation("", coordinate: position) {
                     CarMarkerView()
                 }
             }

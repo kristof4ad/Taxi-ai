@@ -86,7 +86,7 @@ extension MapView {
 
                 // Simulation dot
                 if let position = viewModel.simulationEngine.currentPosition {
-                    Annotation("Taxi", coordinate: position) {
+                    Annotation("", coordinate: position) {
                         SimulationDotView()
                     }
                 }
