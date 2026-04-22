@@ -20,6 +20,10 @@ struct CompletedRideDetailView: View {
 
                 CompletedRideDetailMapSnapshot(data: ride.mapSnapshotData)
 
+                if let summary = ride.aiSummary, !summary.isEmpty {
+                    CompletedRideDetailSummary(summary: summary)
+                }
+
                 CompletedRideDetailPrice(ride: ride)
 
                 CompletedRideDetailRouteCard(ride: ride)
@@ -59,6 +63,32 @@ private struct CompletedRideDetailHeader: View {
         .padding(.horizontal, 16)
         .padding(.top, 20)
         .padding(.bottom, 8)
+    }
+}
+
+// MARK: - AI Summary
+
+/// A small callout showing the on-device AI summary for the ride.
+private struct CompletedRideDetailSummary: View {
+    var summary: String
+
+    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: "sparkles")
+                .foregroundStyle(Self.gold)
+
+            Text(summary)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            Spacer(minLength: 0)
+        }
+        .padding(12)
+        .background(Self.gold.opacity(0.08), in: .rect(cornerRadius: 10))
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
 }
 

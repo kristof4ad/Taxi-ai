@@ -6,12 +6,25 @@ struct RideHistoryView: View {
     @Query(sort: \CompletedRide.date, order: .reverse)
     private var rides: [CompletedRide]
 
+    @Environment(IntelligenceService.self) private var intelligenceService
+
     var onDone: () -> Void
 
     @State private var selectedRide: CompletedRide?
+    @State private var recap: RideRecap?
 
     /// Gold color matching the app's branding.
     private static let goldColor = Color(red: 0.835, green: 0.627, blue: 0.094)
+
+    /// Minimum number of rides in the last 7 days required to show a recap.
+    private static let minRidesForRecap = 2
+
+    private var recentRides: [CompletedRide] {
+        guard let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: .now) else {
+            return []
+        }
+        return rides.filter { $0.date >= weekAgo }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,6 +33,9 @@ struct RideHistoryView: View {
             if rides.isEmpty {
                 RideHistoryEmptyState()
             } else {
+                if let recap {
+                    WeeklyRecapBanner(recap: recap)
+                }
                 RideHistoryList(rides: rides, onSelectRide: { selectedRide = $0 })
             }
 
@@ -31,6 +47,25 @@ struct RideHistoryView: View {
             CompletedRideDetailView(ride: ride)
             .presentationDragIndicator(.visible)
         }
+        .task {
+            await loadRecap()
+        }
+    }
+
+    private func loadRecap() async {
+        let recent = recentRides
+        guard recent.count >= Self.minRidesForRecap else {
+            recap = nil
+            return
+        }
+        let inputs = recent.map { ride in
+            RecapRideInput(
+                destination: ride.destinationName,
+                priceDisplay: ride.totalPrice.formatted(.currency(code: ride.currencyCode)),
+                starRating: ride.starRating
+            )
+        }
+        recap = await intelligenceService.weeklyRecap(from: inputs)
     }
 }
 
@@ -194,6 +229,13 @@ private struct RideHistoryRow: View {
                 // Price (including tip)
                 Text(ride.totalPrice, format: .currency(code: ride.currencyCode))
                     .font(.headline)
+            }
+
+            if let summary = ride.aiSummary, !summary.isEmpty {
+                Text(summary)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
             }
         }
         .padding(16)
