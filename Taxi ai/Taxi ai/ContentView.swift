@@ -4,6 +4,7 @@ import SwiftUI
 /// Root content view managing screen navigation and ride persistence.
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(IntelligenceService.self) var intelligenceService
     var homeViewModel: HomeViewModel
     @State private var tripViewModel: TripViewModel?
     @State private var currentScreen: AppScreen = .welcome
@@ -312,6 +313,9 @@ struct ContentView: View {
             }
 
             modelContext.insert(completedRide)
+
+            // Kick off the AI summary after save; never blocks the UI.
+            generateSummary(for: completedRide)
 
             withAnimation {
                 tripViewModel = nil

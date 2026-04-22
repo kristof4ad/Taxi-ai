@@ -7,7 +7,10 @@ struct HomeView: View {
     var onPlaceSelected: (NearbyPlace) -> Void
     var onShowRideHistory: () -> Void
 
+    @Environment(IntelligenceService.self) private var intelligenceService
     @State private var isMenuPresented = false
+    @State private var isVoiceSheetPresented = false
+    @State private var voiceService = VoiceTranscriptionService()
 
     var body: some View {
         ZStack {
@@ -20,7 +23,14 @@ struct HomeView: View {
 
                 BottomSheetSection(
                     viewModel: viewModel,
-                    onPlaceSelected: onPlaceSelected
+                    onPlaceSelected: onPlaceSelected,
+                    // Only show the AI mic pill on devices that can actually
+                    // run the on-device model. On A14 and earlier (e.g.
+                    // iPhone 12 mini) voice-only dictation into a literal
+                    // MapKit search is worse than the regular keyboard.
+                    onAITapped: intelligenceService.isAvailable
+                        ? { isVoiceSheetPresented = true }
+                        : nil
                 )
             }
             .ignoresSafeArea(edges: .top)
@@ -33,6 +43,7 @@ struct HomeView: View {
             )
         }
         .task {
+            viewModel.intelligenceService = intelligenceService
             viewModel.onAppear()
             await viewModel.loadInitialPlaces()
         }
@@ -41,6 +52,29 @@ struct HomeView: View {
         } message: {
             Text("This destination is more than 30 miles away. Our taxi service cannot reach it.")
         }
+        .sheet(isPresented: $isVoiceSheetPresented, onDismiss: {
+            // `reset()` already stops the recorder and clears state;
+            // calling `stop()` as well races with `reset()` and leaves the
+            // service stuck in `.finished`, which breaks the next open.
+            voiceService.reset()
+        }, content: {
+            VoiceSearchSheet(
+                service: voiceService,
+                onSubmit: { transcript in
+                    isVoiceSheetPresented = false
+                    // Wait for the sheet's dismissal animation to finish so
+                    // focusing the search bar doesn't fight the transition
+                    // and leave the home layout half-settled.
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .milliseconds(400))
+                        await viewModel.submitVoiceQuery(transcript)
+                    }
+                },
+                onDismiss: {
+                    isVoiceSheetPresented = false
+                }
+            )
+        })
     }
 }
 
@@ -78,6 +112,9 @@ private struct HomeMapSection: View {
 private struct BottomSheetSection: View {
     @Bindable var viewModel: HomeViewModel
     var onPlaceSelected: (NearbyPlace) -> Void
+    /// Optional — `nil` hides the AI mic pill on devices without Apple
+    /// Intelligence support.
+    var onAITapped: (() -> Void)?
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -106,7 +143,8 @@ private struct BottomSheetSection: View {
 
                     CategoriesRow(
                         selected: viewModel.selectedCategory,
-                        onSelect: { viewModel.selectCategory($0) }
+                        onSelect: { viewModel.selectCategory($0) },
+                        onAITapped: onAITapped
                     )
 
                     if viewModel.selectedDestination != nil {
@@ -179,4 +217,5 @@ private struct ArrivalBanner: View {
         onPlaceSelected: { _ in },
         onShowRideHistory: { }
     )
+    .environment(IntelligenceService())
 }

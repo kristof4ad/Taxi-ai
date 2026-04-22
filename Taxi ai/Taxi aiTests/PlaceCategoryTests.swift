@@ -26,7 +26,7 @@ struct PlaceCategoryTests {
         #expect(PlaceCategory.food.label == "Food")
         #expect(PlaceCategory.fast.label == "Fast Food")
         #expect(PlaceCategory.fun.label == "Fun")
-        #expect(PlaceCategory.shopping.label == "Shopping")
+        #expect(PlaceCategory.shopping.label == "Shops")
     }
 
     // MARK: - System Images

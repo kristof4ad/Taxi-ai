@@ -16,7 +16,7 @@ enum PlaceCategory: String, CaseIterable, Identifiable, Sendable {
         case .food: "Food"
         case .fast: "Fast Food"
         case .fun: "Fun"
-        case .shopping: "Shopping"
+        case .shopping: "Shops"
         }
     }
 

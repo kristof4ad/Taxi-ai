@@ -21,6 +21,10 @@ final class CompletedRide: Identifiable {
     var tipPercentage: Int?
     var tipAmount: Double?
 
+    /// One-sentence summary generated on-device after the ride is saved.
+    /// Nil when Apple Intelligence is unavailable or the generation has not finished.
+    var aiSummary: String?
+
     /// Total price including tip, if any.
     var totalPrice: Double {
         price + (tipAmount ?? 0)
@@ -36,7 +40,8 @@ final class CompletedRide: Identifiable {
         starRating: Int? = nil,
         feedbackText: String? = nil,
         tipPercentage: Int? = nil,
-        tipAmount: Double? = nil
+        tipAmount: Double? = nil,
+        aiSummary: String? = nil
     ) {
         self.id = UUID()
         self.date = date
@@ -49,5 +54,6 @@ final class CompletedRide: Identifiable {
         self.feedbackText = feedbackText
         self.tipPercentage = tipPercentage
         self.tipAmount = tipAmount
+        self.aiSummary = aiSummary
     }
 }

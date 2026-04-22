@@ -111,10 +111,21 @@ struct SearchCompletionRow: View {
 
 // MARK: - Categories Row
 
-/// Horizontal row of category filter buttons.
+/// Horizontal row of category filter buttons, optionally with an AI voice-search pill.
 struct CategoriesRow: View {
     var selected: PlaceCategory
     var onSelect: (PlaceCategory) -> Void
+    var onAITapped: (() -> Void)?
+
+    init(
+        selected: PlaceCategory,
+        onSelect: @escaping (PlaceCategory) -> Void,
+        onAITapped: (() -> Void)? = nil
+    ) {
+        self.selected = selected
+        self.onSelect = onSelect
+        self.onAITapped = onAITapped
+    }
 
     var body: some View {
         HStack {
@@ -124,6 +135,10 @@ struct CategoriesRow: View {
                     isSelected: category == selected,
                     action: { onSelect(category) }
                 )
+            }
+
+            if let onAITapped {
+                AICategoryButton(action: onAITapped)
             }
         }
         .frame(maxWidth: .infinity)

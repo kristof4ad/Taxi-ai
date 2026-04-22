@@ -3,6 +3,504 @@
   "children": [
     {
       "type": "frame",
+      "id": "mVTCI",
+      "x": 3195,
+      "y": -944,
+      "name": "Ride Tracking - Arrived",
+      "clip": true,
+      "width": 393,
+      "height": 852,
+      "fill": "#FFFFFF",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "5Dqv3",
+          "name": "mapArea",
+          "width": "fill_container",
+          "height": 380,
+          "fill": "#E8E4DE",
+          "layout": "none",
+          "children": [
+            {
+              "type": "text",
+              "id": "hISfP",
+              "x": 140,
+              "y": 180,
+              "name": "mapNote4",
+              "fill": "#A1A1AA",
+              "content": "MapKit Map View",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "500"
+            },
+            {
+              "id": "MHFB6",
+              "type": "ref",
+              "ref": "Qa7Om",
+              "x": 340,
+              "y": 62,
+              "name": "menuBtn4"
+            },
+            {
+              "type": "frame",
+              "id": "5NT6P",
+              "x": 340,
+              "y": 110,
+              "name": "routeBtn",
+              "width": 40,
+              "height": 40,
+              "fill": "#FFFFFF",
+              "cornerRadius": 20,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "noCdp",
+                  "name": "routeIc",
+                  "width": 20,
+                  "height": 20,
+                  "iconFontName": "route",
+                  "iconFontFamily": "lucide",
+                  "fill": "#000000"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "eD76i",
+              "x": 140,
+              "y": 280,
+              "name": "pickupLabel",
+              "height": 32,
+              "fill": "#FFFFFF",
+              "cornerRadius": 16,
+              "stroke": {
+                "thickness": 1,
+                "fill": "#E4E4E7"
+              },
+              "gap": 4,
+              "padding": [
+                0,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "l9Ef1",
+                  "name": "pickupIc4",
+                  "width": 14,
+                  "height": 14,
+                  "iconFontName": "pencil",
+                  "iconFontFamily": "lucide",
+                  "fill": "#000000"
+                },
+                {
+                  "type": "text",
+                  "id": "h1zH5",
+                  "name": "pickupTx4",
+                  "fill": "#000000",
+                  "content": "Pickup",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "MzE7Q",
+              "x": 200,
+              "y": 160,
+              "name": "dropoffLabel",
+              "height": 32,
+              "fill": "#000000",
+              "cornerRadius": 16,
+              "gap": 4,
+              "padding": [
+                0,
+                12
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "gMVXU",
+                  "name": "dropoffIc4",
+                  "width": 14,
+                  "height": 14,
+                  "iconFontName": "pencil",
+                  "iconFontFamily": "lucide",
+                  "fill": "#FFFFFF"
+                },
+                {
+                  "type": "text",
+                  "id": "Sb3os",
+                  "name": "dropoffTx4",
+                  "fill": "#FFFFFF",
+                  "content": "Dropoff",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "5lMqR",
+          "name": "bottomCard",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            20,
+            16,
+            16,
+            16
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "KP1sx",
+              "name": "title",
+              "fill": "#000000",
+              "content": "Your ride has arrived",
+              "fontFamily": "Inter",
+              "fontSize": 18,
+              "fontWeight": "700"
+            },
+            {
+              "type": "text",
+              "id": "QO9aD",
+              "name": "licenseLbl",
+              "fill": "#71717A",
+              "content": "License Plate: ABC 1234",
+              "fontFamily": "Inter",
+              "fontSize": 14,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "oTjBb",
+              "name": "spacer4a",
+              "width": "fill_container",
+              "height": 4
+            },
+            {
+              "type": "frame",
+              "id": "wAHs9",
+              "name": "findPickupRow",
+              "width": "fill_container",
+              "gap": 8,
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "uxv6D",
+                  "name": "findPickupBtn",
+                  "height": 36,
+                  "cornerRadius": 18,
+                  "stroke": {
+                    "thickness": 1.5,
+                    "fill": "#000000"
+                  },
+                  "gap": 6,
+                  "padding": [
+                    0,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "4Brb4",
+                      "name": "findLabel",
+                      "fill": "#000000",
+                      "content": "Find Pickup",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "jrfcO",
+                      "name": "findIcon",
+                      "width": 14,
+                      "height": 14,
+                      "iconFontName": "external-link",
+                      "iconFontFamily": "lucide",
+                      "fill": "#000000"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "MtsXQ",
+                  "name": "carImage",
+                  "width": 120,
+                  "height": 70,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1772566138641.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": 8
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Crtqk",
+              "name": "spacer4b",
+              "width": "fill_container",
+              "height": 4
+            },
+            {
+              "type": "frame",
+              "id": "1dHD6",
+              "name": "tripDetails",
+              "width": "fill_container",
+              "layout": "vertical",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "r1RYf",
+                  "name": "pickupRow",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    8,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "iQRB1",
+                      "name": "pickupDot4",
+                      "width": 12,
+                      "height": 12,
+                      "stroke": {
+                        "thickness": 2,
+                        "fill": "#71717A"
+                      }
+                    },
+                    {
+                      "type": "frame",
+                      "id": "S6f2R",
+                      "name": "pickupInfo4",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "pux3O",
+                          "name": "pickupName4",
+                          "fill": "#000000",
+                          "content": "Pickup",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "iAK9T",
+                          "name": "pickupSub4",
+                          "fill": "#71717A",
+                          "content": "Vehicle will wait 7 min",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "NlqEU",
+                      "name": "pickupTime4",
+                      "fill": "#000000",
+                      "content": "8:27 pm",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RvZYG",
+                  "name": "connector",
+                  "width": "fill_container",
+                  "height": 16,
+                  "padding": [
+                    0,
+                    0,
+                    0,
+                    5
+                  ],
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "9Bnmr",
+                      "name": "connLine4",
+                      "width": 2,
+                      "height": "fill_container",
+                      "fill": "#E4E4E7"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "PBoGG",
+                  "name": "destRow",
+                  "width": "fill_container",
+                  "gap": 12,
+                  "padding": [
+                    8,
+                    0
+                  ],
+                  "children": [
+                    {
+                      "type": "ellipse",
+                      "id": "qL8Zk",
+                      "name": "destDot4",
+                      "fill": "#000000",
+                      "width": 12,
+                      "height": 12
+                    },
+                    {
+                      "type": "frame",
+                      "id": "FFaMX",
+                      "name": "destInfo4",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 2,
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "kio2b",
+                          "name": "destName4",
+                          "fill": "#000000",
+                          "content": "La Stazione / Cannoli & Co.",
+                          "fontFamily": "Inter",
+                          "fontSize": 15,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "GSloP",
+                          "name": "destAddr4",
+                          "fill": "#71717A",
+                          "content": "22nd St, SF",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "fcytU",
+                          "name": "destClose4",
+                          "fill": "#9B7E3A",
+                          "content": "Closes in 39 min",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "5klKB",
+                      "name": "destTime4",
+                      "fill": "#000000",
+                      "content": "8:30 pm",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "XLAjc",
+              "name": "divider4",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "#E4E4E7"
+            },
+            {
+              "type": "text",
+              "id": "TwVkr",
+              "name": "tipsLabel",
+              "fill": "#000000",
+              "content": "Tips",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "p2Pwn",
+              "name": "Spacer",
+              "width": "fill_container",
+              "height": "fill_container"
+            },
+            {
+              "type": "frame",
+              "id": "Ag6AK",
+              "name": "GoToVehicleBtn",
+              "width": "fill_container",
+              "height": 52,
+              "fill": {
+                "type": "gradient",
+                "gradientType": "linear",
+                "enabled": true,
+                "rotation": 90,
+                "size": {
+                  "height": 1
+                },
+                "colors": [
+                  {
+                    "color": "#D4A84B",
+                    "position": 0
+                  },
+                  {
+                    "color": "#B8944A",
+                    "position": 1
+                  }
+                ]
+              },
+              "cornerRadius": 26,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "NHyTq",
+                  "name": "disabledLabel",
+                  "fill": "#FFFFFF",
+                  "content": "Go to Vehicle",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
       "id": "SDttS",
       "x": 0,
       "y": -300,
@@ -268,8 +766,8 @@
               "id": "LoFZ6",
               "name": "logo",
               "fill": "#FFFFFF",
-              "content": "Robotaxi",
-              "fontFamily": "Inter",
+              "content": "Taxi ai",
+              "fontFamily": "Zen Dots",
               "fontSize": 36,
               "fontWeight": "300",
               "letterSpacing": 4
@@ -312,35 +810,9 @@
               "name": "signInBtn",
               "descendants": {
                 "jXcLq": {
-                  "content": "Sign In"
+                  "content": "Let's Go!"
                 }
               }
-            },
-            {
-              "type": "frame",
-              "id": "OkEPA",
-              "name": "createAccountBtn",
-              "width": "fill_container",
-              "height": 52,
-              "cornerRadius": 26,
-              "stroke": {
-                "thickness": 1,
-                "fill": "#FFFFFF40"
-              },
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "UoX0a",
-                  "name": "label",
-                  "fill": "#FFFFFF",
-                  "content": "Create Account",
-                  "fontFamily": "Inter",
-                  "fontSize": 16,
-                  "fontWeight": "600"
-                }
-              ]
             }
           ]
         }
@@ -1628,6 +2100,36 @@
               "fontFamily": "Inter",
               "fontSize": 16,
               "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "dv2FA",
+              "name": "Spacer",
+              "width": "fill_container",
+              "height": "fill_container"
+            },
+            {
+              "type": "frame",
+              "id": "9hUWR",
+              "name": "GoToVehicleBtn",
+              "width": "fill_container",
+              "height": 52,
+              "fill": "#D4D4D8",
+              "cornerRadius": 26,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "rI76f",
+                  "name": "disabledLabel",
+                  "fill": "#FFFFFF",
+                  "content": "Go to Vehicle",
+                  "fontFamily": "Inter",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
             }
           ]
         }
@@ -1636,8 +2138,8 @@
     {
       "type": "frame",
       "id": "ufo0w",
-      "x": 1800,
-      "y": 0,
+      "x": 3249,
+      "y": 998,
       "name": "Rate Your Ride",
       "clip": true,
       "width": 393,
@@ -1937,8 +2439,8 @@
     {
       "type": "frame",
       "id": "7X0D0",
-      "x": 0,
-      "y": 920,
+      "x": -610,
+      "y": 1980,
       "name": "Address Search",
       "clip": true,
       "width": 393,
@@ -2666,8 +3168,8 @@
     {
       "type": "frame",
       "id": "HXqsv",
-      "x": 450,
-      "y": 920,
+      "x": -160,
+      "y": 1980,
       "name": "Search Destination",
       "clip": true,
       "width": 393,
@@ -2942,8 +3444,8 @@
     {
       "type": "frame",
       "id": "tseqL",
-      "x": 900,
-      "y": 920,
+      "x": 915,
+      "y": 913,
       "name": "Edit Destination",
       "clip": true,
       "width": 393,
@@ -3273,8 +3775,8 @@
     {
       "type": "frame",
       "id": "3lGOp",
-      "x": 1350,
-      "y": 920,
+      "x": 2375,
+      "y": 37,
       "name": "Pickup Navigation",
       "clip": true,
       "width": 393,
@@ -3633,15 +4135,24 @@
               "fontWeight": "600"
             }
           ]
+        },
+        {
+          "type": "text",
+          "id": "2rJT8",
+          "fill": "#000000",
+          "content": "The finished button and finished right button should be the golden buttons.",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
         }
       ]
     },
     {
       "type": "frame",
       "id": "qpb9t",
-      "x": 1800,
-      "y": 920,
-      "name": "Enter Vehicle",
+      "x": 3977,
+      "y": 852,
+      "name": "old Enter Vehicle",
       "clip": true,
       "width": 393,
       "height": 852,
@@ -4001,8 +4512,8 @@
     {
       "type": "frame",
       "id": "xmUpS",
-      "x": 0,
-      "y": 1840,
+      "x": 432,
+      "y": 874,
       "name": "Start Ride",
       "clip": true,
       "width": 393,
@@ -4272,8 +4783,8 @@
     {
       "type": "frame",
       "id": "lMJlC",
-      "x": 450,
-      "y": 1840,
+      "x": -29,
+      "y": 954,
       "name": "Fasten Seatbelts",
       "width": 393,
       "height": 852,
@@ -4344,7 +4855,9 @@
               "id": "xmt6Q",
               "type": "ref",
               "ref": "Qa7Om",
-              "name": "menuBtn13"
+              "name": "menuBtn13",
+              "x": 329,
+              "y": 0
             }
           ]
         },
@@ -4545,8 +5058,8 @@
     {
       "type": "frame",
       "id": "bzY2W",
-      "x": 900,
-      "y": 1840,
+      "x": 1407,
+      "y": 913,
       "name": "Exit Vehicle",
       "width": 393,
       "height": 852,
@@ -5182,8 +5695,8 @@
     {
       "type": "frame",
       "id": "utIYl",
-      "x": 1350,
-      "y": 1840,
+      "x": 1950,
+      "y": 998,
       "name": "Close Doors",
       "width": 393,
       "height": 852,
@@ -5428,8 +5941,8 @@
     {
       "type": "frame",
       "id": "Y1pw1",
-      "x": 1800,
-      "y": 1840,
+      "x": 2781,
+      "y": 2751,
       "name": "Cancel Ride Dialog",
       "width": 393,
       "height": 852,
@@ -6517,8 +7030,8 @@
     {
       "type": "frame",
       "id": "sp5nt",
-      "x": 1350,
-      "y": 2760,
+      "x": 685,
+      "y": 1817,
       "name": "Ride History",
       "width": 393,
       "height": 852,
@@ -6717,8 +7230,8 @@
     {
       "type": "frame",
       "id": "lgjvK",
-      "x": 1800,
-      "y": 2760,
+      "x": 2527,
+      "y": 998,
       "name": "Ride Detail",
       "width": 393,
       "height": 852,
@@ -7658,6 +8171,1002 @@
               "height": 20,
               "iconFontFamily": "lucide",
               "fill": "$text-primary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "q66r9",
+      "x": 1800,
+      "y": 22,
+      "name": "Enter Vehicle",
+      "clip": true,
+      "width": 393,
+      "height": 852,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "HcTrS",
+          "name": "Map Area",
+          "width": "fill_container",
+          "height": 270,
+          "fill": "$bg-map",
+          "layout": "none",
+          "children": [
+            {
+              "id": "TZHwz",
+              "type": "ref",
+              "ref": "Qa7Om",
+              "x": 337,
+              "y": 50,
+              "name": "menuBtn"
+            },
+            {
+              "type": "frame",
+              "id": "yVp7s",
+              "x": 337,
+              "y": 100,
+              "name": "WalkButton",
+              "width": 44,
+              "height": 44,
+              "fill": "$bg-primary",
+              "cornerRadius": 8,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "zOLnp",
+                  "x": 10,
+                  "y": 10,
+                  "name": "walkIcon",
+                  "width": 24,
+                  "height": 24,
+                  "iconFontName": "footprints",
+                  "iconFontFamily": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "0oj1s",
+              "x": 175,
+              "y": 60,
+              "name": "Road",
+              "width": 40,
+              "height": 250,
+              "fill": "#D1CCC5",
+              "cornerRadius": 4
+            },
+            {
+              "type": "frame",
+              "id": "tgjZW",
+              "x": 182,
+              "y": 130,
+              "name": "CarMarker",
+              "width": 26,
+              "height": 50,
+              "fill": "#E53E3E",
+              "cornerRadius": 4
+            },
+            {
+              "type": "ellipse",
+              "id": "P8ESY",
+              "x": 189,
+              "y": 195,
+              "name": "PickupPin",
+              "fill": "#3B82F6",
+              "width": 12,
+              "height": 12
+            },
+            {
+              "type": "ellipse",
+              "id": "sbXsp",
+              "x": 165,
+              "y": 170,
+              "name": "GlowCircle",
+              "fill": "#3B82F620",
+              "width": 60,
+              "height": 60
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "xQ9YO",
+          "name": "Bottom Sheet",
+          "width": "fill_container",
+          "height": "fill_container",
+          "fill": "$bg-primary",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            16,
+            16,
+            12,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Vj59m",
+              "name": "Header Row",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "c5TmV",
+                  "name": "Title Column",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "0P8o6",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "content": "Please walk to vehicle",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "anIhu",
+                      "name": "Subtitle",
+                      "fill": "$text-secondary",
+                      "content": "Vehicle will wait 7 min",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "U3yhW",
+                  "name": "FindVehicleBtn",
+                  "height": 36,
+                  "cornerRadius": 20,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-light"
+                  },
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ieNGZ",
+                      "name": "findLabel",
+                      "fill": "$text-primary",
+                      "content": "Find Vehicle",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "jK6ot",
+                      "name": "findIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "arrow-up-right",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "PfGt4",
+              "name": "Car Wrapper",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "PGGzq",
+                  "name": "Car Image",
+                  "metadata": {
+                    "type": "unsplash",
+                    "username": "ninjason",
+                    "link": "https://unsplash.com/@ninjason",
+                    "author": "Jason Leung"
+                  },
+                  "width": 220,
+                  "height": 130,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1772616026794.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": 12
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fMdxf",
+              "name": "Action Buttons",
+              "width": "fill_container",
+              "gap": 24,
+              "padding": [
+                4,
+                0
+              ],
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "DrJ87",
+                  "name": "Horn",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "3qpqD",
+                      "x": 13,
+                      "y": 13,
+                      "name": "hornIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "volume-2",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "qJizH",
+                  "name": "Lights",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "LMZ28",
+                      "x": 13,
+                      "y": 13,
+                      "name": "lightsIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "lightbulb",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "UfhJt",
+                  "name": "Lock",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "btZol",
+                      "x": 13,
+                      "y": 13,
+                      "name": "lockIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "lock",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iGWDR",
+                  "name": "Hazard",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "B6k7a",
+                      "x": 13,
+                      "y": 13,
+                      "name": "hazardIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "triangle-alert",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "ieamb",
+              "name": "Divider",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$border-light"
+            },
+            {
+              "id": "i29LS",
+              "type": "ref",
+              "ref": "vv8TN",
+              "width": "fill_container",
+              "name": "locationRow",
+              "descendants": {
+                "8IWrq": {
+                  "content": "Bakar Fitness & Recreation Cen..."
+                },
+                "PN5pY": {
+                  "content": "1675 Owens St, SF"
+                },
+                "fIldN": {
+                  "content": "6:12 pm"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "qfhHH",
+              "name": "WalkInfo",
+              "width": "fill_container",
+              "padding": [
+                0,
+                32,
+                0,
+                0
+              ],
+              "justifyContent": "end",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "r3S6A",
+                  "name": "walkText",
+                  "fill": "$text-secondary",
+                  "content": "+2 min walk",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "A0xCH",
+              "name": "Divider2",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$border-light"
+            },
+            {
+              "type": "text",
+              "id": "BGFa2",
+              "name": "Tips Header",
+              "fill": "$text-primary",
+              "content": "Tips",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "8Tl39",
+              "name": "Tip Card",
+              "width": "fill_container",
+              "fill": "#F0F4FF",
+              "cornerRadius": 12,
+              "gap": 12,
+              "padding": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "P3IP1",
+                  "name": "TipAccent",
+                  "width": 4,
+                  "height": 40,
+                  "fill": "#3B82F6",
+                  "cornerRadius": 2
+                },
+                {
+                  "type": "frame",
+                  "id": "UA2K8",
+                  "name": "TipIconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#3B82F6",
+                  "cornerRadius": 16,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "5DMlG",
+                      "x": 7,
+                      "y": 7,
+                      "name": "tipCarIcon",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "car",
+                      "iconFontFamily": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "gkd6M",
+                  "name": "TipText",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "To open the door, push the wide part of the handle.",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "VP6xR",
+              "type": "ref",
+              "ref": "L9YSD",
+              "width": "fill_container",
+              "name": "goBtn",
+              "descendants": {
+                "jXcLq": {
+                  "content": "Go to Vehicle"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "iaY0B",
+          "fill": "#000000",
+          "content": "On the",
+          "fontFamily": "Inter",
+          "fontSize": 12,
+          "fontWeight": "normal"
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "oFf5p",
+      "x": 4235,
+      "y": -300,
+      "name": "Enter Vehicle",
+      "clip": true,
+      "width": 393,
+      "height": 852,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "MoKgT",
+          "name": "Map Area",
+          "width": "fill_container",
+          "height": 270,
+          "fill": {
+            "type": "image",
+            "enabled": true,
+            "url": "./images/generated-1772616476630.png",
+            "mode": "fill"
+          },
+          "layout": "none",
+          "children": [
+            {
+              "id": "MeIEw",
+              "type": "ref",
+              "ref": "Qa7Om",
+              "x": 337,
+              "y": 50,
+              "name": "menuBtn"
+            },
+            {
+              "type": "frame",
+              "id": "h35Y6",
+              "x": 337,
+              "y": 100,
+              "name": "WalkButton",
+              "width": 44,
+              "height": 44,
+              "fill": "$bg-primary",
+              "cornerRadius": 8,
+              "layout": "none",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "TON4e",
+                  "x": 10,
+                  "y": 10,
+                  "name": "walkIcon",
+                  "width": 24,
+                  "height": 24,
+                  "iconFontName": "footprints",
+                  "iconFontFamily": "lucide",
+                  "fill": "$text-primary"
+                }
+              ]
+            },
+            {
+              "type": "ellipse",
+              "id": "hPA4a",
+              "x": 175,
+              "y": 165,
+              "name": "UserGlow",
+              "fill": "#3B82F620",
+              "width": 50,
+              "height": 50
+            },
+            {
+              "type": "ellipse",
+              "id": "k1ekQ",
+              "x": 191,
+              "y": 181,
+              "name": "UserPin",
+              "fill": "#3B82F6",
+              "width": 18,
+              "height": 18,
+              "stroke": {
+                "thickness": 3,
+                "fill": "#FFFFFF"
+              }
+            },
+            {
+              "type": "frame",
+              "id": "kOjN4",
+              "x": 185,
+              "y": 110,
+              "name": "CarArrived",
+              "width": 24,
+              "height": 44,
+              "fill": "#E53E3E",
+              "cornerRadius": 4
+            },
+            {
+              "type": "frame",
+              "id": "0Eqmo",
+              "x": 165,
+              "y": 90,
+              "name": "CarLabelBg",
+              "width": 64,
+              "height": 22,
+              "fill": "#000000",
+              "cornerRadius": 11,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "6QlV7",
+                  "name": "carLabelText",
+                  "fill": "#FFFFFF",
+                  "content": "Arrived",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "2UipI",
+          "name": "Bottom Sheet",
+          "width": "fill_container",
+          "height": "fill_container",
+          "fill": "$bg-primary",
+          "cornerRadius": [
+            24,
+            24,
+            0,
+            0
+          ],
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            16,
+            16,
+            12,
+            16
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "yrqCv",
+              "name": "Header Row",
+              "width": "fill_container",
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "JuzQK",
+                  "name": "Title Column",
+                  "layout": "vertical",
+                  "gap": 4,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "JCeK4",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "content": "Please enter the vehicle",
+                      "fontFamily": "Inter",
+                      "fontSize": 20,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "BOkVR",
+                      "name": "Subtitle",
+                      "fill": "$text-secondary",
+                      "content": "Vehicle will wait 7 min",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "fPZGR",
+                  "name": "FindVehicleBtn",
+                  "height": 36,
+                  "cornerRadius": 20,
+                  "stroke": {
+                    "thickness": 1,
+                    "fill": "$border-light"
+                  },
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    14
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "4c11V",
+                      "name": "findLabel",
+                      "fill": "$text-primary",
+                      "content": "Find Vehicle",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "kWNIh",
+                      "name": "findIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "arrow-up-right",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "57o65",
+              "name": "Car Wrapper",
+              "width": "fill_container",
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "xuuKN",
+                  "name": "Car Image",
+                  "metadata": {
+                    "type": "unsplash",
+                    "username": "ninjason",
+                    "link": "https://unsplash.com/@ninjason",
+                    "author": "Jason Leung"
+                  },
+                  "width": 220,
+                  "height": 130,
+                  "fill": {
+                    "type": "image",
+                    "enabled": true,
+                    "url": "./images/generated-1772616026794.png",
+                    "mode": "fill"
+                  },
+                  "cornerRadius": 12
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Kq65X",
+              "name": "Action Buttons",
+              "width": "fill_container",
+              "gap": 24,
+              "padding": [
+                4,
+                0
+              ],
+              "justifyContent": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "7tZ27",
+                  "name": "Horn",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "9GoVJ",
+                      "x": 13,
+                      "y": 13,
+                      "name": "hornIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "volume-2",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CiU67",
+                  "name": "Lights",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "4bEbP",
+                      "x": 13,
+                      "y": 13,
+                      "name": "lightsIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "lightbulb",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "5ncle",
+                  "name": "Lock",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "BT5F9",
+                      "x": 13,
+                      "y": 13,
+                      "name": "lockIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "lock",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "tp6Tk",
+                  "name": "Hazard",
+                  "width": 48,
+                  "height": 48,
+                  "fill": "#F5F5F0",
+                  "cornerRadius": 24,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "gVu0w",
+                      "x": 13,
+                      "y": 13,
+                      "name": "hazardIcon",
+                      "width": 22,
+                      "height": 22,
+                      "iconFontName": "triangle-alert",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-primary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "3mqQL",
+              "name": "Divider",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$border-light"
+            },
+            {
+              "id": "kNJAl",
+              "type": "ref",
+              "ref": "vv8TN",
+              "width": "fill_container",
+              "name": "locationRow",
+              "descendants": {
+                "8IWrq": {
+                  "content": "Bakar Fitness & Recreation Cen..."
+                },
+                "PN5pY": {
+                  "content": "1675 Owens St, SF"
+                },
+                "fIldN": {
+                  "content": "6:12 pm"
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "CgICe",
+              "name": "WalkInfo",
+              "width": "fill_container",
+              "padding": [
+                0,
+                32,
+                0,
+                0
+              ],
+              "justifyContent": "end",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "seMd2",
+                  "name": "walkText",
+                  "fill": "$text-secondary",
+                  "content": "+2 min walk",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "2FAkT",
+              "name": "Divider2",
+              "width": "fill_container",
+              "height": 1,
+              "fill": "$border-light"
+            },
+            {
+              "type": "text",
+              "id": "XQfv2",
+              "name": "Tips Header",
+              "fill": "$text-primary",
+              "content": "Tips",
+              "fontFamily": "Inter",
+              "fontSize": 16,
+              "fontWeight": "600"
+            },
+            {
+              "type": "frame",
+              "id": "WnYS7",
+              "name": "Tip Card",
+              "width": "fill_container",
+              "fill": "#F0F4FF",
+              "cornerRadius": 12,
+              "gap": 12,
+              "padding": 12,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "o9w2T",
+                  "name": "TipAccent",
+                  "width": 4,
+                  "height": 40,
+                  "fill": "#3B82F6",
+                  "cornerRadius": 2
+                },
+                {
+                  "type": "frame",
+                  "id": "gVT8p",
+                  "name": "TipIconFrame",
+                  "width": 32,
+                  "height": 32,
+                  "fill": "#3B82F6",
+                  "cornerRadius": 16,
+                  "layout": "none",
+                  "children": [
+                    {
+                      "type": "icon_font",
+                      "id": "1lIW2",
+                      "x": 7,
+                      "y": 7,
+                      "name": "tipCarIcon",
+                      "width": 18,
+                      "height": 18,
+                      "iconFontName": "car",
+                      "iconFontFamily": "lucide",
+                      "fill": "#FFFFFF"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "w6dmX",
+                  "name": "TipText",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "To open the door, push the wide part of the handle.",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "id": "M8OMd",
+              "type": "ref",
+              "ref": "L9YSD",
+              "width": "fill_container",
+              "name": "goBtn",
+              "descendants": {
+                "jXcLq": {
+                  "content": "Go to Vehicle"
+                }
+              }
             }
           ]
         }
