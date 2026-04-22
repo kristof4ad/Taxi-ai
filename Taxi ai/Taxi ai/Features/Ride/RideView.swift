@@ -210,10 +210,10 @@ private struct RideActionButton: View {
             .frame(maxWidth: .infinity)
             .frame(height: 48)
             .contentShape(.rect(cornerRadius: 12))
-            .overlay(
+            .overlay {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(.quaternary, lineWidth: 1)
-            )
+            }
         }
         .buttonStyle(.plain)
     }

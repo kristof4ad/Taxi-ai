@@ -20,7 +20,7 @@ struct TripViewModelPricingTests {
         #expect(vm.estimatedPrice == nil)
     }
 
-    @Test func estimatedPriceForOneMile() {
+    @Test func estimatedPriceForOneMile() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
@@ -29,12 +29,11 @@ struct TripViewModelPricingTests {
         setTripInfo(on: vm, distance: oneMileInMeters)
 
         // Expected: $2 base + $2 * 1 mile = $4
-        let price = vm.estimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 4.0) < 0.01)
+        let price = try #require(vm.estimatedPrice)
+        #expect(abs(price - 4.0) < 0.01)
     }
 
-    @Test func estimatedPriceForFiveMiles() {
+    @Test func estimatedPriceForFiveMiles() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
@@ -42,24 +41,22 @@ struct TripViewModelPricingTests {
         setTripInfo(on: vm, distance: fiveMilesInMeters)
 
         // Expected: $2 base + $2 * 5 miles = $12
-        let price = vm.estimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 12.0) < 0.01)
+        let price = try #require(vm.estimatedPrice)
+        #expect(abs(price - 12.0) < 0.01)
     }
 
-    @Test func estimatedPriceForZeroDistance() {
+    @Test func estimatedPriceForZeroDistance() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
         setTripInfo(on: vm, distance: 0)
 
         // Expected: $2 base + $0 = $2
-        let price = vm.estimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 2.0) < 0.01)
+        let price = try #require(vm.estimatedPrice)
+        #expect(abs(price - 2.0) < 0.01)
     }
 
-    @Test func estimatedPriceForLongTrip() {
+    @Test func estimatedPriceForLongTrip() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
@@ -67,12 +64,11 @@ struct TripViewModelPricingTests {
         setTripInfo(on: vm, distance: twentyMilesInMeters)
 
         // Expected: $2 base + $2 * 20 miles = $42
-        let price = vm.estimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 42.0) < 0.01)
+        let price = try #require(vm.estimatedPrice)
+        #expect(abs(price - 42.0) < 0.01)
     }
 
-    @Test func estimatedPriceForFractionalMiles() {
+    @Test func estimatedPriceForFractionalMiles() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
@@ -81,9 +77,8 @@ struct TripViewModelPricingTests {
         setTripInfo(on: vm, distance: distance)
 
         // Expected: $2 base + $2 * 2.5 miles = $7
-        let price = vm.estimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 7.0) < 0.01)
+        let price = try #require(vm.estimatedPrice)
+        #expect(abs(price - 7.0) < 0.01)
     }
 
     // MARK: - Currency Fallback
@@ -138,17 +133,16 @@ struct TripViewModelPricingTests {
         #expect(vm.estimatedArrivalTime == nil)
     }
 
-    @Test func estimatedArrivalTimeAccountsForTravelTime() {
+    @Test func estimatedArrivalTimeAccountsForTravelTime() throws {
         let vm = TripViewModel()
 
         // Set travel time to 600 seconds (10 minutes).
         setTripInfo(on: vm, distance: 5000, travelTime: 600)
 
-        let arrival = vm.estimatedArrivalTime
-        #expect(arrival != nil)
+        let arrival = try #require(vm.estimatedArrivalTime)
 
         // Arrival = pickup time + travel time = now + 7 min + 10 min = now + 17 min
-        let difference = arrival!.timeIntervalSinceNow
+        let difference = arrival.timeIntervalSinceNow
         #expect(difference > 990) // At least ~16.5 min
         #expect(difference < 1040) // At most ~17.3 min
     }

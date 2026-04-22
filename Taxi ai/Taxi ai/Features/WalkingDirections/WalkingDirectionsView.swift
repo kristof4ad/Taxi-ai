@@ -190,10 +190,10 @@ private struct WalkingDirectionsHeader: View {
                 .padding(.horizontal, 14)
                 .padding(.vertical, 8)
                 .contentShape(.rect(cornerRadius: 20))
-                .overlay(
+                .overlay {
                     RoundedRectangle(cornerRadius: 20)
                         .stroke(.separator, lineWidth: 1)
-                )
+                }
                 .buttonStyle(.plain)
         }
     }
@@ -239,10 +239,10 @@ private struct WalkingDirectionsCloseButton: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
                 .contentShape(.rect(cornerRadius: 24))
-                .overlay(
+                .overlay {
                     RoundedRectangle(cornerRadius: 24)
                         .stroke(.quaternary, lineWidth: 1)
-                )
+                }
         }
         .buttonStyle(.plain)
     }
@@ -296,7 +296,7 @@ private struct FindDestinationDirectionSection: View {
                 )
 
                 Text(distanceText)
-                    .font(.system(size: 42, weight: .heavy))
+                    .font(.system(.largeTitle, weight: .heavy))
                     .foregroundStyle(.primary)
 
                 Text(viewModel.destinationName ?? "Destination")
@@ -334,10 +334,10 @@ private struct FindDestinationCloseButton: View {
             .frame(width: 44, height: 44)
             .contentShape(.rect(cornerRadius: 22))
             .background(.background, in: .rect(cornerRadius: 22))
-            .overlay(
+            .overlay {
                 RoundedRectangle(cornerRadius: 22)
                     .stroke(.separator, lineWidth: 1)
-            )
+            }
             .buttonStyle(.plain)
     }
 }

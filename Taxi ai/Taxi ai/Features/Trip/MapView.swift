@@ -8,7 +8,7 @@ struct MapView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            mapContent
+            MapContent(viewModel: viewModel)
 
             if viewModel.showControlPanel {
                 ControlPanelView(viewModel: viewModel)
@@ -18,12 +18,12 @@ struct MapView: View {
             // Instruction overlay when selecting destination
             if viewModel.simulationState == .selectingDestination
                 && viewModel.destination == nil {
-                instructionBanner
+                MapInstructionBanner()
             }
 
             // Loading indicator while calculating route
             if viewModel.simulationState == .calculatingRoute {
-                calculatingOverlay
+                MapCalculatingOverlay()
             }
         }
         .animation(.default, value: viewModel.showControlPanel)
@@ -65,10 +65,12 @@ struct MapView: View {
     }
 }
 
-// MARK: - Subviews
+// MARK: - Map Content
 
-extension MapView {
-    private var mapContent: some View {
+private struct MapContent: View {
+    @Bindable var viewModel: TripViewModel
+
+    var body: some View {
         MapReader { proxy in
             Map(position: $viewModel.cameraPosition) {
                 // Destination pin
@@ -105,8 +107,12 @@ extension MapView {
             }
         }
     }
+}
 
-    private var instructionBanner: some View {
+// MARK: - Instruction Banner
+
+private struct MapInstructionBanner: View {
+    var body: some View {
         VStack {
             Text("Tap on the map to select your destination")
                 .font(.subheadline)
@@ -118,8 +124,12 @@ extension MapView {
             Spacer()
         }
     }
+}
 
-    private var calculatingOverlay: some View {
+// MARK: - Calculating Overlay
+
+private struct MapCalculatingOverlay: View {
+    var body: some View {
         VStack {
             Spacer()
 

@@ -45,10 +45,10 @@ private struct RateRideCloseButton: View {
                 .foregroundStyle(.primary)
                 .frame(width: 44, height: 44)
                 .contentShape(.rect(cornerRadius: 22))
-                .overlay(
+                .overlay {
                     RoundedRectangle(cornerRadius: 22)
                         .stroke(.quaternary, lineWidth: 1)
-                )
+                }
                 .buttonStyle(.plain)
 
             Spacer()
@@ -128,10 +128,10 @@ private struct RateRideFeedbackArea: View {
             }
         }
         .frame(height: 120)
-        .overlay(
+        .overlay {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(.quaternary, lineWidth: 1)
-        )
+        }
         .padding(.top, 20)
         .padding(.horizontal, 20)
     }
@@ -200,13 +200,13 @@ private struct TipOptionButton: View {
                 isSelected ? Self.goldColor.opacity(0.1) : .clear,
                 in: .rect(cornerRadius: 12)
             )
-            .overlay(
+            .overlay {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
                         isSelected ? Self.goldColor : Color.secondary.opacity(0.2),
                         lineWidth: isSelected ? 2 : 1
                     )
-            )
+            }
         }
         .buttonStyle(.plain)
         .contentShape(.rect(cornerRadius: 12))

@@ -36,7 +36,7 @@ struct NearbyPlaceTests {
         )
 
         let formatted = place.formattedDistance
-        #expect(!formatted.isEmpty)
+        #expect(formatted.isEmpty == false)
     }
 
     @Test func formattedDistanceForOneMile() {
@@ -49,7 +49,7 @@ struct NearbyPlaceTests {
         )
 
         let formatted = place.formattedDistance
-        #expect(!formatted.isEmpty)
+        #expect(formatted.isEmpty == false)
     }
 
     @Test func formattedDistanceForZero() {
@@ -62,7 +62,7 @@ struct NearbyPlaceTests {
         )
 
         let formatted = place.formattedDistance
-        #expect(!formatted.isEmpty)
+        #expect(formatted.isEmpty == false)
     }
 
     @Test func formattedDistanceForLargeDistance() {
@@ -75,7 +75,7 @@ struct NearbyPlaceTests {
         )
 
         let formatted = place.formattedDistance
-        #expect(!formatted.isEmpty)
+        #expect(formatted.isEmpty == false)
     }
 
     // MARK: - Identifiable

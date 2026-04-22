@@ -226,7 +226,7 @@ private struct TripTimeline: View {
             // Pickup row
             HStack(spacing: 12) {
                 Circle()
-                    .stroke(Color(.systemGray3), lineWidth: 2)
+                    .stroke(.tertiary, lineWidth: 2)
                     .frame(width: 12, height: 12)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -248,7 +248,7 @@ private struct TripTimeline: View {
             // Connector line
             HStack {
                 Rectangle()
-                    .fill(Color(.systemGray4))
+                    .fill(.quaternary)
                     .frame(width: 2, height: 16)
                     .padding(.leading, 5)
 

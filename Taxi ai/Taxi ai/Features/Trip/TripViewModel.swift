@@ -68,6 +68,12 @@ final class TripViewModel {
     let pickupSimulationEngine = SimulationEngine()
     var pickupApproachTask: Task<Void, Never>?
 
+    /// Monitors the ride simulation engine and mirrors its progress into
+    /// `simulationState`. Stored so it can be cancelled when the ride restarts
+    /// (e.g. mid-ride destination change) — otherwise a stale monitor races
+    /// the new one and overwrites `.simulating` with `.completed`.
+    private var rideMonitoringTask: Task<Void, Never>?
+
     // MARK: - Services
 
     let locationService: LocationService
@@ -218,14 +224,20 @@ final class TripViewModel {
         cameraPosition = .region(MKCoordinateRegion(paddedRect))
 
         // Monitor progress updates. Keep looping while running or paused so a
-        // pause doesn't prematurely mark the ride as completed.
-        Task {
+        // pause doesn't prematurely mark the ride as completed. Cancel any
+        // previous monitor first so a mid-ride destination change doesn't
+        // leave a stale task alive that would later overwrite the new ride's
+        // state with `.completed`.
+        rideMonitoringTask?.cancel()
+        rideMonitoringTask = Task {
             while simulationEngine.isRunning || simulationEngine.isPaused {
+                if Task.isCancelled { return }
                 if simulationEngine.isRunning {
                     simulationState = .simulating(progress: simulationEngine.progress)
                 }
                 try? await Task.sleep(for: .milliseconds(100))
             }
+            guard !Task.isCancelled else { return }
             simulationState = .completed
         }
     }
@@ -302,7 +314,11 @@ final class TripViewModel {
             cameraPosition = .region(MKCoordinateRegion(paddedRect))
 
             // If the ride simulation is running or paused, restart it with the new route.
+            // Cancel the old monitor before resetting the engine so its loop
+            // exit doesn't stomp the new state.
             if isRideActive {
+                rideMonitoringTask?.cancel()
+                rideMonitoringTask = nil
                 simulationEngine.reset()
                 beginRideSimulation(with: calculatedRoute)
             } else {
@@ -314,6 +330,8 @@ final class TripViewModel {
     }
 
     func resetTrip() {
+        rideMonitoringTask?.cancel()
+        rideMonitoringTask = nil
         simulationEngine.reset()
         pickupSimulationEngine.reset()
         pickupApproachTask?.cancel()

@@ -49,10 +49,17 @@ final class HomeViewModel {
 
     /// Waits for location to become available, then loads places for the default category.
     func loadInitialPlaces() async {
-        // Poll until location becomes available
+        // Poll until location becomes available. Exit promptly on cancellation —
+        // `try?` would swallow the CancellationError and turn the loop into a CPU
+        // spin as soon as the parent task is cancelled.
         while locationService.userLocation == nil {
-            try? await Task.sleep(for: .milliseconds(500))
+            do {
+                try await Task.sleep(for: .milliseconds(500))
+            } catch {
+                return
+            }
         }
+        guard !Task.isCancelled else { return }
         await searchNearbyPlaces(for: selectedCategory)
     }
 

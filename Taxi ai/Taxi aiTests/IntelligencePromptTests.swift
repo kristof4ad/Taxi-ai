@@ -56,8 +56,8 @@ struct IntelligencePromptTests {
             starRating: nil,
             feedback: nil
         )
-        #expect(!prompt.contains("Rating"))
-        #expect(!prompt.contains("feedback"))
+        #expect(prompt.contains("Rating") == false)
+        #expect(prompt.contains("feedback") == false)
     }
 
     @Test func summaryPromptOmitsEmptyFeedback() {
@@ -68,7 +68,7 @@ struct IntelligencePromptTests {
             starRating: 4,
             feedback: ""
         )
-        #expect(!prompt.contains("feedback"))
+        #expect(prompt.contains("feedback") == false)
     }
 
     // MARK: - Recap prompt
@@ -98,6 +98,6 @@ struct IntelligencePromptTests {
             RecapRideInput(destination: "Park", priceDisplay: "$6", starRating: nil)
         ]
         let prompt = IntelligenceService.recapPrompt(for: rides)
-        #expect(!prompt.contains("★"))
+        #expect(prompt.contains("★") == false)
     }
 }

@@ -11,7 +11,7 @@ struct PickupMarkerView: View {
             .background(.background)
             .clipShape(.capsule)
             .overlay {
-                Capsule().stroke(Color(.systemGray4), lineWidth: 1)
+                Capsule().stroke(.quaternary, lineWidth: 1)
             }
             .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
     }

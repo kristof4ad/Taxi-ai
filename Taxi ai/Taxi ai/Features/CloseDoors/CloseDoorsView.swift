@@ -129,7 +129,7 @@ private struct CloseDoorsBottomSection: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 48)
                 .contentShape(.capsule)
-                .overlay(Capsule().stroke(.quaternary, lineWidth: 1))
+                .overlay { Capsule().stroke(.quaternary, lineWidth: 1) }
             }
             .buttonStyle(.plain)
 
