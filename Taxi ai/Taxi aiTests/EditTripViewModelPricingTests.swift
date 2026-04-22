@@ -31,7 +31,7 @@ struct EditTripViewModelPricingTests {
         #expect(vm.newEstimatedPrice == nil)
     }
 
-    @Test func newEstimatedPriceCalculatesFromTripInfo() {
+    @Test func newEstimatedPriceCalculatesFromTripInfo() throws {
         let vm = makeViewModel()
         // 1 mile = 1609.34 m
         vm.newTripInfo = TripInfo(
@@ -40,12 +40,11 @@ struct EditTripViewModelPricingTests {
             routeName: "Test"
         )
         // Expected: $2 base + $2 * 1 mile = $4 (in USD, no exchange rate set)
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 4.0) < 0.01)
+        let price = try #require(vm.newEstimatedPrice)
+        #expect(abs(price - 4.0) < 0.01)
     }
 
-    @Test func newEstimatedPriceIncludesDistanceAlreadyDriven() {
+    @Test func newEstimatedPriceIncludesDistanceAlreadyDriven() throws {
         let oneMile = 1609.34
         let vm = makeViewModel(distanceAlreadyDriven: oneMile)
         // New route is 1 mile, but already driven 1 mile → total 2 miles
@@ -55,12 +54,11 @@ struct EditTripViewModelPricingTests {
             routeName: "Test"
         )
         // Expected: $2 base + $2 * 2 miles = $6
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 6.0) < 0.01)
+        let price = try #require(vm.newEstimatedPrice)
+        #expect(abs(price - 6.0) < 0.01)
     }
 
-    @Test func newEstimatedPriceEnforcesMinimumPrice() {
+    @Test func newEstimatedPriceEnforcesMinimumPrice() throws {
         let vm = makeViewModel(
             distanceAlreadyDriven: 0,
             minimumPrice: 10.0
@@ -71,12 +69,11 @@ struct EditTripViewModelPricingTests {
             expectedTravelTime: 100,
             routeName: "Test"
         )
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
-        #expect(price! == 10.0)
+        let price = try #require(vm.newEstimatedPrice)
+        #expect(price == 10.0)
     }
 
-    @Test func newEstimatedPriceExceedsMinimumWhenHigher() {
+    @Test func newEstimatedPriceExceedsMinimumWhenHigher() throws {
         let vm = makeViewModel(
             distanceAlreadyDriven: 0,
             minimumPrice: 3.0
@@ -87,12 +84,11 @@ struct EditTripViewModelPricingTests {
             expectedTravelTime: 600,
             routeName: "Test"
         )
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 12.0) < 0.01)
+        let price = try #require(vm.newEstimatedPrice)
+        #expect(abs(price - 12.0) < 0.01)
     }
 
-    @Test func newEstimatedPriceWithZeroDistance() {
+    @Test func newEstimatedPriceWithZeroDistance() throws {
         let vm = makeViewModel()
         vm.newTripInfo = TripInfo(
             distance: 0,
@@ -100,12 +96,11 @@ struct EditTripViewModelPricingTests {
             routeName: "Test"
         )
         // Expected: $2 base only
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 2.0) < 0.01)
+        let price = try #require(vm.newEstimatedPrice)
+        #expect(abs(price - 2.0) < 0.01)
     }
 
-    @Test func newEstimatedPriceWithLargeDistanceAlreadyDriven() {
+    @Test func newEstimatedPriceWithLargeDistanceAlreadyDriven() throws {
         let oneMile = 1609.34
         let vm = makeViewModel(distanceAlreadyDriven: oneMile * 10)
         // New route is 5 miles, already driven 10 miles → total 15 miles
@@ -115,9 +110,8 @@ struct EditTripViewModelPricingTests {
             routeName: "Test"
         )
         // Expected: $2 + $2 * 15 = $32
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 32.0) < 0.01)
+        let price = try #require(vm.newEstimatedPrice)
+        #expect(abs(price - 32.0) < 0.01)
     }
 
     // MARK: - priceDifference
@@ -138,7 +132,7 @@ struct EditTripViewModelPricingTests {
         #expect(vm.priceDifference == nil)
     }
 
-    @Test func priceDifferenceCalculatesPositiveIncrease() {
+    @Test func priceDifferenceCalculatesPositiveIncrease() throws {
         let vm = makeViewModel(originalPrice: 4.0)
         // 5 miles → $12
         vm.newTripInfo = TripInfo(
@@ -146,12 +140,11 @@ struct EditTripViewModelPricingTests {
             expectedTravelTime: 600,
             routeName: "Test"
         )
-        let diff = vm.priceDifference
-        #expect(diff != nil)
-        #expect(abs(diff! - 8.0) < 0.01) // $12 - $4 = $8
+        let diff = try #require(vm.priceDifference)
+        #expect(abs(diff - 8.0) < 0.01) // $12 - $4 = $8
     }
 
-    @Test func priceDifferenceCalculatesNegativeDecrease() {
+    @Test func priceDifferenceCalculatesNegativeDecrease() throws {
         let vm = makeViewModel(originalPrice: 12.0)
         // 1 mile → $4
         vm.newTripInfo = TripInfo(
@@ -159,12 +152,11 @@ struct EditTripViewModelPricingTests {
             expectedTravelTime: 300,
             routeName: "Test"
         )
-        let diff = vm.priceDifference
-        #expect(diff != nil)
-        #expect(abs(diff! - (-8.0)) < 0.01) // $4 - $12 = -$8
+        let diff = try #require(vm.priceDifference)
+        #expect(abs(diff - (-8.0)) < 0.01) // $4 - $12 = -$8
     }
 
-    @Test func priceDifferenceIsZeroForSamePrice() {
+    @Test func priceDifferenceIsZeroForSamePrice() throws {
         // Original price $4, new route 1 mile → $4
         let vm = makeViewModel(originalPrice: 4.0)
         vm.newTripInfo = TripInfo(
@@ -172,16 +164,15 @@ struct EditTripViewModelPricingTests {
             expectedTravelTime: 300,
             routeName: "Test"
         )
-        let diff = vm.priceDifference
-        #expect(diff != nil)
-        #expect(abs(diff!) < 0.01)
+        let diff = try #require(vm.priceDifference)
+        #expect(abs(diff) < 0.01)
     }
 
     // MARK: - displayCurrencyCode
 
     @Test func displayCurrencyCodeIsNotEmpty() {
         let vm = makeViewModel()
-        #expect(!vm.displayCurrencyCode.isEmpty)
+        #expect(vm.displayCurrencyCode.isEmpty == false)
     }
 
     // MARK: - clearSearch
@@ -234,7 +225,7 @@ struct EditTripViewModelPricingTests {
 
     // MARK: - Minimum Price Edge Cases
 
-    @Test func minimumPriceNilAllowsAnyPrice() {
+    @Test func minimumPriceNilAllowsAnyPrice() throws {
         let vm = makeViewModel(minimumPrice: nil)
         // Very short route → cheap price
         vm.newTripInfo = TripInfo(
@@ -242,13 +233,12 @@ struct EditTripViewModelPricingTests {
             expectedTravelTime: 10,
             routeName: "Test"
         )
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
+        let price = try #require(vm.newEstimatedPrice)
         // $2 base + small per-mile, no minimum enforcement
-        #expect(price! < 3.0)
+        #expect(price < 3.0)
     }
 
-    @Test func minimumPriceOfZeroHasNoEffect() {
+    @Test func minimumPriceOfZeroHasNoEffect() throws {
         let vm = makeViewModel(minimumPrice: 0)
         vm.newTripInfo = TripInfo(
             distance: 1609.34,
@@ -256,8 +246,7 @@ struct EditTripViewModelPricingTests {
             routeName: "Test"
         )
         // $4 > $0 minimum, so max returns $4
-        let price = vm.newEstimatedPrice
-        #expect(price != nil)
-        #expect(abs(price! - 4.0) < 0.01)
+        let price = try #require(vm.newEstimatedPrice)
+        #expect(abs(price - 4.0) < 0.01)
     }
 }

@@ -83,15 +83,15 @@ struct RateRideViewModelTests {
         #expect(rating.tipAmount == nil)
     }
 
-    @Test func buildRatingWithTipCalculatesAmount() {
+    @Test func buildRatingWithTipCalculatesAmount() throws {
         let vm = RateRideViewModel(ridePrice: 20.0, currencyCode: "USD")
         vm.starRating = 5
         vm.selectedTipPercentage = 20
 
         let rating = vm.buildRating()
         #expect(rating.tipPercentage == 20)
-        #expect(rating.tipAmount != nil)
-        #expect(abs(rating.tipAmount! - 4.0) < 0.001)
+        let tipAmount = try #require(rating.tipAmount)
+        #expect(abs(tipAmount - 4.0) < 0.001)
     }
 
     @Test func buildRatingWithEmptyFeedback() {

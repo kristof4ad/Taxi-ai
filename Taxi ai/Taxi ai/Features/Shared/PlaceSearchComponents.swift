@@ -35,7 +35,7 @@ struct SearchBarRow: View {
         .frame(height: 48)
         .background {
             RoundedRectangle(cornerRadius: 24)
-                .stroke(Color(.systemGray4), lineWidth: 1)
+                .stroke(.quaternary, lineWidth: 1)
         }
         .contentShape(.rect(cornerRadius: 24))
         .onTapGesture {
@@ -164,7 +164,7 @@ struct CategoryButton: View {
                     .background(
                         isSelected
                             ? Self.gold.opacity(0.15)
-                            : Color(.systemGray6)
+                            : Color.gray.opacity(0.12)
                     )
                     .clipShape(.rect(cornerRadius: 16))
 

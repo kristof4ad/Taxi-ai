@@ -8,7 +8,7 @@ struct CurrencyServiceTests {
 
     @Test func localCurrencyCodeIsNotEmpty() {
         let service = CurrencyService()
-        #expect(!service.localCurrencyCode.isEmpty)
+        #expect(service.localCurrencyCode.isEmpty == false)
     }
 
     @Test func exchangeRateIsNilInitially() {

@@ -114,7 +114,6 @@ struct LocationServiceHeadingTests {
     @Test func emaOutputIsAlwaysNormalized() {
         // Verify that the output is always in [0, 360) range
         // for various input headings.
-        let alpha = 0.15
         let testHeadings: [Double] = [0, 45, 90, 135, 180, 225, 270, 315, 359]
 
         for heading in testHeadings {
@@ -130,9 +129,6 @@ struct LocationServiceHeadingTests {
             // Output should be close to input for direct initialization.
             #expect(abs(degrees - heading) < 0.01 || abs(degrees - heading - 360) < 0.01)
         }
-
-        // Suppress unused variable warning.
-        _ = alpha
     }
 
     @Test func emaDueSouthConverges() {

@@ -33,7 +33,7 @@ struct PlaceCategoryTests {
 
     @Test func systemImagesAreNotEmpty() {
         for category in PlaceCategory.allCases {
-            #expect(!category.systemImage.isEmpty)
+            #expect(category.systemImage.isEmpty == false)
         }
     }
 
@@ -49,7 +49,7 @@ struct PlaceCategoryTests {
 
     @Test func searchQueriesAreNotEmpty() {
         for category in PlaceCategory.allCases {
-            #expect(!category.searchQuery.isEmpty)
+            #expect(category.searchQuery.isEmpty == false)
         }
     }
 

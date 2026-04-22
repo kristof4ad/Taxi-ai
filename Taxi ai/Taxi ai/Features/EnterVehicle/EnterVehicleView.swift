@@ -153,9 +153,9 @@ private struct UserLocationMarker: View {
             Circle()
                 .fill(.blue)
                 .frame(width: 14, height: 14)
-                .overlay(
+                .overlay {
                     Circle().stroke(.white, lineWidth: 3)
-                )
+                }
         }
     }
 }
@@ -238,10 +238,10 @@ private struct FindVehicleButton: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 8)
             .contentShape(.rect(cornerRadius: 20))
-            .overlay(
+            .overlay {
                 RoundedRectangle(cornerRadius: 20)
                     .stroke(.separator, lineWidth: 1)
-            )
+            }
             .buttonStyle(.plain)
     }
 }

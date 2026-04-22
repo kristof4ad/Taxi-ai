@@ -46,7 +46,7 @@ private struct DirectionSection: View {
                 )
 
                 Text(distanceText)
-                    .font(.system(size: 42, weight: .heavy))
+                    .font(.system(.largeTitle, weight: .heavy))
                     .foregroundStyle(.primary)
 
                 Text("Pickup Pin")
@@ -92,10 +92,10 @@ private struct CloseButton: View {
             .frame(width: 44, height: 44)
             .contentShape(.rect(cornerRadius: 22))
             .background(.background, in: .rect(cornerRadius: 22))
-            .overlay(
+            .overlay {
                 RoundedRectangle(cornerRadius: 22)
                     .stroke(.separator, lineWidth: 1)
-            )
+            }
             .buttonStyle(.plain)
     }
 }

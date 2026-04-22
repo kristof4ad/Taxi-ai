@@ -53,19 +53,18 @@ struct TripViewModelDestinationChangeTests {
         _ = vm.currentRouteOrigin
     }
 
-    @Test func currentRouteOriginUsesPickupStopLocation() {
+    @Test func currentRouteOriginUsesPickupStopLocation() throws {
         let vm = TripViewModel()
         let stopLocation = CLLocationCoordinate2D(latitude: 52.23, longitude: 21.01)
         vm.pickupStopLocation = stopLocation
 
         // With no running simulation and pickup stop set, should use pickup stop.
-        let origin = vm.currentRouteOrigin
-        #expect(origin != nil)
-        #expect(origin!.latitude == stopLocation.latitude)
-        #expect(origin!.longitude == stopLocation.longitude)
+        let origin = try #require(vm.currentRouteOrigin)
+        #expect(origin.latitude == stopLocation.latitude)
+        #expect(origin.longitude == stopLocation.longitude)
     }
 
-    @Test func currentRouteOriginPrefersSimulationPositionOverPickupStop() {
+    @Test func currentRouteOriginPrefersSimulationPositionOverPickupStop() throws {
         let vm = TripViewModel()
         vm.pickupStopLocation = CLLocationCoordinate2D(latitude: 52.23, longitude: 21.01)
 
@@ -75,10 +74,9 @@ struct TripViewModelDestinationChangeTests {
 
         // When the simulation is running and has a current position,
         // it should take priority over the pickup stop.
-        let origin = vm.currentRouteOrigin
-        #expect(origin != nil)
-        #expect(abs(origin!.latitude - 50.5) < 0.0001)
-        #expect(abs(origin!.longitude - 20.5) < 0.0001)
+        let origin = try #require(vm.currentRouteOrigin)
+        #expect(abs(origin.latitude - 50.5) < 0.0001)
+        #expect(abs(origin.longitude - 20.5) < 0.0001)
     }
 
     // MARK: - resetTrip Clears Destination Change State
