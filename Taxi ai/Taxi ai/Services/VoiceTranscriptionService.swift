@@ -82,6 +82,7 @@ final class VoiceTranscriptionService {
         // Delete the temp file — we don't need to keep it.
         try? FileManager.default.removeItem(at: url)
         if recordingURL == url { recordingURL = nil }
+        deactivateAudioSession()
 
         // `reset()` may have run while transcription was in flight — for example
         // the user swiped the sheet away. Don't resurrect a finished session.
@@ -100,6 +101,7 @@ final class VoiceTranscriptionService {
         volatileTranscript = ""
         finalizedTranscript = ""
         state = .idle
+        deactivateAudioSession()
     }
 
     // MARK: - Recording
@@ -212,6 +214,16 @@ final class VoiceTranscriptionService {
         let session = AVAudioSession.sharedInstance()
         try session.setCategory(.record, mode: .measurement)
         try session.setActive(true, options: .notifyOthersOnDeactivation)
+    }
+
+    /// Releases the `.record` session once recording is over, so playback-oriented
+    /// audio — the vehicle sound effects — can take the shared session back.
+    private func deactivateAudioSession() {
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        } catch {
+            log.error("Failed to deactivate audio session: \(error.localizedDescription, privacy: .public)")
+        }
     }
 
     private func audioSessionIsBusyWithCall(_ error: Error) -> Bool {

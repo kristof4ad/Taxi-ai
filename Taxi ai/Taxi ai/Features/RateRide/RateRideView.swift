@@ -97,7 +97,9 @@ private struct StarRatingRow: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("^[\(index) star](inflect: true)")
-                .accessibilityAddTraits(index <= rating ? .isSelected : [])
+                // Only the chosen value is selected; `<=` would announce every
+                // filled star as selected and misstate the current rating.
+                .accessibilityAddTraits(index == rating ? .isSelected : [])
             }
         }
         .padding(.top, 20)

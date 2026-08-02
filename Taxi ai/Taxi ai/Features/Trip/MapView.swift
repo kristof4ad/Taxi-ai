@@ -56,6 +56,9 @@ struct MapView: View {
         }
         .onAppear {
             viewModel.onAppear()
+            // Access may already have been denied on a previous launch, in which
+            // case `locationDenied` never transitions and `onChange` never fires.
+            if viewModel.locationDenied { isLocationAlertPresented = true }
         }
     }
 }

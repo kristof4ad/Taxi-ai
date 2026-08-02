@@ -16,11 +16,7 @@ final class SoundPlayer {
     private let trunkPlayer: AVAudioPlayer?
 
     init() {
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback)
-        } catch {
-            log.error("Failed to configure audio session: \(error.localizedDescription, privacy: .public)")
-        }
+        Self.activatePlayback()
 
         let lock = Self.loadPlayer(for: "car-lock", type: "mp3")
         hornPlayer = Self.loadPlayer(for: "car-horn", type: "mp3")
@@ -31,6 +27,7 @@ final class SoundPlayer {
 
     /// Plays a short car horn honk.
     func playHorn() {
+        Self.activatePlayback()
         hornPlayer?.currentTime = 0
         hornPlayer?.play()
     }
@@ -38,6 +35,7 @@ final class SoundPlayer {
     /// Plays a car central locking click sound.
     func playLock() {
         guard let player = lockPlayer else { return }
+        Self.activatePlayback()
         player.currentTime = 0
         player.play()
 
@@ -51,6 +49,7 @@ final class SoundPlayer {
     /// Plays an electric trunk actuator sound.
     func playTrunk() {
         guard let player = trunkPlayer else { return }
+        Self.activatePlayback()
         player.currentTime = 0
         player.play()
 
@@ -58,6 +57,22 @@ final class SoundPlayer {
         Task {
             try? await Task.sleep(for: .seconds(1.2))
             player.stop()
+        }
+    }
+
+    /// Puts the process-wide audio session back into playback mode.
+    ///
+    /// Voice search switches the shared session to `.record` and this player is
+    /// created only once at launch, so its initial category would otherwise go
+    /// stale after a voice search and effects would play silently.
+    private static func activatePlayback() {
+        let session = AVAudioSession.sharedInstance()
+        guard session.category != .playback else { return }
+        do {
+            try session.setCategory(.playback)
+            try session.setActive(true)
+        } catch {
+            log.error("Failed to configure audio session: \(error.localizedDescription, privacy: .public)")
         }
     }
 
