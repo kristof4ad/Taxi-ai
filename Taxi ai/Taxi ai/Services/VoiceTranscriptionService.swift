@@ -41,6 +41,11 @@ final class VoiceTranscriptionService {
     /// Upper bound on how long to wait for the recognizer before giving up.
     private static let transcriptionTimeout = Duration.seconds(30)
 
+    /// Identifies the current recording session. Bumped whenever a session is
+    /// abandoned so late work from an earlier one can be told apart from the
+    /// session that replaced it.
+    private var sessionGeneration = 0
+
     // MARK: - Public API
 
     /// Requests permission, prepares the recorder, and starts recording.
@@ -69,6 +74,7 @@ final class VoiceTranscriptionService {
         if recorder.isRecording { recorder.stop() }
         audioRecorder = nil
         state = .processing
+        let generation = sessionGeneration
         log.info("stop: recording ended, transcribing \(url.lastPathComponent, privacy: .public)")
 
         var transcript: String?
@@ -79,20 +85,28 @@ final class VoiceTranscriptionService {
             log.error("stop: transcription failed \(error.localizedDescription, privacy: .public)")
         }
 
-        // Delete the temp file — we don't need to keep it.
+        // This recording's own temp file, so it is always safe to remove.
         try? FileManager.default.removeItem(at: url)
-        if recordingURL == url { recordingURL = nil }
+
+        // A newer session started while this transcription was in flight — for
+        // example the user swiped the sheet away and tried again. Leave its
+        // audio session and state alone; this result belongs to nobody.
+        guard generation == sessionGeneration else { return }
+
+        recordingURL = nil
         deactivateAudioSession()
 
-        // `reset()` may have run while transcription was in flight — for example
-        // the user swiped the sheet away. Don't resurrect a finished session.
         guard state == .processing else { return }
         if let transcript { finalizedTranscript = transcript }
         state = .finished
     }
 
     /// Clears transcripts and returns to `.idle`.
+    ///
+    /// Also retires the current session, so a transcription still in flight
+    /// cannot come back and clobber whatever starts next.
     func reset() {
+        sessionGeneration += 1
         if let recorder = audioRecorder, recorder.isRecording { recorder.stop() }
         audioRecorder = nil
         cancelRecognitionTask()
