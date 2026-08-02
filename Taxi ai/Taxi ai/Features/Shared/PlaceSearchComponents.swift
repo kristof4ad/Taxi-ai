@@ -16,12 +16,16 @@ struct SearchBarRow: View {
         HStack(spacing: 8) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
 
+            // Fills the pill so the whole row acts as the field's hit target,
+            // which avoids needing a tap gesture that VoiceOver can't reach.
             TextField(placeholder, text: $text)
                 .focused($isFocused)
                 .textFieldStyle(.plain)
                 .autocorrectionDisabled()
                 .submitLabel(.search)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             if !text.isEmpty {
                 Button("Clear", systemImage: "xmark.circle.fill") {
@@ -38,9 +42,6 @@ struct SearchBarRow: View {
                 .stroke(.quaternary, lineWidth: 1)
         }
         .contentShape(.rect(cornerRadius: 24))
-        .onTapGesture {
-            isFocused = true
-        }
         .onChange(of: isActive) { _, newValue in
             isFocused = newValue
         }
@@ -153,8 +154,6 @@ struct CategoryButton: View {
     var isSelected: Bool
     var action: () -> Void
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         Button(action: action) {
             VStack(spacing: 6) {
@@ -163,7 +162,7 @@ struct CategoryButton: View {
                     .frame(width: 48, height: 48)
                     .background(
                         isSelected
-                            ? Self.gold.opacity(0.15)
+                            ? Color.taxiGold.opacity(0.15)
                             : Color.gray.opacity(0.12)
                     )
                     .clipShape(.rect(cornerRadius: 16))
@@ -171,7 +170,7 @@ struct CategoryButton: View {
                 Text(category.label)
                     .font(.caption2.weight(.medium))
             }
-            .foregroundStyle(isSelected ? Self.gold : .primary)
+            .foregroundStyle(isSelected ? Color.taxiGold : .primary)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)
@@ -205,15 +204,13 @@ struct DestinationBanner: View {
     var onGoDirectly: () -> Void
     var onClear: () -> Void
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         Button {
             onGoDirectly()
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: "mappin.and.ellipse")
-                    .foregroundStyle(Self.gold)
+                    .foregroundStyle(Color.taxiGold)
 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(destination.name)
@@ -230,11 +227,11 @@ struct DestinationBanner: View {
 
                 Image(systemName: "arrow.right.circle.fill")
                     .font(.title2)
-                    .foregroundStyle(Self.gold)
+                    .foregroundStyle(Color.taxiGold)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(Self.gold.opacity(0.08))
+            .background(Color.taxiGold.opacity(0.08))
             .clipShape(.rect(cornerRadius: 12))
             .contentShape(.rect(cornerRadius: 12))
         }

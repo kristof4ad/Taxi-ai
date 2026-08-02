@@ -4,8 +4,6 @@ import SwiftUI
 struct AICategoryButton: View {
     var action: () -> Void
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         Button(action: action) {
             VStack(spacing: 6) {
@@ -15,7 +13,7 @@ struct AICategoryButton: View {
                     .frame(width: 48, height: 48)
                     .background(
                         LinearGradient(
-                            colors: [Self.gold, Self.gold.opacity(0.75)],
+                            colors: [Color.taxiGold, Color.taxiGold.opacity(0.75)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
@@ -25,7 +23,7 @@ struct AICategoryButton: View {
                 Text("AI")
                     .font(.caption2.weight(.medium))
             }
-            .foregroundStyle(Self.gold)
+            .foregroundStyle(Color.taxiGold)
             .contentShape(.rect)
         }
         .buttonStyle(.plain)

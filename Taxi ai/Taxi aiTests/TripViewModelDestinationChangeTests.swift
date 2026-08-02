@@ -268,6 +268,6 @@ struct TripViewModelDestinationChangeTests {
         vm.pickupSimulationEngine.configure(with: coords)
 
         let remaining = vm.remainingPickupRouteCoordinates
-        #expect(!remaining.isEmpty)
+        #expect(remaining.isEmpty == false)
     }
 }

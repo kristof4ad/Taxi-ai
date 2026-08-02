@@ -8,6 +8,10 @@ extension TripViewModel {
     func startPickupApproach() {
         guard let userLocation = locationService.userLocation else { return }
 
+        // Cancel any approach already in flight so two monitors can't both
+        // drive `simulationState`.
+        pickupApproachTask?.cancel()
+
         let startPosition = randomNearbyPosition(around: userLocation)
         pickupCarPosition = startPosition
         simulationState = .approachingPickup(progress: 0)
@@ -19,6 +23,7 @@ extension TripViewModel {
                     from: startPosition,
                     to: userLocation
                 )
+                guard !Task.isCancelled else { return }
                 pickupRoute = approachRoute
 
                 // Zoom camera to show the approach route area (car → pickup).
@@ -41,8 +46,12 @@ extension TripViewModel {
                 pickupSimulationEngine.configure(with: trimmedCoordinates)
                 pickupSimulationEngine.start()
 
-                // Monitor the engine's progress.
+                // Monitor the engine's progress. `Task.sleep` errors are
+                // swallowed below, so cancellation has to be checked explicitly
+                // — otherwise a cancelled monitor would fall out of the loop and
+                // overwrite freshly reset state with `.arrivedAtPickup`.
                 while pickupSimulationEngine.isRunning {
+                    guard !Task.isCancelled else { return }
                     if let position = pickupSimulationEngine.currentPosition {
                         pickupCarPosition = position
                     }
@@ -50,10 +59,12 @@ extension TripViewModel {
                     try? await Task.sleep(for: .milliseconds(16))
                 }
 
+                guard !Task.isCancelled else { return }
                 pickupCarPosition = pickupStopLocation
                 simulationState = .arrivedAtPickup
             } catch {
                 // If route calculation fails, fall back to arrived state.
+                guard !Task.isCancelled else { return }
                 pickupCarPosition = userLocation
                 pickupStopLocation = userLocation
                 simulationState = .arrivedAtPickup
@@ -132,7 +143,6 @@ extension TripViewModel {
         return [coordinates[0]]
     }
 
-    // TODO: Migrate to MKAddressRepresentations when API stabilizes
     /// Reverse geocodes the user's current location to capture a short pickup address (street + city).
     func reverseGeocodePickupLocation() {
         guard let location = locationService.userLocation else { return }
@@ -140,15 +150,11 @@ extension TripViewModel {
         let clLocation = CLLocation(latitude: location.latitude, longitude: location.longitude)
         guard let request = MKReverseGeocodingRequest(location: clLocation) else { return }
 
-        request.getMapItems { [weak self] items, _ in
-            guard let self,
-                  let shortAddress = items?.first?.address?.shortAddress,
+        Task {
+            guard let items = try? await request.mapItems,
+                  let shortAddress = items.first?.address?.shortAddress,
                   !shortAddress.isEmpty else { return }
-            let address = shortAddress
-            guard !address.isEmpty else { return }
-            Task { @MainActor in
-                self.pickupAddress = address
-            }
+            pickupAddress = shortAddress
         }
     }
 

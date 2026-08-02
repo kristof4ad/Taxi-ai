@@ -11,9 +11,6 @@ struct EditTripPriceConfirmation: View {
     var onConfirm: () -> Void
     var onCancel: () -> Void
 
-    private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
-    private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
-
     var body: some View {
         ZStack {
             // Dimmed background
@@ -58,13 +55,7 @@ struct EditTripPriceConfirmation: View {
                             .foregroundStyle(.white)
                             .frame(maxWidth: .infinity)
                             .frame(height: 52)
-                            .background(
-                                LinearGradient(
-                                    colors: [Self.goldStart, Self.goldEnd],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                            )
+                            .background(LinearGradient.taxiGold)
                             .clipShape(.rect(cornerRadius: 26))
                             .contentShape(.rect(cornerRadius: 26))
                     }

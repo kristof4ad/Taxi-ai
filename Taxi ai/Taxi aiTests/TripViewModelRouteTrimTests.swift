@@ -7,7 +7,7 @@ import Testing
 struct TripViewModelRouteTrimTests {
     // MARK: - Basic Trimming
 
-    @Test func trimRemovesTrailingDistance() {
+    @Test func trimRemovesTrailingDistance() throws {
         // Create a straight route of ~1000 m heading north.
         let start = CLLocationCoordinate2D(latitude: 52.2297, longitude: 21.0122)
         let end = CLLocationCoordinate2D(latitude: 52.2387, longitude: 21.0122) // ~1000 m north
@@ -17,11 +17,13 @@ struct TripViewModelRouteTrimTests {
         // Should have 2 coordinates (start + interpolated point).
         #expect(trimmed.count == 2)
 
+        let trimmedEnd = try #require(trimmed.last)
+
         // The trimmed endpoint should be closer to start than the original end.
         let originalDistance = CLLocation(latitude: start.latitude, longitude: start.longitude)
             .distance(from: CLLocation(latitude: end.latitude, longitude: end.longitude))
         let trimmedDistance = CLLocation(latitude: start.latitude, longitude: start.longitude)
-            .distance(from: CLLocation(latitude: trimmed.last!.latitude, longitude: trimmed.last!.longitude))
+            .distance(from: CLLocation(latitude: trimmedEnd.latitude, longitude: trimmedEnd.longitude))
 
         // The trimmed route should be approximately 100 m shorter.
         #expect(abs((originalDistance - trimmedDistance) - 100) < 5)
@@ -68,7 +70,7 @@ struct TripViewModelRouteTrimTests {
         #expect(trimmed[0].latitude == start.latitude)
     }
 
-    @Test func trimWithZeroTrailingMetersReturnsFullRoute() {
+    @Test func trimWithZeroTrailingMetersReturnsFullRoute() throws {
         let start = CLLocationCoordinate2D(latitude: 52.2297, longitude: 21.0122)
         let end = CLLocationCoordinate2D(latitude: 52.2400, longitude: 21.0122)
 
@@ -77,12 +79,12 @@ struct TripViewModelRouteTrimTests {
         // With 0 trailing meters, the fraction calculation yields 1 - 0/length = 1,
         // which means the interpolated point equals the segment endpoint.
         #expect(trimmed.count == 2)
-        #expect(abs(trimmed.last!.latitude - end.latitude) < 0.0001)
+        #expect(abs(try #require(trimmed.last).latitude - end.latitude) < 0.0001)
     }
 
     // MARK: - Multi-Segment Routes
 
-    @Test func trimCutsWithinCorrectSegment() {
+    @Test func trimCutsWithinCorrectSegment() throws {
         // Four-point route with varying segment lengths.
         let coords: [CLLocationCoordinate2D] = [
             CLLocationCoordinate2D(latitude: 52.2297, longitude: 21.0122), // Point 0
@@ -99,11 +101,12 @@ struct TripViewModelRouteTrimTests {
         #expect(trimmed.count == 4)
 
         // The last trimmed point should be between point 2 and point 3.
-        #expect(trimmed.last!.latitude > coords[2].latitude)
-        #expect(trimmed.last!.latitude < coords[3].latitude)
+        let cutPoint = try #require(trimmed.last)
+        #expect(cutPoint.latitude > coords[2].latitude)
+        #expect(cutPoint.latitude < coords[3].latitude)
     }
 
-    @Test func trimAcrossMultipleSegments() {
+    @Test func trimAcrossMultipleSegments() throws {
         // Three short segments of ~100 m each.
         let coords: [CLLocationCoordinate2D] = [
             CLLocationCoordinate2D(latitude: 52.22970, longitude: 21.0122),
@@ -120,13 +123,14 @@ struct TripViewModelRouteTrimTests {
         #expect(trimmed.count == 2)
 
         // Interpolated point should be between point 0 and point 1.
-        #expect(trimmed.last!.latitude > coords[0].latitude)
-        #expect(trimmed.last!.latitude < coords[1].latitude)
+        let cutPoint = try #require(trimmed.last)
+        #expect(cutPoint.latitude > coords[0].latitude)
+        #expect(cutPoint.latitude < coords[1].latitude)
     }
 
     // MARK: - Accuracy
 
-    @Test func trimmedDistanceMatchesExpectedReduction() {
+    @Test func trimmedDistanceMatchesExpectedReduction() throws {
         let start = CLLocationCoordinate2D(latitude: 52.2297, longitude: 21.0122)
         let end = CLLocationCoordinate2D(latitude: 52.2500, longitude: 21.0122) // ~2260 m
 
@@ -135,8 +139,10 @@ struct TripViewModelRouteTrimTests {
 
         let originalLength = CLLocation(latitude: start.latitude, longitude: start.longitude)
             .distance(from: CLLocation(latitude: end.latitude, longitude: end.longitude))
-        let trimmedLength = CLLocation(latitude: trimmed.first!.latitude, longitude: trimmed.first!.longitude)
-            .distance(from: CLLocation(latitude: trimmed.last!.latitude, longitude: trimmed.last!.longitude))
+        let trimStart = try #require(trimmed.first)
+        let trimEnd = try #require(trimmed.last)
+        let trimmedLength = CLLocation(latitude: trimStart.latitude, longitude: trimStart.longitude)
+            .distance(from: CLLocation(latitude: trimEnd.latitude, longitude: trimEnd.longitude))
 
         // The difference should be approximately the trim distance.
         let reduction = originalLength - trimmedLength

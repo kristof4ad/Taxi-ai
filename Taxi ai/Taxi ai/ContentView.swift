@@ -1,5 +1,8 @@
+import OSLog
 import SwiftData
 import SwiftUI
+
+private let log = Logger(subsystem: "com.ikristof.Taxi-ai", category: "Persistence")
 
 /// Root content view managing screen navigation and ride persistence.
 struct ContentView: View {
@@ -266,6 +269,16 @@ struct ContentView: View {
 
     // MARK: - Menu Actions
 
+    /// Writes pending changes to disk. Autosave timing is not guaranteed, so
+    /// ride records are committed explicitly.
+    func save() {
+        do {
+            try modelContext.save()
+        } catch {
+            log.error("Failed to save ride: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
     /// Cancels a pre-ride order, clearing the trip and returning to Home.
     private func cancelOrder() {
         withAnimation {
@@ -313,6 +326,7 @@ struct ContentView: View {
             }
 
             modelContext.insert(completedRide)
+            save()
 
             // Kick off the AI summary after save; never blocks the UI.
             generateSummary(for: completedRide)

@@ -32,6 +32,15 @@ final class VoiceTranscriptionService {
     private var audioRecorder: AVAudioRecorder?
     private var recordingURL: URL?
 
+    /// Held for the lifetime of a request: a deallocated recognizer drops its
+    /// callback silently, stranding the caller.
+    private var activeRecognizer: SFSpeechRecognizer?
+    private var recognitionTask: SFSpeechRecognitionTask?
+    private var transcriptionWatchdog: Task<Void, Never>?
+
+    /// Upper bound on how long to wait for the recognizer before giving up.
+    private static let transcriptionTimeout = Duration.seconds(30)
+
     // MARK: - Public API
 
     /// Requests permission, prepares the recorder, and starts recording.
@@ -62,16 +71,22 @@ final class VoiceTranscriptionService {
         state = .processing
         log.info("stop: recording ended, transcribing \(url.lastPathComponent, privacy: .public)")
 
+        var transcript: String?
         do {
-            let text = try await transcribeFile(at: url)
-            finalizedTranscript = text
-            log.info("stop: transcription chars=\(text.count)")
+            transcript = try await transcribeFile(at: url)
+            log.info("stop: transcription chars=\(transcript?.count ?? 0)")
         } catch {
             log.error("stop: transcription failed \(error.localizedDescription, privacy: .public)")
         }
+
         // Delete the temp file — we don't need to keep it.
         try? FileManager.default.removeItem(at: url)
-        recordingURL = nil
+        if recordingURL == url { recordingURL = nil }
+
+        // `reset()` may have run while transcription was in flight — for example
+        // the user swiped the sheet away. Don't resurrect a finished session.
+        guard state == .processing else { return }
+        if let transcript { finalizedTranscript = transcript }
         state = .finished
     }
 
@@ -79,6 +94,7 @@ final class VoiceTranscriptionService {
     func reset() {
         if let recorder = audioRecorder, recorder.isRecording { recorder.stop() }
         audioRecorder = nil
+        cancelRecognitionTask()
         if let url = recordingURL { try? FileManager.default.removeItem(at: url) }
         recordingURL = nil
         volatileTranscript = ""
@@ -149,20 +165,45 @@ final class VoiceTranscriptionService {
             throw VoiceSetupError.modelUnavailable
         }
 
+        // Hold the recognizer for the lifetime of the request — see `activeRecognizer`.
+        activeRecognizer = recognizer
+        defer {
+            activeRecognizer = nil
+            recognitionTask = nil
+            transcriptionWatchdog?.cancel()
+            transcriptionWatchdog = nil
+        }
+
         let request = SFSpeechURLRecognitionRequest(url: url)
         request.shouldReportPartialResults = false
         request.taskHint = .search
 
         return try await withCheckedThrowingContinuation { continuation in
-            recognizer.recognitionTask(with: request) { result, error in
+            let handoff = RecognitionContinuation(continuation)
+
+            recognitionTask = recognizer.recognitionTask(with: request) { result, error in
                 if let error {
-                    continuation.resume(throwing: error)
-                    return
+                    handoff.finish(.failure(error))
+                } else if let result, result.isFinal {
+                    handoff.finish(.success(result.bestTranscription.formattedString))
                 }
-                guard let result, result.isFinal else { return }
-                continuation.resume(returning: result.bestTranscription.formattedString)
+            }
+
+            // Bound the wait: if the framework never delivers a terminal
+            // callback, this keeps the caller from hanging indefinitely.
+            transcriptionWatchdog = Task {
+                try? await Task.sleep(for: Self.transcriptionTimeout)
+                guard !Task.isCancelled else { return }
+                self.cancelRecognitionTask()
+                handoff.finish(.failure(VoiceSetupError.transcriptionTimedOut))
             }
         }
+    }
+
+    /// Cancels any in-flight speech recognition task.
+    private func cancelRecognitionTask() {
+        recognitionTask?.cancel()
+        recognitionTask = nil
     }
 
     // MARK: - Audio session

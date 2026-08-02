@@ -50,31 +50,16 @@ final class SimulationEngine {
     /// Starts the simulation from the beginning of the route.
     func start() {
         guard !routeCoordinates.isEmpty else { return }
+        // Drop any run already in flight so two loops can't drive position at once.
+        simulationTask?.cancel()
+        isPaused = false
+        pausedProgress = nil
         isRunning = true
         progress = 0
         currentPosition = routeCoordinates.first
         currentBearing = segmentBearing(at: 0)
 
-        simulationTask = Task {
-            let startTime = ContinuousClock.now
-
-            while !Task.isCancelled {
-                let elapsed = ContinuousClock.now - startTime
-                let elapsedSeconds = elapsed / .seconds(1)
-                let newProgress = min(elapsedSeconds / simulationDuration, 1.0)
-
-                self.progress = newProgress
-                self.currentPosition = interpolatedCoordinate(at: newProgress)
-                self.currentBearing = segmentBearing(at: newProgress)
-
-                if newProgress >= 1.0 {
-                    self.isRunning = false
-                    return
-                }
-
-                try? await Task.sleep(for: .milliseconds(16))
-            }
-        }
+        simulationTask = makeSimulationTask(startingAt: 0)
     }
 
     /// Pauses the simulation, preserving current progress so it can be resumed later.
@@ -90,25 +75,31 @@ final class SimulationEngine {
     /// Resumes the simulation from where it was paused.
     func resume() {
         guard let savedProgress = pausedProgress, !routeCoordinates.isEmpty else { return }
+        simulationTask?.cancel()
         pausedProgress = nil
         isPaused = false
         isRunning = true
 
-        let resumeFrom = savedProgress
-        simulationTask = Task {
+        simulationTask = makeSimulationTask(startingAt: savedProgress)
+    }
+
+    /// Drives progress from `startProgress` to 1.0 at a constant rate, updating
+    /// position and bearing on every frame.
+    private func makeSimulationTask(startingAt startProgress: Double) -> Task<Void, Never> {
+        Task {
             let startTime = ContinuousClock.now
 
             while !Task.isCancelled {
                 let elapsed = ContinuousClock.now - startTime
                 let elapsedSeconds = elapsed / .seconds(1)
-                let newProgress = min(resumeFrom + elapsedSeconds / simulationDuration, 1.0)
+                let newProgress = min(startProgress + elapsedSeconds / simulationDuration, 1.0)
 
-                self.progress = newProgress
-                self.currentPosition = interpolatedCoordinate(at: newProgress)
-                self.currentBearing = segmentBearing(at: newProgress)
+                progress = newProgress
+                currentPosition = interpolatedCoordinate(at: newProgress)
+                currentBearing = segmentBearing(at: newProgress)
 
                 if newProgress >= 1.0 {
-                    self.isRunning = false
+                    isRunning = false
                     return
                 }
 

@@ -1,23 +1,32 @@
 import AVFoundation
+import OSLog
+import SwiftUI
+
+nonisolated private let log = Logger(subsystem: "com.ikristof.Taxi-ai", category: "Sound")
 
 /// Plays bundled sound effects for vehicle interactions.
+///
+/// Initialization configures the shared audio session and decodes three clips
+/// from the bundle, so the instance is created once and shared through the
+/// environment rather than per-view.
 @MainActor
 final class SoundPlayer {
-    private var hornPlayer: AVAudioPlayer?
-    private var lockPlayer: AVAudioPlayer?
-    private var trunkPlayer: AVAudioPlayer?
+    private let hornPlayer: AVAudioPlayer?
+    private let lockPlayer: AVAudioPlayer?
+    private let trunkPlayer: AVAudioPlayer?
 
     init() {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback)
         } catch {
-            print("Failed to configure audio session: \(error)")
+            log.error("Failed to configure audio session: \(error.localizedDescription, privacy: .public)")
         }
 
+        let lock = Self.loadPlayer(for: "car-lock", type: "mp3")
         hornPlayer = Self.loadPlayer(for: "car-horn", type: "mp3")
-        lockPlayer = Self.loadPlayer(for: "car-lock", type: "mp3")
+        lockPlayer = lock
         // Falls back to lock sound if dedicated trunk sound is not available.
-        trunkPlayer = Self.loadPlayer(for: "car-trunk", type: "mp3") ?? lockPlayer
+        trunkPlayer = Self.loadPlayer(for: "car-trunk", type: "mp3") ?? lock
     }
 
     /// Plays a short car horn honk.
@@ -59,4 +68,12 @@ final class SoundPlayer {
         }
         return try? AVAudioPlayer(contentsOf: url)
     }
+}
+
+extension EnvironmentValues {
+    /// The app-wide sound player, injected once at the root of the scene.
+    ///
+    /// Optional because the default value is evaluated off the main actor, where
+    /// a `@MainActor` instance cannot be constructed.
+    @Entry var soundPlayer: SoundPlayer?
 }

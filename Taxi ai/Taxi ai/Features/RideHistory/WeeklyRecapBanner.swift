@@ -5,8 +5,6 @@ import SwiftUI
 struct WeeklyRecapBanner: View {
     let recap: RideRecap
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 6) {
@@ -14,7 +12,7 @@ struct WeeklyRecapBanner: View {
                 Text("This week")
                     .font(.caption.weight(.semibold))
             }
-            .foregroundStyle(Self.gold)
+            .foregroundStyle(Color.taxiGold)
 
             Text(recap.headline)
                 .font(.headline)
@@ -25,7 +23,7 @@ struct WeeklyRecapBanner: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Self.gold.opacity(0.08), in: .rect(cornerRadius: 12))
+        .background(Color.taxiGold.opacity(0.08), in: .rect(cornerRadius: 12))
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
     }

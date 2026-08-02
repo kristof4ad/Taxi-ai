@@ -52,13 +52,11 @@ struct CurrencyServiceTests {
 
     // MARK: - Fallback Behavior
 
-    @Test func conversionFallsBackGracefully() {
+    @Test(arguments: [1.0, 5.5, 100.0, 0.01])
+    func conversionFallsBackGracefully(_ amount: Double) {
         let service = CurrencyService()
-        // Multiple conversions without a rate should all return USD amounts.
-        let amounts = [1.0, 5.5, 100.0, 0.01]
-        for amount in amounts {
-            #expect(service.convertFromUSD(amount) == amount)
-        }
+        // Without a rate, conversion returns the original USD amount.
+        #expect(service.convertFromUSD(amount) == amount)
     }
 
     @Test func displayCurrencyCodeConsistentWithoutRate() {

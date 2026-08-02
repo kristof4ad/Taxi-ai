@@ -24,6 +24,9 @@ enum AppScreen {
 struct Taxi_aiApp: App {
     @State private var homeViewModel = HomeViewModel()
     @State private var intelligenceService = IntelligenceService()
+    /// Created once here: initializing it configures the audio session and
+    /// decodes three clips, which is wasteful to repeat per screen.
+    @State private var soundPlayer = SoundPlayer()
 
     init() {
         Self.primeSpeechPermission()
@@ -49,6 +52,7 @@ struct Taxi_aiApp: App {
         WindowGroup {
             ContentView(homeViewModel: homeViewModel)
                 .environment(intelligenceService)
+                .environment(\.soundPlayer, soundPlayer)
         }
         .modelContainer(for: CompletedRide.self)
     }

@@ -72,8 +72,6 @@ private struct StartRideTopBar: View {
 private struct StartRideHeading: View {
     var destinationName: String?
 
-    private static let goldText = Color(red: 0.831, green: 0.659, blue: 0.294)
-
     var body: some View {
         VStack(spacing: 4) {
             Text("Heading to")
@@ -82,7 +80,7 @@ private struct StartRideHeading: View {
 
             Text(destinationName ?? "Destination")
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(Self.goldText)
+                .foregroundStyle(Color.taxiGold)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 300)
         }
@@ -114,30 +112,12 @@ private struct StartRideCircle: View {
 
 /// Custom button style that shows a gold circle with a darker pressed state.
 private struct StartRideButtonStyle: ButtonStyle {
-    private static let goldGradient = LinearGradient(
-        colors: [
-            Color(red: 0.83, green: 0.66, blue: 0.29),
-            Color(red: 0.72, green: 0.58, blue: 0.29)
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
-    private static let goldGradientPressed = LinearGradient(
-        colors: [
-            Color(red: 0.66, green: 0.53, blue: 0.23),
-            Color(red: 0.58, green: 0.46, blue: 0.23)
-        ],
-        startPoint: .top,
-        endPoint: .bottom
-    )
-
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .background(
                 configuration.isPressed
-                    ? Self.goldGradientPressed
-                    : Self.goldGradient,
+                    ? LinearGradient.taxiGoldPressed
+                    : LinearGradient.taxiGold,
                 in: .circle
             )
             .scaleEffect(configuration.isPressed ? 0.96 : 1.0)
@@ -152,7 +132,7 @@ private struct StartRideActionButtons: View {
     var onEditTrip: () -> Void
 
     @State private var isLocked = true
-    @State private var soundPlayer = SoundPlayer()
+    @Environment(\.soundPlayer) private var soundPlayer
 
     var body: some View {
         VStack(spacing: 12) {
@@ -162,7 +142,7 @@ private struct StartRideActionButtons: View {
                     title: isLocked ? "Lock" : "Unlock",
                     icon: isLocked ? "lock" : "lock.open",
                     action: {
-                        soundPlayer.playLock()
+                        soundPlayer?.playLock()
                         isLocked.toggle()
                     }
                 )

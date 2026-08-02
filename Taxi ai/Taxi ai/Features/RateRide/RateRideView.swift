@@ -83,9 +83,6 @@ private struct RateRideHeader: View {
 private struct StarRatingRow: View {
     @Binding var rating: Int
 
-    /// Amber gold color matching the Pencil design.
-    private static let starColor = Color(red: 0.961, green: 0.620, blue: 0.043)
-
     var body: some View {
         HStack(spacing: 8) {
             ForEach(1...5, id: \.self) { index in
@@ -94,11 +91,13 @@ private struct StarRatingRow: View {
                 } label: {
                     Image(systemName: index <= rating ? "star.fill" : "star")
                         .font(.title)
-                        .foregroundStyle(index <= rating ? Self.starColor : .gray.opacity(0.3))
+                        .foregroundStyle(index <= rating ? Color.ratingAmber : .gray.opacity(0.3))
                         .frame(width: 44, height: 44)
                         .contentShape(.rect)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("^[\(index) star](inflect: true)")
+                .accessibilityAddTraits(index <= rating ? .isSelected : [])
             }
         }
         .padding(.top, 20)
@@ -181,9 +180,6 @@ private struct TipOptionButton: View {
     var isSelected: Bool
     var onTap: () -> Void
 
-    /// Gold highlight color for selected state.
-    private static let goldColor = Color(red: 0.831, green: 0.659, blue: 0.294)
-
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 2) {
@@ -197,13 +193,13 @@ private struct TipOptionButton: View {
             .frame(maxWidth: .infinity)
             .frame(height: 48)
             .background(
-                isSelected ? Self.goldColor.opacity(0.1) : .clear,
+                isSelected ? Color.taxiGold.opacity(0.1) : .clear,
                 in: .rect(cornerRadius: 12)
             )
             .overlay {
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        isSelected ? Self.goldColor : Color.secondary.opacity(0.2),
+                        isSelected ? Color.taxiGold : Color.secondary.opacity(0.2),
                         lineWidth: isSelected ? 2 : 1
                     )
             }

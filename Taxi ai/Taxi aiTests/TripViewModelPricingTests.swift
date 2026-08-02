@@ -88,7 +88,7 @@ struct TripViewModelPricingTests {
         // Without fetching exchange rate, should fall back to USD if no rate is available.
         let code = vm.displayCurrencyCode
         // Will be either local currency or "USD" depending on device locale.
-        #expect(!code.isEmpty)
+        #expect(code.isEmpty == false)
     }
 
     // MARK: - Minimum Ride Price

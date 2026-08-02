@@ -87,7 +87,7 @@ private struct FastenSeatbeltsHeader: View {
 /// Illustration of a car seat with a fastened seatbelt.
 private struct SeatbeltIllustration: View {
     var body: some View {
-        Image("SeatbeltIllustration")
+        Image(decorative: "SeatbeltIllustration")
             .resizable()
             .scaledToFit()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -103,10 +103,7 @@ private struct FastenSeatbeltsActions: View {
     var onEditTrip: () -> Void
 
     @State private var isLocked = true
-    @State private var soundPlayer = SoundPlayer()
-
-    private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
-    private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
+    @Environment(\.soundPlayer) private var soundPlayer
 
     var body: some View {
         VStack(spacing: 12) {
@@ -116,7 +113,7 @@ private struct FastenSeatbeltsActions: View {
                     title: isLocked ? "Lock" : "Unlock",
                     icon: isLocked ? "lock" : "lock.open",
                     action: {
-                        soundPlayer.playLock()
+                        soundPlayer?.playLock()
                         isLocked.toggle()
                     }
                 )
@@ -128,13 +125,7 @@ private struct FastenSeatbeltsActions: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
-                    .background(
-                        LinearGradient(
-                            colors: [Self.goldStart, Self.goldEnd],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                    )
+                    .background(LinearGradient.taxiGold)
                     .clipShape(.rect(cornerRadius: 26))
                     .contentShape(.rect(cornerRadius: 26))
             }

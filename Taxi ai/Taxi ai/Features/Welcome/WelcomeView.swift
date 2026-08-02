@@ -65,16 +65,7 @@ struct GoldButton: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.83, green: 0.66, blue: 0.29),
-                            Color(red: 0.72, green: 0.58, blue: 0.29)
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .background(LinearGradient.taxiGold)
                 .clipShape(.rect(cornerRadius: 26))
         }
         .buttonStyle(.plain)
