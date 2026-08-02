@@ -1,10 +1,10 @@
 /// Describes the current phase of a ride for determining menu behavior.
 ///
-/// - `none`: No ride in progress (Home screen). Menu shows only "List of rides".
-/// - `ordering`: Ride is being ordered but hasn't started (RoutePreview through StartRide).
-///   Cancel label is "Cancel the order" and the ride is not recorded.
+/// - `none`: No ride in progress (Home screen). The menu offers only ride history.
+/// - `ordering`: Ride is being ordered but hasn't started (RoutePreview through
+///   StartRide). Cancelling is free and the ride is not recorded.
 /// - `riding`: Ride has started or is completing (Ride through RideDetail).
-///   Cancel label is "Cancel the ride" and the ride is recorded.
+///   Cancelling still charges the rider and the ride is recorded.
 enum RidePhase: Sendable {
     case none
     case ordering

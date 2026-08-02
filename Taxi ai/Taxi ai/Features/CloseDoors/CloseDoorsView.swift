@@ -94,7 +94,7 @@ private struct CloseDoorsTitle: View {
 /// Top-down image of the car with doors open.
 private struct CarTopViewImage: View {
     var body: some View {
-        Image("CarTopView")
+        Image(decorative: "CarTopView")
             .resizable()
             .scaledToFit()
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -108,7 +108,7 @@ private struct CloseDoorsBottomSection: View {
     var viewModel: TripViewModel
     var onFinishRide: () -> Void
 
-    @State private var soundPlayer = SoundPlayer()
+    @Environment(\.soundPlayer) private var soundPlayer
     @State private var showWalkingDirections = false
 
     var body: some View {
@@ -135,7 +135,7 @@ private struct CloseDoorsBottomSection: View {
 
             // Trunk toggle button
             Button {
-                soundPlayer.playTrunk()
+                soundPlayer?.playTrunk()
                 viewModel.isTrunkOpen.toggle()
             } label: {
                 HStack(spacing: 8) {

@@ -14,7 +14,7 @@ struct EnterVehicleView: View {
     @State private var isMenuPresented = false
     @State private var flashTrigger = 0
     @State private var hazardTrigger = 0
-    @State private var soundPlayer = SoundPlayer()
+    @Environment(\.soundPlayer) private var soundPlayer
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -29,9 +29,9 @@ struct EnterVehicleView: View {
                 viewModel: viewModel,
                 onFindVehicle: onFindVehicle,
                 onOpenDoor: onOpenDoor,
-                onHorn: { soundPlayer.playHorn() },
+                onHorn: { soundPlayer?.playHorn() },
                 onLights: { flashTrigger += 1 },
-                onUnlock: { soundPlayer.playLock() },
+                onUnlock: { soundPlayer?.playLock() },
                 onHazard: { hazardTrigger += 1 }
             )
 
@@ -325,11 +325,6 @@ private struct PickupLocationRow: View {
 private struct OpenDoorButton: View {
     var action: () -> Void
 
-    /// Gold gradient start color.
-    private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
-    /// Gold gradient end color.
-    private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
-
     var body: some View {
         Button(action: action) {
             Text("Open the door")
@@ -337,13 +332,7 @@ private struct OpenDoorButton: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(
-                    LinearGradient(
-                        colors: [Self.goldStart, Self.goldEnd],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                )
+                .background(LinearGradient.taxiGold)
                 .clipShape(.rect(cornerRadius: 26))
                 .contentShape(.rect(cornerRadius: 26))
         }

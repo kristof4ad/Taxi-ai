@@ -7,8 +7,6 @@ struct VoiceSearchSheet: View {
     var onSubmit: (String) -> Void
     var onDismiss: () -> Void
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         VStack(spacing: 24) {
             VoiceSearchHeader(state: service.state, onDismiss: onDismiss)
@@ -100,13 +98,12 @@ private struct VoiceSearchBody: View {
 // MARK: - States
 
 private struct VoiceSearchIdleView: View {
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
 
     var body: some View {
         VStack(spacing: 16) {
             ProgressView()
                 .controlSize(.large)
-                .tint(Self.gold)
+                .tint(Color.taxiGold)
             Text("Preparing microphone…")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -119,17 +116,16 @@ private struct VoiceSearchRecordingView: View {
     let finalText: String
 
     @State private var pulse: Bool = false
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
 
     var body: some View {
         VStack(spacing: 20) {
             ZStack {
                 Circle()
-                    .fill(Self.gold.opacity(pulse ? 0.25 : 0.08))
+                    .fill(Color.taxiGold.opacity(pulse ? 0.25 : 0.08))
                     .frame(width: 140, height: 140)
 
                 Circle()
-                    .fill(Self.gold)
+                    .fill(Color.taxiGold)
                     .frame(width: 88, height: 88)
 
                 Image(systemName: "mic.fill")
@@ -154,13 +150,12 @@ private struct VoiceSearchRecordingView: View {
 }
 
 private struct VoiceSearchProcessingView: View {
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
 
     var body: some View {
         VStack(spacing: 16) {
             ProgressView()
                 .controlSize(.large)
-                .tint(Self.gold)
+                .tint(Color.taxiGold)
             Text("Transcribing your request…")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
@@ -212,8 +207,6 @@ private struct VoiceSearchActions: View {
     var onRetry: () async -> Void
     var onSubmit: () -> Void
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         switch state {
         case .idle, .preparing, .processing:
@@ -227,7 +220,7 @@ private struct VoiceSearchActions: View {
                     .font(.headline)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
-                    .background(Self.gold, in: .rect(cornerRadius: 14))
+                    .background(Color.taxiGold, in: .rect(cornerRadius: 14))
                     .foregroundStyle(.white)
             }
             .buttonStyle(.plain)
@@ -251,7 +244,7 @@ private struct VoiceSearchActions: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
-                        .background(Self.gold, in: .rect(cornerRadius: 14))
+                        .background(Color.taxiGold, in: .rect(cornerRadius: 14))
                         .foregroundStyle(.white)
                 }
                 .buttonStyle(.plain)

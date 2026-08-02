@@ -85,7 +85,7 @@ private struct MenuRow: View {
     var action: () -> Void
 
     var body: some View {
-        Button(action: action) {
+        Button(role: role, action: action) {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.body)

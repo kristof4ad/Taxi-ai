@@ -77,8 +77,6 @@ struct RideView: View {
 private struct RideTopSection: View {
     var viewModel: TripViewModel
 
-    private static let goldText = Color(red: 0.831, green: 0.659, blue: 0.294)
-
     var body: some View {
         VStack(spacing: 4) {
             Text("Heading to")
@@ -87,7 +85,7 @@ private struct RideTopSection: View {
 
             Text(viewModel.destinationName ?? "Destination")
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(Self.goldText)
+                .foregroundStyle(Color.taxiGold)
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 300)
         }
@@ -166,7 +164,7 @@ private struct RideActionButtons: View {
     var onEditTrip: () -> Void
 
     @State private var isLocked = true
-    @State private var soundPlayer = SoundPlayer()
+    @Environment(\.soundPlayer) private var soundPlayer
 
     var body: some View {
         HStack(spacing: 12) {
@@ -175,7 +173,7 @@ private struct RideActionButtons: View {
                 title: isLocked ? "Lock" : "Unlock",
                 icon: isLocked ? "lock" : "lock.open",
                 action: {
-                    soundPlayer.playLock()
+                    soundPlayer?.playLock()
                     isLocked.toggle()
                 }
             )

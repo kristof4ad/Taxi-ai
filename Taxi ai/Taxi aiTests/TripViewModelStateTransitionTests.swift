@@ -45,15 +45,15 @@ struct TripViewModelStateTransitionTests {
         #expect(vm.destination == nil)
     }
 
-    @Test func selectDestinationSetsCoordinateWhenSelecting() {
+    @Test func selectDestinationSetsCoordinateWhenSelecting() throws {
         let vm = TripViewModel()
         vm.onAppear()
         let coord = CLLocationCoordinate2D(latitude: 52.23, longitude: 21.01)
         vm.selectDestination(coord)
 
-        #expect(vm.destination != nil)
-        #expect(vm.destination!.latitude == coord.latitude)
-        #expect(vm.destination!.longitude == coord.longitude)
+        let destination = try #require(vm.destination)
+        #expect(destination.latitude == coord.latitude)
+        #expect(destination.longitude == coord.longitude)
     }
 
     @Test func selectDestinationIgnoredDuringRouteReady() {
@@ -264,7 +264,7 @@ struct TripViewModelStateTransitionTests {
 
     // MARK: - setDestination
 
-    @Test func setDestinationUpdatesNameAndAddress() {
+    @Test func setDestinationUpdatesNameAndAddress() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
@@ -280,8 +280,7 @@ struct TripViewModelStateTransitionTests {
 
         #expect(vm.destinationName == "Coffee Shop")
         #expect(vm.destinationAddress == "456 Brew Ave")
-        #expect(vm.destination != nil)
-        #expect(vm.destination!.latitude == 52.24)
+        #expect(try #require(vm.destination).latitude == 52.24)
     }
 
     @Test func setDestinationTransitionsToSelectingFirst() {

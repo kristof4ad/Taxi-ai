@@ -67,23 +67,11 @@ struct HomeViewModelTests {
 
     // MARK: - Category Selection
 
-    @Test func selectCategoryUpdatesSelected() {
+    @Test(arguments: PlaceCategory.allCases)
+    func selectCategoryUpdatesSelection(_ category: PlaceCategory) {
         let vm = HomeViewModel()
-        #expect(vm.selectedCategory == .bars)
-
-        vm.selectCategory(.food)
-        #expect(vm.selectedCategory == .food)
-
-        vm.selectCategory(.shopping)
-        #expect(vm.selectedCategory == .shopping)
-    }
-
-    @Test func selectCategoryAllCases() {
-        let vm = HomeViewModel()
-        for category in PlaceCategory.allCases {
-            vm.selectCategory(category)
-            #expect(vm.selectedCategory == category)
-        }
+        vm.selectCategory(category)
+        #expect(vm.selectedCategory == category)
     }
 
     // MARK: - Default Category
@@ -139,19 +127,11 @@ struct HomeViewModelTests {
 
     // MARK: - Search Without Location
 
-    @Test func searchNearbyPlacesDoesNothingWithoutLocation() async {
+    @Test(arguments: PlaceCategory.allCases)
+    func searchNearbyPlacesDoesNothingWithoutLocation(_ category: PlaceCategory) async {
         let vm = HomeViewModel()
-        // userLocation is nil, so search should return early without crashing.
-        await vm.searchNearbyPlaces(for: .bars)
-        #expect(vm.nearbyPlaces.isEmpty)
-    }
-
-    @Test func searchNearbyPlacesDoesNothingForAllCategoriesWithoutLocation() async {
-        let vm = HomeViewModel()
-        for category in PlaceCategory.allCases {
-            await vm.searchNearbyPlaces(for: category)
-            // Should not crash and places should remain empty.
-        }
+        // userLocation is nil, so the search should return early without crashing.
+        await vm.searchNearbyPlaces(for: category)
         #expect(vm.nearbyPlaces.isEmpty)
     }
 }

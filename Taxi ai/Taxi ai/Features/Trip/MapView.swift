@@ -6,6 +6,10 @@ struct MapView: View {
     @Bindable var viewModel: TripViewModel
     @Environment(\.openURL) private var openURL
 
+    /// Mirrors `viewModel.locationDenied` so dismissing the alert actually sticks;
+    /// a binding derived straight from the view model can never be set back.
+    @State private var isLocationAlertPresented = false
+
     var body: some View {
         ZStack(alignment: .bottom) {
             MapContent(viewModel: viewModel)
@@ -28,13 +32,7 @@ struct MapView: View {
         }
         .animation(.default, value: viewModel.showControlPanel)
         .animation(.default, value: viewModel.simulationState)
-        .alert(
-            "Error",
-            isPresented: .init(
-                get: { viewModel.errorMessage != nil },
-                set: { if !$0 { viewModel.dismissError() } }
-            )
-        ) {
+        .alert("Error", isPresented: $viewModel.hasError) {
             Button("OK") {
                 viewModel.dismissError()
             }
@@ -43,15 +41,9 @@ struct MapView: View {
                 Text(message)
             }
         }
-        .alert(
-            "Location Access Required",
-            isPresented: .init(
-                get: { viewModel.locationDenied },
-                set: { _ in }
-            )
-        ) {
+        .alert("Location Access Required", isPresented: $isLocationAlertPresented) {
             Button("Open Settings", systemImage: "gear") {
-                if let url = URL(string: "App-Prefs:root") {
+                if let url = URL(string: UIApplication.openSettingsURLString) {
                     openURL(url)
                 }
             }
@@ -59,8 +51,14 @@ struct MapView: View {
         } message: {
             Text("Please enable location access in Settings to use Taxi AI.")
         }
+        .onChange(of: viewModel.locationDenied) { _, isDenied in
+            if isDenied { isLocationAlertPresented = true }
+        }
         .onAppear {
             viewModel.onAppear()
+            // Access may already have been denied on a previous launch, in which
+            // case `locationDenied` never transitions and `onChange` never fires.
+            if viewModel.locationDenied { isLocationAlertPresented = true }
         }
     }
 }

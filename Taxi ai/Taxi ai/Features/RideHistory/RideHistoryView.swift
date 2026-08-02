@@ -1,5 +1,8 @@
+import OSLog
 import SwiftData
 import SwiftUI
+
+private let log = Logger(subsystem: "com.ikristof.Taxi-ai", category: "Persistence")
 
 /// List of completed rides showing date, pickup, destination, and price.
 struct RideHistoryView: View {
@@ -12,9 +15,6 @@ struct RideHistoryView: View {
 
     @State private var selectedRide: CompletedRide?
     @State private var recap: RideRecap?
-
-    /// Gold color matching the app's branding.
-    private static let goldColor = Color(red: 0.835, green: 0.627, blue: 0.094)
 
     /// Minimum number of rides in the last 7 days required to show a recap.
     private static let minRidesForRecap = 2
@@ -39,7 +39,7 @@ struct RideHistoryView: View {
                 RideHistoryList(rides: rides, onSelectRide: { selectedRide = $0 })
             }
 
-            RideHistoryDoneButton(color: Self.goldColor, onDone: onDone)
+            RideHistoryDoneButton(color: Color.taxiGold, onDone: onDone)
         }
         .background(.gray.opacity(0.06))
         .ignoresSafeArea(edges: .top)
@@ -168,6 +168,11 @@ private struct RideHistoryList: View {
 
     private func deleteRide(_ ride: CompletedRide) {
         modelContext.delete(ride)
+        do {
+            try modelContext.save()
+        } catch {
+            log.error("Failed to delete ride: \(error.localizedDescription, privacy: .public)")
+        }
     }
 }
 
@@ -176,9 +181,6 @@ private struct RideHistoryList: View {
 /// A single ride entry showing date, pickup, destination, and price.
 private struct RideHistoryRow: View {
     var ride: CompletedRide
-
-    /// Amber gold color for star ratings.
-    private static let starColor = Color(red: 0.961, green: 0.620, blue: 0.043)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -193,9 +195,11 @@ private struct RideHistoryRow: View {
                     ForEach(1...5, id: \.self) { index in
                         Image(systemName: index <= stars ? "star.fill" : "star")
                             .font(.caption2)
-                            .foregroundStyle(index <= stars ? Self.starColor : .gray.opacity(0.3))
+                            .foregroundStyle(index <= stars ? Color.ratingAmber : .gray.opacity(0.3))
                     }
                 }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Rated \(stars) out of 5 stars")
             }
 
             // Route

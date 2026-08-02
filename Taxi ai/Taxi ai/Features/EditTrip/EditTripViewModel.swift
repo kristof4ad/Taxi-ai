@@ -32,6 +32,10 @@ final class EditTripViewModel {
     /// Set to true when a selected destination exceeds the maximum service distance.
     var showTooFarAlert = false
 
+    /// Incremented for every POI search so results that arrive after a newer
+    /// search started can be discarded instead of overwriting fresher data.
+    private var searchGeneration = 0
+
     // MARK: - Dependencies
 
     private let locationService: LocationService
@@ -246,42 +250,7 @@ final class EditTripViewModel {
 
     /// Performs a local search for POIs near the route origin.
     private func searchNearbyPlaces(for category: PlaceCategory) async {
-        isSearching = true
-
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = category.searchQuery
-        request.region = MKCoordinateRegion(
-            center: routeOrigin,
-            latitudinalMeters: 2000,
-            longitudinalMeters: 2000
-        )
-
-        do {
-            let search = MKLocalSearch(request: request)
-            let response = try await search.start()
-            let originLocation = CLLocation(
-                latitude: routeOrigin.latitude,
-                longitude: routeOrigin.longitude
-            )
-
-            nearbyPlaces = response.mapItems.prefix(10).map { item in
-                let itemLocation = item.location
-                let distance = originLocation.distance(from: itemLocation)
-
-                return NearbyPlace(
-                    id: item.identifier?.rawValue ?? item.name ?? UUID().uuidString,
-                    name: item.name ?? "Unknown",
-                    address: formatAddress(item),
-                    coordinate: itemLocation.coordinate,
-                    distance: distance
-                )
-            }
-            .sorted { $0.distance < $1.distance }
-        } catch {
-            nearbyPlaces = []
-        }
-
-        isSearching = false
+        await runLocalSearch(query: category.searchQuery, center: routeOrigin)
     }
 
     /// Searches for POIs around a specific coordinate (used when exploring a destination).
@@ -289,16 +258,25 @@ final class EditTripViewModel {
         _ center: CLLocationCoordinate2D,
         for category: PlaceCategory
     ) async {
+        await runLocalSearch(query: category.searchQuery, center: center)
+    }
+
+    /// Runs a POI search around `center`, discarding results that a newer search
+    /// has already superseded.
+    private func runLocalSearch(query: String, center: CLLocationCoordinate2D) async {
+        searchGeneration += 1
+        let generation = searchGeneration
         isSearching = true
 
         let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = category.searchQuery
+        request.naturalLanguageQuery = query
         request.region = MKCoordinateRegion(
             center: center,
             latitudinalMeters: 2000,
             longitudinalMeters: 2000
         )
 
+        let places: [NearbyPlace]
         do {
             let search = MKLocalSearch(request: request)
             let response = try await search.start()
@@ -307,7 +285,7 @@ final class EditTripViewModel {
                 longitude: center.longitude
             )
 
-            nearbyPlaces = response.mapItems.prefix(10).map { item in
+            places = response.mapItems.prefix(10).map { item in
                 let itemLocation = item.location
                 let distance = centerLocation.distance(from: itemLocation)
 
@@ -321,9 +299,11 @@ final class EditTripViewModel {
             }
             .sorted { $0.distance < $1.distance }
         } catch {
-            nearbyPlaces = []
+            places = []
         }
 
+        guard generation == searchGeneration else { return }
+        nearbyPlaces = places
         isSearching = false
     }
 

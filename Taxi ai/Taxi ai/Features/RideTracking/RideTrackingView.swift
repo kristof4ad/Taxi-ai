@@ -170,11 +170,6 @@ private struct GoToVehicleButton: View {
     var isEnabled: Bool
     var action: () -> Void
 
-    /// Gold gradient start color.
-    private static let goldStart = Color(red: 0.831, green: 0.659, blue: 0.294)
-    /// Gold gradient end color.
-    private static let goldEnd = Color(red: 0.722, green: 0.581, blue: 0.290)
-
     var body: some View {
         Button(action: action) {
             Text("Go to Vehicle")
@@ -184,13 +179,7 @@ private struct GoToVehicleButton: View {
                 .frame(height: 52)
                 .background(
                     isEnabled
-                        ? AnyShapeStyle(
-                            LinearGradient(
-                                colors: [Self.goldStart, Self.goldEnd],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
+                        ? AnyShapeStyle(LinearGradient.taxiGold)
                         : AnyShapeStyle(.quaternary)
                 )
                 .clipShape(.rect(cornerRadius: 26))

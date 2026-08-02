@@ -24,7 +24,7 @@ struct CarMarkerView: View {
 
     var body: some View {
         VStack(spacing: 2) {
-            Image("CarMapIcon")
+            Image(decorative: "CarMapIcon")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 40, height: 40)

@@ -64,7 +64,7 @@ struct RideFlowIntegrationTests {
 
     // MARK: - Destination Selection Flow
 
-    @Test func selectDestinationFromNearbyPlaceFlow() {
+    @Test func selectDestinationFromNearbyPlaceFlow() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
@@ -80,12 +80,12 @@ struct RideFlowIntegrationTests {
 
         #expect(vm.destinationName == "Italian Restaurant")
         #expect(vm.destinationAddress == "456 Pasta Lane")
-        #expect(vm.destination != nil)
-        #expect(vm.destination!.latitude == 52.24)
-        #expect(vm.destination!.longitude == 21.02)
+        let destination = try #require(vm.destination)
+        #expect(destination.latitude == 52.24)
+        #expect(destination.longitude == 21.02)
     }
 
-    @Test func selectDestinationThenResetThenSelectAgain() {
+    @Test func selectDestinationThenResetThenSelectAgain() throws {
         let vm = TripViewModel()
         vm.onAppear()
 
@@ -115,7 +115,7 @@ struct RideFlowIntegrationTests {
         )
         vm.setDestination(from: place2)
         #expect(vm.destinationName == "Second Place")
-        #expect(vm.destination!.latitude == 52.25)
+        #expect(try #require(vm.destination).latitude == 52.25)
     }
 
     // MARK: - Pricing Integration

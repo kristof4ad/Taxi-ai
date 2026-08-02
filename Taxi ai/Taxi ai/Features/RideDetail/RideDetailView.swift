@@ -302,9 +302,6 @@ private struct RideDetailRatingSection: View {
     var rating: RideRating
     var currencyCode: String
 
-    /// Amber gold color for star ratings.
-    private static let starColor = Color(red: 0.961, green: 0.620, blue: 0.043)
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Your Rating")
@@ -314,10 +311,12 @@ private struct RideDetailRatingSection: View {
                 ForEach(1...5, id: \.self) { index in
                     Image(systemName: index <= rating.starRating ? "star.fill" : "star")
                         .foregroundStyle(
-                            index <= rating.starRating ? Self.starColor : .gray.opacity(0.3)
+                            index <= rating.starRating ? Color.ratingAmber : .gray.opacity(0.3)
                         )
                 }
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Rated \(rating.starRating) out of 5 stars")
 
             if !rating.feedbackText.isEmpty {
                 Text(rating.feedbackText)

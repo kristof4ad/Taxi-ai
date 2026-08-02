@@ -66,8 +66,6 @@ private struct EditTripMapSection: View {
     var tripViewModel: TripViewModel
     var exploredDestination: NearbyPlace?
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         Map(position: .constant(tripViewModel.cameraPosition)) {
             if let destination = tripViewModel.destination {
@@ -91,7 +89,7 @@ private struct EditTripMapSection: View {
                 Annotation(explored.name, coordinate: explored.coordinate) {
                     Image(systemName: "mappin.circle.fill")
                         .font(.title)
-                        .foregroundStyle(Self.gold)
+                        .foregroundStyle(Color.taxiGold)
                 }
             }
 

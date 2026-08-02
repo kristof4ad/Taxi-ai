@@ -11,6 +11,7 @@ enum VoiceSetupError: Error {
     case noCompatibleFormat
     case analyzerStartFailed
     case microphoneFailed
+    case transcriptionTimedOut
 
     var userMessage: String {
         switch self {
@@ -30,6 +31,8 @@ enum VoiceSetupError: Error {
             "Could not start the transcriber."
         case .microphoneFailed:
             "Could not start the microphone."
+        case .transcriptionTimedOut:
+            "Transcribing took too long. Please try again."
         }
     }
 }

@@ -197,16 +197,7 @@ private struct ArrivalBanner: View {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .frame(height: 36)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color(red: 0.83, green: 0.66, blue: 0.29),
-                        Color(red: 0.72, green: 0.58, blue: 0.29)
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
+            .background(LinearGradient.taxiGoldHorizontal)
             .clipShape(.rect(cornerRadius: 18))
     }
 }

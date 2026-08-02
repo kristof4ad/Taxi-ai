@@ -141,7 +141,7 @@ struct SimulationEngineStateTests {
 
     // MARK: - Remaining Coordinates
 
-    @Test func remainingCoordinatesAtStartContainsAllWaypoints() {
+    @Test func remainingCoordinatesAtStartContainsAllWaypoints() throws {
         let engine = SimulationEngine()
         let coords: [CLLocationCoordinate2D] = [
             CLLocationCoordinate2D(latitude: 0, longitude: 0),
@@ -155,7 +155,7 @@ struct SimulationEngineStateTests {
         let remaining = engine.remainingCoordinates
         #expect(remaining.count >= 2)
         // Last remaining coordinate should match the route endpoint.
-        #expect(abs(remaining.last!.latitude - 0.002) < 0.0001)
+        #expect(abs(try #require(remaining.last).latitude - 0.002) < 0.0001)
     }
 
     @Test func remainingCoordinatesWithEmptyRoute() {

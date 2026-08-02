@@ -258,14 +258,14 @@ private struct ExitVehicleActionButtons: View {
     var viewModel: TripViewModel
     var onOpenDoor: () -> Void
 
-    @State private var soundPlayer = SoundPlayer()
+    @Environment(\.soundPlayer) private var soundPlayer
     @State private var isUnlocked = false
 
     var body: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 Button {
-                    soundPlayer.playTrunk()
+                    soundPlayer?.playTrunk()
                     viewModel.isTrunkOpen.toggle()
                 } label: {
                     HStack(spacing: 8) {
@@ -287,7 +287,7 @@ private struct ExitVehicleActionButtons: View {
                 .buttonStyle(.plain)
 
                 Button {
-                    soundPlayer.playLock()
+                    soundPlayer?.playLock()
                     isUnlocked.toggle()
                 } label: {
                     HStack(spacing: 8) {
@@ -320,17 +320,7 @@ private struct ExitVehicleActionButtons: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: 56)
                 .contentShape(.rect(cornerRadius: 16))
-                .background(
-                    LinearGradient(
-                        colors: [
-                            Color(red: 0.831, green: 0.659, blue: 0.294),
-                            Color(red: 0.722, green: 0.581, blue: 0.290)
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ),
-                    in: .rect(cornerRadius: 16)
-                )
+                .background(LinearGradient.taxiGoldHorizontal, in: .rect(cornerRadius: 16))
             }
             .buttonStyle(.plain)
         }

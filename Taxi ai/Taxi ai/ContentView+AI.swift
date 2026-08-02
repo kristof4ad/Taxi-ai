@@ -20,6 +20,7 @@ extension ContentView {
             )
             guard let summary else { return }
             ride.aiSummary = summary
+            save()
         }
     }
 }

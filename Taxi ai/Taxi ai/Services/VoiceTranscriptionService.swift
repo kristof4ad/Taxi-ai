@@ -1,19 +1,14 @@
-@preconcurrency import AVFoundation
 import Foundation
 import OSLog
-import Speech
 import SwiftUI
 
 private let log = Logger(subsystem: "com.ikristof.Taxi-ai", category: "VoiceTranscription")
 
-/// On-device voice transcription. Records microphone audio to a temporary WAV
-/// file, then transcribes the file via `SFSpeechURLRecognitionRequest`.
+/// Drives the voice-search session: what state the sheet should show, and which
+/// transcription results are still allowed to affect it.
 ///
-/// We tried the live-streaming path (both `SpeechAnalyzer` in iOS 26 and
-/// `SFSpeechAudioBufferRecognitionRequest`) — both crash Apple's internal
-/// `RealtimeMessenger.mServiceQueue` on some devices when audio buffers begin
-/// flowing. File-based transcription flows through a different code path that
-/// is stable and matches what proven apps like swift-scribe use.
+/// All device work is delegated to a ``VoiceCapturing`` so this type stays
+/// testable — see `SystemVoiceCapture` for the microphone and speech plumbing.
 @MainActor
 @Observable
 final class VoiceTranscriptionService {
@@ -29,8 +24,17 @@ final class VoiceTranscriptionService {
 
     // MARK: - Private plumbing
 
-    private var audioRecorder: AVAudioRecorder?
+    private let capture: any VoiceCapturing
     private var recordingURL: URL?
+
+    /// Identifies the current recording session. Bumped whenever a session is
+    /// abandoned so late work from an earlier one can be told apart from the
+    /// session that replaced it.
+    private var sessionGeneration = 0
+
+    init(capture: any VoiceCapturing = SystemVoiceCapture()) {
+        self.capture = capture
+    }
 
     // MARK: - Public API
 
@@ -41,7 +45,7 @@ final class VoiceTranscriptionService {
         state = .preparing
 
         do {
-            try await prepareAndStartRecording()
+            recordingURL = try await capture.startRecording()
             state = .recording
         } catch let error as VoiceSetupError {
             state = .unavailable(reason: error.userMessage)
@@ -52,140 +56,58 @@ final class VoiceTranscriptionService {
 
     /// Stops recording and transcribes the captured audio file.
     func stop() async {
-        guard let recorder = audioRecorder, let url = recordingURL else {
+        // A repeat tap while the first call is still transcribing must not touch
+        // state: flipping `.processing` to `.finished` here would make the real
+        // transcript be rejected when it finally arrives.
+        guard state != .processing else { return }
+
+        guard let url = recordingURL else {
             state = .finished
             return
         }
 
-        if recorder.isRecording { recorder.stop() }
-        audioRecorder = nil
+        capture.stopRecording()
         state = .processing
+        let generation = sessionGeneration
         log.info("stop: recording ended, transcribing \(url.lastPathComponent, privacy: .public)")
 
+        var transcript: String?
         do {
-            let text = try await transcribeFile(at: url)
-            finalizedTranscript = text
-            log.info("stop: transcription chars=\(text.count)")
+            transcript = try await capture.transcribe(fileAt: url)
+            log.info("stop: transcription chars=\(transcript?.count ?? 0)")
         } catch {
             log.error("stop: transcription failed \(error.localizedDescription, privacy: .public)")
         }
-        // Delete the temp file — we don't need to keep it.
-        try? FileManager.default.removeItem(at: url)
+
+        // This recording's own temp file, so it is always safe to remove.
+        capture.discardRecording(at: url)
+
+        // A newer session started while this transcription was in flight — for
+        // example the user swiped the sheet away and tried again. Leave its
+        // audio session and state alone; this result belongs to nobody.
+        guard generation == sessionGeneration else { return }
+
         recordingURL = nil
+        capture.releaseSession()
+
+        guard state == .processing else { return }
+        if let transcript { finalizedTranscript = transcript }
         state = .finished
     }
 
     /// Clears transcripts and returns to `.idle`.
+    ///
+    /// Also retires the current session, so a transcription still in flight
+    /// cannot come back and clobber whatever starts next.
     func reset() {
-        if let recorder = audioRecorder, recorder.isRecording { recorder.stop() }
-        audioRecorder = nil
-        if let url = recordingURL { try? FileManager.default.removeItem(at: url) }
+        sessionGeneration += 1
+        capture.stopRecording()
+        capture.cancelTranscription()
+        if let url = recordingURL { capture.discardRecording(at: url) }
         recordingURL = nil
         volatileTranscript = ""
         finalizedTranscript = ""
         state = .idle
-    }
-
-    // MARK: - Recording
-
-    private func prepareAndStartRecording() async throws {
-        #if targetEnvironment(simulator)
-        throw VoiceSetupError.simulatorUnsupported
-        #else
-        log.info("start: requesting mic permission")
-        guard await requestMicrophonePermission() else {
-            throw VoiceSetupError.micPermissionDenied
-        }
-
-        log.info("start: checking speech permission")
-        guard SFSpeechRecognizer.authorizationStatus() == .authorized else {
-            throw VoiceSetupError.micPermissionDenied
-        }
-
-        log.info("start: configuring audio session")
-        do {
-            try configureAudioSession()
-        } catch {
-            if audioSessionIsBusyWithCall(error) {
-                throw VoiceSetupError.audioSessionBusy
-            }
-            throw VoiceSetupError.audioSessionFailed(underlying: error)
-        }
-
-        let url = FileManager.default.temporaryDirectory
-            .appending(path: "voice-\(UUID().uuidString).wav")
-        recordingURL = url
-
-        let settings: [String: Any] = [
-            AVFormatIDKey: Int(kAudioFormatLinearPCM),
-            AVSampleRateKey: 16_000,
-            AVNumberOfChannelsKey: 1,
-            AVLinearPCMBitDepthKey: 16,
-            AVLinearPCMIsBigEndianKey: false,
-            AVLinearPCMIsFloatKey: false
-        ]
-
-        do {
-            let recorder = try AVAudioRecorder(url: url, settings: settings)
-            audioRecorder = recorder
-            guard recorder.record() else {
-                throw VoiceSetupError.microphoneFailed
-            }
-        } catch is VoiceSetupError {
-            throw VoiceSetupError.microphoneFailed
-        } catch {
-            log.error("start: recorder init failed \(error.localizedDescription, privacy: .public)")
-            throw VoiceSetupError.microphoneFailed
-        }
-        log.info("start: recording to \(url.lastPathComponent, privacy: .public)")
-        #endif
-    }
-
-    // MARK: - File-based transcription
-
-    private func transcribeFile(at url: URL) async throws -> String {
-        guard let recognizer = SFSpeechRecognizer(locale: Locale.current),
-              recognizer.isAvailable else {
-            throw VoiceSetupError.modelUnavailable
-        }
-
-        let request = SFSpeechURLRecognitionRequest(url: url)
-        request.shouldReportPartialResults = false
-        request.taskHint = .search
-
-        return try await withCheckedThrowingContinuation { continuation in
-            recognizer.recognitionTask(with: request) { result, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let result, result.isFinal else { return }
-                continuation.resume(returning: result.bestTranscription.formattedString)
-            }
-        }
-    }
-
-    // MARK: - Audio session
-
-    private func configureAudioSession() throws {
-        let session = AVAudioSession.sharedInstance()
-        try session.setCategory(.record, mode: .measurement)
-        try session.setActive(true, options: .notifyOthersOnDeactivation)
-    }
-
-    private func audioSessionIsBusyWithCall(_ error: Error) -> Bool {
-        let nsError = error as NSError
-        return nsError.domain == NSOSStatusErrorDomain && nsError.code == 560_030_580
-    }
-
-    // MARK: - Permissions
-
-    private func requestMicrophonePermission() async -> Bool {
-        switch AVCaptureDevice.authorizationStatus(for: .audio) {
-        case .authorized: return true
-        case .denied, .restricted: return false
-        case .notDetermined: return await AVCaptureDevice.requestAccess(for: .audio)
-        @unknown default: return false
-        }
+        capture.releaseSession()
     }
 }

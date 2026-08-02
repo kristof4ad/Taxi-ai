@@ -27,7 +27,8 @@ final class IntelligenceService {
     func interpretSearch(_ query: String) async -> SearchInterpretation? {
         let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
         let availability = SystemLanguageModel.default.availability
-        log.info("interpret: query=\(trimmed, privacy: .public) available=\(String(describing: availability), privacy: .public)")
+        // The query itself is user-entered personal data — log only its shape.
+        log.info("interpret: queryLength=\(trimmed.count) available=\(String(describing: availability), privacy: .public)")
 
         guard isAvailable else {
             log.info("interpret: skipped — Apple Intelligence unavailable")
@@ -46,8 +47,9 @@ final class IntelligenceService {
             )
             let interpretation = response.content
             log.info("interpret: model said shouldSuggest=\(interpretation.shouldSuggest)")
-            log.info("interpret: rewrite=\(interpretation.rewrittenQuery, privacy: .public)")
-            log.info("interpret: label=\(interpretation.label, privacy: .public)")
+            // Rewrite and label are derived from the user's query, so keep them private.
+            log.info("interpret: rewrite=\(interpretation.rewrittenQuery, privacy: .private)")
+            log.info("interpret: label=\(interpretation.label, privacy: .private)")
 
             guard interpretation.shouldSuggest else { return nil }
             let rewrite = interpretation.rewrittenQuery.trimmingCharacters(in: .whitespacesAndNewlines)

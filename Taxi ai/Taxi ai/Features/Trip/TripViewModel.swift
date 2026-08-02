@@ -118,6 +118,13 @@ final class TripViewModel {
         return nil
     }
 
+    /// Whether an error is currently being surfaced. Writable so an alert's
+    /// `isPresented` binding can clear it on dismissal.
+    var hasError: Bool {
+        get { errorMessage != nil }
+        set { if !newValue { dismissError() } }
+    }
+
     /// Estimated trip price in USD based on distance: $2 base + $2/mile.
     private var estimatedPriceUSD: Double? {
         guard let tripInfo else { return nil }

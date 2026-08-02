@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 /// Detail view for a completed ride shown when tapping a row in ride history.
 struct CompletedRideDetailView: View {
@@ -72,12 +71,10 @@ private struct CompletedRideDetailHeader: View {
 private struct CompletedRideDetailSummary: View {
     var summary: String
 
-    private static let gold = Color(red: 0.83, green: 0.66, blue: 0.29)
-
     var body: some View {
         HStack(alignment: .top, spacing: 8) {
             Image(systemName: "sparkles")
-                .foregroundStyle(Self.gold)
+                .foregroundStyle(Color.taxiGold)
 
             Text(summary)
                 .font(.subheadline)
@@ -86,7 +83,7 @@ private struct CompletedRideDetailSummary: View {
             Spacer(minLength: 0)
         }
         .padding(12)
-        .background(Self.gold.opacity(0.08), in: .rect(cornerRadius: 10))
+        .background(Color.taxiGold.opacity(0.08), in: .rect(cornerRadius: 10))
         .padding(.horizontal, 16)
         .padding(.top, 8)
     }
@@ -228,9 +225,6 @@ private struct CompletedRideDetailRating: View {
     var ride: CompletedRide
     var stars: Int
 
-    /// Amber gold color for star ratings.
-    private static let starColor = Color(red: 0.961, green: 0.620, blue: 0.043)
-
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Your Rating")
@@ -240,10 +234,12 @@ private struct CompletedRideDetailRating: View {
                 ForEach(1...5, id: \.self) { index in
                     Image(systemName: index <= stars ? "star.fill" : "star")
                         .foregroundStyle(
-                            index <= stars ? Self.starColor : .gray.opacity(0.3)
+                            index <= stars ? Color.ratingAmber : .gray.opacity(0.3)
                         )
                 }
             }
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Rated \(stars) out of 5 stars")
 
             if let feedback = ride.feedbackText, !feedback.isEmpty {
                 Text(feedback)

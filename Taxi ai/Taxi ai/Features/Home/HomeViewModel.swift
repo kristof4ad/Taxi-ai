@@ -24,6 +24,10 @@ final class HomeViewModel {
 
     private var interpretationTask: Task<Void, Never>?
 
+    /// Incremented for every POI search so results that arrive after a newer
+    /// search started can be discarded instead of overwriting fresher data.
+    private var searchGeneration = 0
+
     /// Maximum service distance in miles.
     static let maxDistanceMiles: Double = 30
 
@@ -258,6 +262,8 @@ final class HomeViewModel {
     }
 
     private func runLocalSearch(query: String, center: CLLocationCoordinate2D) async {
+        searchGeneration += 1
+        let generation = searchGeneration
         isSearching = true
 
         let request = MKLocalSearch.Request()
@@ -268,6 +274,7 @@ final class HomeViewModel {
             longitudinalMeters: 2000
         )
 
+        let places: [NearbyPlace]
         do {
             let search = MKLocalSearch(request: request)
             let response = try await search.start()
@@ -276,7 +283,7 @@ final class HomeViewModel {
                 longitude: center.longitude
             )
 
-            nearbyPlaces = response.mapItems.prefix(10).map { item in
+            places = response.mapItems.prefix(10).map { item in
                 let itemLocation = item.location
                 let distance = centerLocation.distance(from: itemLocation)
 
@@ -290,9 +297,12 @@ final class HomeViewModel {
             }
             .sorted { $0.distance < $1.distance }
         } catch {
-            nearbyPlaces = []
+            places = []
         }
 
+        // A newer search started while this one was in flight — its results win.
+        guard generation == searchGeneration else { return }
+        nearbyPlaces = places
         isSearching = false
     }
 
