@@ -35,8 +35,11 @@ final class VoiceTranscriptionService {
     /// Held for the lifetime of a request: a deallocated recognizer drops its
     /// callback silently, stranding the caller.
     private var activeRecognizer: SFSpeechRecognizer?
-    private var recognitionTask: SFSpeechRecognitionTask?
-    private var transcriptionWatchdog: Task<Void, Never>?
+
+    /// Aborts the in-flight transcription. Registered by the session that owns
+    /// it and captured over that session's own handles, so invoking it can never
+    /// cancel a newer session's work.
+    private var cancelActiveRecognition: (() -> Void)?
 
     /// Upper bound on how long to wait for the recognizer before giving up.
     private static let transcriptionTimeout = Duration.seconds(30)
@@ -109,7 +112,8 @@ final class VoiceTranscriptionService {
         sessionGeneration += 1
         if let recorder = audioRecorder, recorder.isRecording { recorder.stop() }
         audioRecorder = nil
-        cancelRecognitionTask()
+        cancelActiveRecognition?()
+        cancelActiveRecognition = nil
         if let url = recordingURL { try? FileManager.default.removeItem(at: url) }
         recordingURL = nil
         volatileTranscript = ""
@@ -181,13 +185,21 @@ final class VoiceTranscriptionService {
             throw VoiceSetupError.modelUnavailable
         }
 
+        let generation = sessionGeneration
+
         // Hold the recognizer for the lifetime of the request — see `activeRecognizer`.
         activeRecognizer = recognizer
+
+        // Held locally rather than on the instance: a session that finishes late
+        // must not cancel or clear handles that now belong to a newer one.
+        var watchdog: Task<Void, Never>?
         defer {
-            activeRecognizer = nil
-            recognitionTask = nil
-            transcriptionWatchdog?.cancel()
-            transcriptionWatchdog = nil
+            watchdog?.cancel()
+            // Only release shared state while this session still owns it.
+            if generation == sessionGeneration {
+                activeRecognizer = nil
+                cancelActiveRecognition = nil
+            }
         }
 
         let request = SFSpeechURLRecognitionRequest(url: url)
@@ -197,7 +209,7 @@ final class VoiceTranscriptionService {
         return try await withCheckedThrowingContinuation { continuation in
             let handoff = RecognitionContinuation(continuation)
 
-            recognitionTask = recognizer.recognitionTask(with: request) { result, error in
+            let recognition = recognizer.recognitionTask(with: request) { result, error in
                 if let error {
                     handoff.finish(.failure(error))
                 } else if let result, result.isFinal {
@@ -205,21 +217,21 @@ final class VoiceTranscriptionService {
                 }
             }
 
+            // Lets `reset()` abort this session specifically.
+            cancelActiveRecognition = {
+                recognition.cancel()
+                handoff.finish(.failure(CancellationError()))
+            }
+
             // Bound the wait: if the framework never delivers a terminal
             // callback, this keeps the caller from hanging indefinitely.
-            transcriptionWatchdog = Task {
+            watchdog = Task {
                 try? await Task.sleep(for: Self.transcriptionTimeout)
                 guard !Task.isCancelled else { return }
-                self.cancelRecognitionTask()
+                recognition.cancel()
                 handoff.finish(.failure(VoiceSetupError.transcriptionTimedOut))
             }
         }
-    }
-
-    /// Cancels any in-flight speech recognition task.
-    private func cancelRecognitionTask() {
-        recognitionTask?.cancel()
-        recognitionTask = nil
     }
 
     // MARK: - Audio session
